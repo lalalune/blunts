@@ -1,0 +1,20 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+.venv/
+.ruff_cache/
+node_modules/
+# Local generated media and provider job responses (preserved on disk).
+ad/*.json
+ad/anime/*.json
+ad/anime/log_*.txt
+ad/**/*.mp4
+ad/**/*.mp3
+ad/**/*.wav
+ad/**/*.pcm
+ad/**/*.png
+ad/**/*.jpg
+ad/**/*.ttf

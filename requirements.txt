@@ -1,0 +1,2 @@
+# Only needed for the optional ad-generation scripts.
+Pillow>=10.4,<13

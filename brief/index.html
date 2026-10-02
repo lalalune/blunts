@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Blunts Founder Brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme: dark;
+  --ground:#1A120D;
+  --panel:#251A13;
+  --panel-2:#2F2219;
+  --line:#44332A;
+  --text:#F1E6D0;
+  --dim:#B6A387;
+  --faint:#85745F;
+  --leaf:#8DBB50;
+  --gold:#F2C14E;
+  --ember:#FF7A3D;
+  --bad:#E5705A;
+  --display:"Bungee", "Arial Black", Impact, sans-serif;
+  --body:"Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--ground);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.6;padding-inline:20px;padding-block:0 80px}
+a{color:var(--gold);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.wrap{max-width:900px;margin:0 auto}
+.prose{max-width:66ch}
+header.top{padding-block:56px 36px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:14px}
+.kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);font-weight:700}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(40px,8vw,72px);line-height:.92;margin:0;color:var(--gold);text-shadow:0 5px 0 #5c340d}
+.dek{font-size:20px;line-height:1.45;color:var(--text);margin:0;max-width:40ch;text-wrap:balance}
+.meta{font-size:13.5px;color:var(--faint);display:flex;gap:16px;flex-wrap:wrap}
+.meta a{font-weight:700}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px 18px;padding-block:18px;border-bottom:1px solid var(--line);font-size:14px}
+nav.toc a{color:var(--dim);text-decoration:none;font-weight:600}
+nav.toc a:hover{color:var(--gold)}
+section{padding-block:48px 8px;display:flex;flex-direction:column;gap:18px}
+h2{font-family:var(--display);font-weight:400;font-size:28px;line-height:1.05;margin:0;text-wrap:balance}
+h2 .n{color:var(--gold);margin-right:10px}
+h3{font-size:18px;margin:0;font-weight:800;text-wrap:balance}
+p{margin:0}
+.lead{font-size:18px;color:var(--text)}
+.dim{color:var(--dim)}
+ul.tight{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+ul.tight li::marker{color:var(--gold)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:var(--panel-2);color:var(--dim);vertical-align:2px}
+.tag.go{color:var(--leaf)} .tag.no{color:var(--bad)} .tag.warn{color:var(--gold)}
+
+.verdict{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.vcard{background:var(--panel);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.vcard .h{font-weight:800;font-size:16px}
+.vcard p{color:var(--dim);font-size:14.5px}
+
+.units{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.unit{background:var(--panel);border-radius:16px;padding:14px 16px}
+.unit .a{font-family:var(--display);font-size:26px;color:var(--gold);line-height:1.1}
+.unit .b{font-weight:800}
+.unit .c{font-size:13.5px;color:var(--dim)}
+@media (max-width:560px){.units{grid-template-columns:1fr}}
+
+.tbl{overflow-x:auto;border-radius:14px;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:640px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:800;background:var(--panel)}
+tr:last-child td{border-bottom:0}
+td.num{white-space:nowrap}
+td b{color:var(--text)}
+td{color:var(--dim)}
+td:first-child{color:var(--text);font-weight:700}
+
+.blocker{border-top:1px solid var(--line);padding-top:18px;display:grid;grid-template-columns:200px 1fr;gap:10px 24px}
+.blocker:first-of-type{border-top:0;padding-top:0}
+.blocker .lbl{display:flex;flex-direction:column;gap:6px}
+.blocker .lbl h3{font-size:17px}
+.blocker .body{display:flex;flex-direction:column;gap:10px}
+.blocker .row{display:grid;grid-template-columns:92px 1fr;gap:12px;font-size:15px}
+.blocker .row .k{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:var(--faint);padding-top:3px}
+.blocker .row.fix .k{color:var(--leaf)}
+@media (max-width:640px){.blocker{grid-template-columns:1fr}.blocker .row{grid-template-columns:1fr;gap:2px}}
+
+pre.flow{background:var(--panel);border-radius:14px;padding:16px 18px;font-family:var(--mono);font-size:13px;line-height:1.55;color:var(--dim);overflow-x:auto;margin:0}
+pre.flow b{color:var(--gold);font-weight:500}
+
+.phases{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0}
+.phases li{display:grid;grid-template-columns:120px 1fr;gap:18px;padding:14px 0;border-bottom:1px solid var(--line)}
+.phases li:last-child{border-bottom:0}
+.phases .when{font-family:var(--mono);font-size:13.5px;color:var(--gold)}
+.phases .what b{display:block;margin-bottom:2px}
+.phases .what span{color:var(--dim);font-size:14.5px}
+@media (max-width:560px){.phases li{grid-template-columns:1fr;gap:4px}}
+
+.sev{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:0}
+.sev.c{background:var(--bad)} .sev.h{background:var(--ember)} .sev.m{background:var(--gold)}
+.callout{background:var(--panel);border-radius:16px;padding:16px 18px;font-size:15px;color:var(--dim)}
+.callout b{color:var(--text)}
+.files{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.file{background:var(--panel);border-radius:14px;padding:14px 16px;font-size:14px;color:var(--dim)}
+.file code{font-family:var(--mono);font-size:13px;color:var(--text);display:block;margin-bottom:4px;word-break:break-all}
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--faint)}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="kicker">Founder brief · Sept 28, 2026</span>
+    <h1>BLUNTS</h1>
+    <p class="dek">A savings app where $100 is a blunt and $1,000 is a band. The idea holds up. Three parts of the plumbing have to change before Americans can use it.</p>
+    <div class="meta">
+      <span>Prototype: <a href="../prototype/">click-through app</a></span>
+      <span>Research, not legal advice. Get securities counsel before building.</span>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sections">
+    <a href="#call">The call</a><a href="#mvp">MVP</a><a href="#ship">Shipping it</a><a href="#revenue">Making money</a><a href="#product">Product</a><a href="#money">Money in and out</a><a href="#basket">What's in a blunt</a><a href="#blockers">Blockers</a><a href="#brand">Brand risk</a><a href="#plan">Plan</a><a href="#risks">Risk register</a><a href="#next">Next steps</a>
+  </nav>
+
+  <section id="call">
+    <h2>The call</h2>
+    <p class="lead prose">The loop works: deposit, watch a blunt fill, stack rolls, cash out whenever. Blunts can launch in the US within 12 to 18 months if it runs on regulated partners. The version in the pitch, with an offshore token and a 10% cut of profits, can't legally be sold to Americans.</p>
+    <div class="verdict">
+      <div class="vcard"><span class="tag go">Keep</span><div class="h">The core loop and the math</div><p>$25 quarter, $100 blunt, $1K band. Blunts count money put in, and gains are shown separately. Only two buttons. No trading. That last part matters: regulators go after trading games, and this app has none.</p></div>
+      <div class="vcard"><span class="tag warn">Change</span><div class="h">How it's built for the US</div><p>Replace the pooled BLUNT token with a model portfolio. Each user owns real fractional shares at a registered broker. On-chain comes later.</p></div>
+      <div class="vcard"><span class="tag no">Drop for US</span><div class="h">Profit cut, withholding, offshore</div><p>A share of profits is banned for everyday clients. Nobody can withhold capital-gains tax. Running a Cayman/BVI entity that serves Americans is how Binance and BitMEX ended up in enforcement actions.</p></div>
+    </div>
+  </section>
+
+  <section id="mvp">
+    <h2>The MVP</h2>
+    <p class="lead prose">One asset, one pay-in, one payout. Every blunt buys <b>QQQ</b>. Money comes in and goes out through <b>Cash App</b>. A bank account is the backup, and only people who can't use Cash App ever see it.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Step</th><th>What the user does</th><th>What happens underneath</th></tr></thead>
+      <tbody>
+        <tr><td>Sign up</td><td>ID check, about 2 minutes</td><td>Dinari's hosted KYC (Persona). An embedded wallet (Privy) is created for them. They never see it.</td></tr>
+        <tr><td>Fill</td><td>Pick an amount → copy address → Open Cash App → send</td><td>Cash App sends USDC on Arbitrum to their wallet. When it lands, the user taps "Roll it" on a live quote (Face ID) and Dinari buys tokenized QQQ. Free on Cash App's side, $1 minimum.</td></tr>
+        <tr><td>Spark</td><td>Pick blunts → SPARK → Cash App</td><td>The user signs the sell and the payout with one Face ID tap. QQQ is sold to USDC and sent to their saved Cash App address. Arrives in minutes. Blunts relays and pays the gas.</td></tr>
+        <tr><td>Backup: bank</td><td>"Add a bank" → pick bank (Plaid)</td><td>zerohash pulls from the bank and converts to USDC for fills, and pays out instantly (RTP/FedNow) on sparks. zerohash is the licensed money mover, including New York.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Who sees what</h3>
+    <ul class="tight prose">
+      <li><b>Cash App user, not in New York:</b> Cash App in, Cash App out. No bank needed.</li>
+      <li><b>New York, or no Cash App:</b> adds a bank or uses Apple Pay (through Coinbase). Bank fills take 1–3 days, Apple Pay fills are instant, and sparks to a bank are instant.</li>
+    </ul>
+    <h3>Must-haves before launch</h3>
+    <ul class="tight prose">
+      <li>Send payouts only as native USDC on Arbitrum. Run a $1 test payout when someone saves their Cash App address. A payout on the wrong network can't be recovered.</li>
+      <li>Watch Arbitrum, Ethereum and Polygon for incoming deposits, with a "send it back" button for mistakes.</li>
+      <li>Queue sparks above Cash App's $10k-a-week receive limit.</li>
+      <li>Fit Dinari's required screens into the design: exact disclosure wording, 6 checkboxes, a live price before each order.</li>
+      <li>Dinari: $2k a month minimum, SOC 2 or equivalent, $0.20 per order (ask to be billed at actual gas instead).</li>
+    </ul>
+    <p class="callout prose"><b>Fee decision still open.</b> A 10–20% cut of profits isn't legal for US retail users under this setup. It's either a banned adviser performance fee or broker pay Blunts can't receive. The two legal options: (1) Blunts registers as an adviser and charges 0.25–0.5% a year on the balance, collected only at spark, or (2) Dinari charges a flat fee on sparks and pays Blunts a fixed platform fee. The prototype still shows 10% of profit.</p>
+  </section>
+
+  <section id="ship">
+    <h2>Shipping it</h2>
+    <p class="lead prose">Yes, this can ship as a real app on iOS, Android and the web, in all 50 states plus DC, including New York. It takes one rule: <b>Blunts never moves anyone's money on its own.</b> Every fill and spark is signed by the user with Face ID, and our server only passes it along. That keeps Blunts out of money-transmitter, BitLicense and California crypto licensing.</p>
+    <div class="verdict">
+      <div class="vcard"><span class="tag go">Apple's cut</span><div class="h">0% of deposits and trades</div><p>Apple and Google don't take a cut of brokerage money, and there's no legal way to give them a share of profit. Cut them in with an optional <b>Blunts+</b> subscription for digital extras (themes, stash skins, stats), sold through in-app purchase. They keep 15%.</p></div>
+      <div class="vcard"><span class="tag go">Apple Pay</span><div class="h">Yes, through Coinbase</div><p>Blunts can't be the Apple Pay merchant for money going into investments. Coinbase's Headless Onramp can: Apple Pay (debit) buys USDC into the user's wallet with no Coinbase account. Free to us if Coinbase approves Blunts for its zero-fee USDC program.</p></div>
+      <div class="vcard"><span class="tag warn">App Review</span><div class="h">The real risk</div><p>Apple rule 3.2.1(viii) wants investing apps submitted by the licensed firm. Send a letter from Dinari, its CRD number, a demo account and clean store art (money, no leaves). If Apple still says no, Blunts registers as an adviser. Google has no such rule.</p></div>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>Who</th><th>Money in</th><th>Money out</th></tr></thead>
+      <tbody>
+        <tr><td>Cash App user, not NY</td><td>Cash App USDC ($0)</td><td>Back to Cash App (~$0.02, about a minute)</td></tr>
+        <tr><td>New York</td><td>Bank via zerohash · Apple Pay if Coinbase confirms NY · Cash App through its bank numbers</td><td>Bank via zerohash, in seconds</td></tr>
+        <tr><td>No Cash App</td><td>Apple Pay (Coinbase) or bank (zerohash)</td><td>Bank (zerohash)</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Login</h3>
+    <ul class="tight prose">
+      <li><b>No username, no password.</b> Face ID creates a passkey, and that is the account. A phone number is the required backup, for new phones and recovery.</li>
+      <li><b>"Sign in with Cash App" doesn't exist.</b> Block offers no login for other apps. What we can do: save the user's Cash App address after a $1 test payout, so sparks just land there.</li>
+      <li>We can't skip identity. The broker has to verify every funded user (about 2 minutes, inside the app). The tutorial runs as a guest before that.</li>
+    </ul>
+    <h3>Web</h3>
+    <ul class="tight prose">
+      <li>The web is the full app, built from the same codebase (Expo) with the same passkey and the same wallet.</li>
+      <li>No App Review, so it's where the closed beta starts. On desktop, Cash App deposits become "scan this QR."</li>
+      <li>Weak spots: push only after "Add to Home Screen" on iPhone, and more phishing risk.</li>
+    </ul>
+    <p class="callout prose"><b>Launch order:</b> web beta (non-NY Cash App) → add zerohash bank and NY → Android → iOS. About 16–18 weeks of build with 3 engineers, plus 3–6 weeks for partner approvals and review. Fixed costs are about $6.5–11k a month, driven by Dinari's $2k minimum. Full plan: <code>research/19-ship-plan-feasibility.md</code>.</p>
+  </section>
+
+  <section id="revenue">
+    <h2>Making money</h2>
+    <p class="callout prose"><b>Update: 1% on every fill and spark.</b> The market (Americans 18–34) is about a $750M-a-year fee pool at 1% per move. The core audience (18–34 Cash App users who don't invest yet, about 22M people) is about $210M. At $600 a year put in, a user earns about $12 and nets about $2, which doesn't pay for a team. At $2,400 a year (fill every payday), a user nets about $33, and 300k users is about $12.5M revenue and $5M profit. The business depends on how much money each user moves, not on the fee rate. See <code>research/22-tam-sam-revenue.md</code>.</p>
+    <p class="lead prose">At $300–800 balances a user is worth about $4–5 a year at launch and about $12 at scale. Serving one costs about $4.50 a year. The fee alone won't pay for ads, so the plan layers revenue on top of it.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Revenue line</th><th>Per user / year</th><th>When</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Adviser fee on balance (0.25–0.5%/yr) or flat spark fee via Dinari</td><td class="num">$1.25–3.60</td><td>MVP</td><td>Pending the fee decision. Collected only at spark.</td></tr>
+        <tr><td>Yield on idle USDC</td><td class="num">$0.10–1.50</td><td>MVP</td><td>Stablecoin rewards on uninvested balances. Legally grey once GENIUS Act rules land.</td></tr>
+        <tr><td>Blunts+ at $3/mo (optional)</td><td class="num">~$3.60 blended</td><td>v2</td><td>Opt-in only. A required fee on a $500 balance is 7% a year, which regulators flag.</td></tr>
+        <tr><td>Blunts debit card</td><td class="num">~$3</td><td>v2</td><td>Card fees via Bridge or another issuer. Pushes Blunts toward being the main account.</td></tr>
+        <tr><td>Affiliate offers</td><td class="num">$0.50–2</td><td>v2</td><td>Credit builders, banking.</td></tr>
+        <tr><td>Direct deposit / main account</td><td class="num">Biggest lever</td><td>Scale</td><td>Paychecks landing in Blunts multiply balances and card spend.</td></tr>
+      </tbody>
+    </table></div>
+    <p class="callout prose"><b>Break-even:</b> about 45,000 funded users on $300k of fixed costs a year. Keep the cost to get each funded user under $6–19: Chime paid about $109 per user in 2024, while Cash App paid about $10 in 2021. Growth has to be word of mouth and creators, not paid ads.</p>
+    <p class="callout prose"><b>If you want the 1% sell fee exactly as pitched:</b> Blunts registers as its own adviser (2–4 months, about $10–25k to set up plus $8–125k a year in compliance), or the broker charges it as its own commission and pays Blunts a flat fee. Either way, get a written legal opinion first.</p>
+  </section>
+
+  <section id="product">
+    <h2>The product</h2>
+    <p class="prose dim">The only actions are deposit and withdraw. Everything else is feedback on those two.</p>
+    <div class="units">
+      <div class="unit"><div class="a">$25</div><div class="b">A quarter</div><div class="c">Fills 25% of a blunt. Pop, then flakes and sparkling $ fall.</div></div>
+      <div class="unit"><div class="a">$100</div><div class="b">A blunt</div><div class="c">Rolls up, the tip glows, and it drops into the stash.</div></div>
+      <div class="unit"><div class="a">$1K</div><div class="b">A band</div><div class="c">Ten blunts with a rubber band on them. The big milestone.</div></div>
+    </div>
+    <h3>Design decisions in the prototype</h3>
+    <ul class="tight prose">
+      <li><b>Blunts track money put in, never market value.</b> A market dip never un-rolls a blunt. Gains show up as a separate "Grown" number so users always know which part is theirs and which part the market gave them.</li>
+      <li><b>Celebrate saving, not selling.</b> Deposits get flakes and stamps. Withdrawals get a quiet ash drift and an itemized receipt. This is also what the Massachusetts v. Robinhood settlement over confetti effects implies.</li>
+      <li><b>A tax stash instead of withholding.</b> On gains you cash out, a slice goes into a separate balance that's still the user's money. It's settled at filing time. 0% is an option, since many users owe 0% on long-term gains.</li>
+      <li><b>No crypto vocabulary.</b> No wallets, chains or tokens in the UI. "What's inside" shows the stock mix as plain percentages.</li>
+      <li><b>No credit cards.</b> Card issuers often treat investing or crypto purchases as cash advances. Investing borrowed money is also how this audience gets hurt.</li>
+      <li><b>Fee model is a toggle</b> in the prototype: your 10%-of-gains pitch next to a flat-fee version that's legal in the US.</li>
+    </ul>
+  </section>
+
+  <section id="money">
+    <h2>Money in and out</h2>
+    <p class="prose">The biggest 2026 change for this audience is that <b>Cash App, Venmo and PayPal now send stablecoins directly</b>. Cash App added USDC on Arbitrum for US users (except New York) on May 27, 2026, free for now. Venmo and PayPal send PYUSD on Arbitrum. If Blunts goes on-chain, users can deposit from the balance they already have for about a penny, with no chargebacks.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Method</th><th>Best rail</th><th>Cost to Blunts on $25</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Cash App</td><td>Native USDC send on Arbitrum</td><td class="num">~$0.02–0.10</td><td>Instant and irreversible. Cash-in at Walmart or CVS via Cash App Paper Money ($1). Not in NY.</td></tr>
+        <tr><td>Venmo / PayPal</td><td>Native PYUSD send on Arbitrum</td><td class="num">~$0.02–0.10</td><td>Paxos converts PYUSD to USDG for free.</td></tr>
+        <tr><td>Bank</td><td>Bridge (Stripe) or Zero Hash virtual account, ACH or FedNow</td><td class="num">~$0.17</td><td>~0.25–0.5% (unverified). Zero Hash covers all states including NY.</td></tr>
+        <tr><td>Debit / Apple Pay</td><td>Coinbase Headless Onramp, zero-fee USDC program</td><td class="num">$0 if approved</td><td>Otherwise 2.5–4.5%, which breaks the free-deposit promise.</td></tr>
+        <tr><td>Credit card</td><td>Don't offer</td><td class="num">3.5–5% + cash-advance fee</td><td>Worst fraud profile. Wrong product for savings.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="tbl"><table>
+      <thead><tr><th>Withdraw to</th><th>Speed</th><th>Cost on $100</th><th>User fee</th></tr></thead>
+      <tbody>
+        <tr><td>Cash App</td><td>Minutes</td><td class="num">~$0.05–0.30</td><td>Free. This is the killer off-ramp.</td></tr>
+        <tr><td>Venmo / PayPal</td><td>Minutes</td><td class="num">~$0.05–0.30</td><td>Free</td></tr>
+        <tr><td>Bank (ACH / FedNow)</td><td>Seconds to 2 days</td><td class="num">~$0.25–0.55</td><td>Free</td></tr>
+        <tr><td>Debit card, instant</td><td>Minutes</td><td class="num">~$0.50–1.50</td><td>~$1. The only fee a user ever sees.</td></tr>
+      </tbody>
+    </table></div>
+    <p class="callout prose"><b>Unit economics:</b> a user depositing $25 a week costs about $4–11 a year in rails. With a 10–20% cut of gains in a 10% year, that breaks even at an average balance of $200–1,000. In a down year there's no profit to share, so a flat or asset-based fee is also the more durable business.</p>
+    <p class="callout prose"><b>For the US launch</b> (next sections), the simpler path is bank and debit funding straight into the broker partner: Plaid plus the broker's ACH. Stablecoin rails matter for the international product and for phase 2.</p>
+  </section>
+
+  <section id="basket">
+    <h2>What's in a blunt</h2>
+    <p class="prose">Robinhood Chain went live on July 1, 2026 as an Arbitrum-based L2 with about 190 stock tokens. Those tokens are debt notes from a Jersey subsidiary, not shares, and <b>they aren't available to US persons</b>. The same is true of xStocks (Kraken) and Ondo Stocks. On Robinhood Chain, trades under $100 lose about 4–5% to fees and slippage, so micro-deposits have to be batched.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Option</th><th>How</th><th>US users?</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>Broker fractional shares</td><td>Alpaca or DriveWealth. Each user owns their shares, and "BLUNT" is a model portfolio in the UI.</td><td><span class="tag go">Yes</span></td><td>US launch. Cheapest execution, SIPC protection, clean 1099s.</td></tr>
+        <tr><td>Tokenized QQQ</td><td>QQQx or QQQon. One token, Nasdaq-100, no rebalancing.</td><td><span class="tag no">No</span></td><td>Simplest core for the international product.</td></tr>
+        <tr><td>Own multi-token vault</td><td>ERC-4626 vault holding NVDA, PLTR, TSLA, SPCX and others.</td><td><span class="tag no">No</span></td><td>Most on-brand, but you're running a fund. Use it as satellites around the QQQ core.</td></tr>
+        <tr><td>Dinari dShares</td><td>US broker-dealer and transfer agent. 724 tokenized stocks for US investors since Aug 2026.</td><td><span class="tag go">Yes</span></td><td>Phase 2 "on-chain inside." Transfers are allowlisted.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>The private names</h3>
+    <ul class="tight prose">
+      <li><b>SpaceX</b> went public on June 12, 2026 as SPCX. It's now an ordinary stock and can go in the basket.</li>
+      <li><b>Anthropic</b> filed confidentially and is reportedly targeting an IPO around November. Add it after it lists.</li>
+      <li><b>OpenAI</b> says it won't IPO until 2027. Both companies have declared pre-IPO SPV transfers void, and those tokens fell 34–39%. <b>Keep SPV tokens out of the basket.</b> Advertising "OpenAI inside" would be a legal and reputational mistake.</li>
+    </ul>
+  </section>
+
+  <section id="blockers">
+    <h2>The four blockers</h2>
+    <div class="blocker">
+      <div class="lbl"><span class="tag no">Critical</span><h3>The BLUNT token is a fund</h3></div>
+      <div class="body">
+        <div class="row"><span class="k">The plan</span><span class="dim">A treasury pools deposits, buys a basket, and issues a redeemable token.</span></div>
+        <div class="row"><span class="k">Why it breaks</span><span>That's a security and an unregistered investment company under the '40 Act. The SEC's Jan 2026 statement says tokenization changes nothing. Registering a fund costs $2–5M+ and takes 18–36 months.</span></div>
+        <div class="row fix"><span class="k">Instead</span><span>Use the robo-adviser model, the way Acorns and Betterment work. Blunts registers as an investment adviser, and each user owns fractional shares at a broker partner. Rule 3a-4 keeps it out of fund territory. BLUNT becomes a portfolio name, not a token.</span></div>
+      </div>
+    </div>
+    <div class="blocker">
+      <div class="lbl"><span class="tag no">Critical</span><h3>10% of profits</h3></div>
+      <div class="body">
+        <div class="row"><span class="k">The plan</span><span class="dim">No deposit or withdraw fees. Take 5–10% of gains.</span></div>
+        <div class="row"><span class="k">Why it breaks</span><span>Advisers Act §205 bans performance fees except for "qualified clients": $1.4M invested with you or $2.7M net worth, as of June 29, 2026. Taking the cut at withdrawal doesn't change that.</span></div>
+        <div class="row fix"><span class="k">Instead</span><span>A flat $3–5 a month, free below a threshold (for example, your first band), or a 0.25–0.35% asset fee. The line becomes "We never charge to put money in or take it out." Keep the profit cut only for a separate non-US product, where it may be allowed.</span></div>
+      </div>
+    </div>
+    <div class="blocker">
+      <div class="lbl"><span class="tag no">Critical</span><h3>Cayman / BVI for Americans</h3></div>
+      <div class="body">
+        <div class="row"><span class="k">The plan</span><span class="dim">Set up offshore, launch, sort out the US later.</span></div>
+        <div class="row"><span class="k">Why it breaks</span><span>US law follows the investor. An English-language app with US culture, marketed to Americans on US app stores, is "directed selling" by definition. BitMEX paid $100M and its founders were charged, Binance paid over $4B, and KuCoin was barred from the US in March 2026. An offshore fund token is also a PFIC for US holders, a tax mess that contradicts "we handle your taxes."</span></div>
+        <div class="row fix"><span class="k">Instead</span><span>US-first through registered partners. If you want to ship faster, run a separate brand and entity for non-US markets (LatAm, Africa, Caribbean) with hard geoblocking and no US marketing, and treat it as a product lab.</span></div>
+      </div>
+    </div>
+    <div class="blocker">
+      <div class="lbl"><span class="tag warn">High</span><h3>"Withhold the taxes"</h3></div>
+      <div class="body">
+        <div class="row"><span class="k">The plan</span><span class="dim">Take capital-gains tax out on the front end so users never deal with it.</span></div>
+        <div class="row"><span class="k">Why it breaks</span><span>US brokers can't withhold capital-gains tax. The only withholding is 24% backup withholding when a user has no valid SSN or ITIN on file. Single filers under $49,450 of taxable income pay <b>0%</b> on long-term gains in 2026, so blanket withholding would take money many users don't owe.</span></div>
+        <div class="row fix"><span class="k">Instead</span><span>Make a <b>Roth IRA blunt</b> the flagship: growth is tax-free, and contributions can be withdrawn anytime. For taxable accounts: the tax stash, tax-smart lot selection, "hold 43 more days" nudges, broker-issued 1099s, and in-app filing through Column Tax or April.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="brand">
+    <h2>Brand risk</h2>
+    <p class="prose">The name can stay. The imagery needs care. Recreational cannabis is still Schedule I. Apple rejects apps that encourage drug use, Stripe prohibits cannabis, and broker partners have to approve your marketing under FINRA 2210 and the SEC Marketing Rule.</p>
+    <ul class="tight prose">
+      <li>Position "blunt" as money slang, like "band." Keep smoke, joints, lighters and "get lit" copy out of the store listing, icon, screenshots and ads.</li>
+      <li>Keep the flake and ember effects inside the app, abstract and behind an age gate. Market to 21+, even if accounts open at 18.</li>
+      <li>Have the broker, bank and app-review contacts approve the brand guide in writing <b>before</b> you commit to it.</li>
+      <li>Keep a brand-safe name for ads and partner decks. Run a USPTO trademark search on BLUNTS in Class 36 now.</li>
+      <li>Expect the "weed stock app targets urban youth" headline. Answer it in advance with plain risk disclosures ("you can lose money"), no return promises, and a community advisory group.</li>
+    </ul>
+  </section>
+
+  <section id="plan">
+    <h2>The plan</h2>
+    <pre class="flow"><b>Blunts, Inc.</b> (Delaware C-corp)
+ ├─ <b>Blunts Advisers LLC</b>: registered adviser, runs the "Blunts Tech Basket" model
+ │     flat fee or ≤0.35% AUM · no profit share · Rule 3a-4 managed accounts
+ ├─ Broker partner: Alpaca / DriveWealth / Apex
+ │     KYC, custody (SIPC), fractional execution, 1099s, Roth IRA custody
+ ├─ Money movement: Plaid + broker ACH · later: Bridge / Zero Hash stablecoin rails
+ ├─ Taxes: tax stash + lot optimizer in-house · filing via Column Tax or April
+ └─ Later: <b>Blunts International</b> (Cayman/BVI, separate brand, non-US only,
+          tokenized QQQ core + stock-token satellites, profit share possible)</pre>
+    <ol class="phases">
+      <li><span class="when">Months 0–3</span><span class="what"><b>Foundations</b><span>Securities counsel, entity, trademark, broker LOIs, flow-of-funds memo, fee decision, partner brand review. Legal $75–200k.</span></span></li>
+      <li><span class="when">Months 2–6</span><span class="what"><b>Adviser registration</b><span>Form ADV, Form CRS, compliance manual, outsourced CCO, marketing policies.</span></span></li>
+      <li><span class="when">Months 3–9</span><span class="what"><b>Build on the broker</b><span>Taxable account and Roth IRA, KYC flow, basket and rebalancing, tax stash, filing integration.</span></span></li>
+      <li><span class="when">Months 8–12</span><span class="what"><b>US beta</b><span>Waitlist or a few states. Marketing-rule review of every creative. App Store submission.</span></span></li>
+      <li><span class="when">Months 12–18</span><span class="what"><b>National launch</b><span>All 50 states. All-in setup cost roughly $250–750k.</span></span></li>
+      <li><span class="when">Months 18–30</span><span class="what"><b>On-chain inside</b><span>Dinari dShares or trading venues under the SEC's Sept 17, 2026 Innovation Exemption. A US basket token is realistic in 2027–2028 at the earliest.</span></span></li>
+    </ol>
+  </section>
+
+  <section id="risks">
+    <h2>Risk register</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Risk</th><th>Odds</th><th>Impact</th><th>Mitigation</th></tr></thead>
+      <tbody>
+        <tr><td>Pooled token = unregistered fund</td><td>High as designed</td><td><span class="sev c"></span>Critical</td><td>Managed accounts, no pooled token in the US</td></tr>
+        <tr><td>Offshore entity caught serving Americans</td><td>High</td><td><span class="sev c"></span>Critical</td><td>US-first, separate non-US brand, hard geoblock</td></tr>
+        <tr><td>Broker or bank refuses the brand</td><td>Medium</td><td><span class="sev c"></span>Critical</td><td>Brand-guide sign-off before launch, backup partner</td></tr>
+        <tr><td>Profit-share fee violates §205</td><td>High</td><td><span class="sev h"></span>High</td><td>Flat or AUM fee</td></tr>
+        <tr><td>App Store rejection for drug references</td><td>Medium</td><td><span class="sev h"></span>High</td><td>Clean listing, 17+ rating, pre-submission call</td></tr>
+        <tr><td>Stock-token issuer or Alpaca failure (most issuers sit on Alpaca)</td><td>Low</td><td><span class="sev h"></span>High</td><td>SIPC broker custody in US, diversified issuers abroad</td></tr>
+        <tr><td>Ad-platform bans</td><td>Medium–High</td><td><span class="sev m"></span>Medium</td><td>Brand-safe creative, creator program with disclosures</td></tr>
+        <tr><td>"We handle your taxes" read as misleading</td><td>Medium</td><td><span class="sev m"></span>Medium</td><td>Tax-stash wording, never "withheld"</td></tr>
+        <tr><td>Gamification enforcement (MA-style)</td><td>Low–Medium</td><td><span class="sev m"></span>Medium</td><td>Reward deposits and holding only, no lottery mechanics</td></tr>
+        <tr><td>KYC failures and ACH fraud on thin-file users</td><td>Medium</td><td><span class="sev m"></span>Medium</td><td>Document fallback, deposit holds, push rails</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="next">
+    <h2>Next steps</h2>
+    <ul class="tight prose">
+      <li><b>Pick the fee:</b> adviser fee on balance, or Dinari flat spark fee plus platform fee.</li>
+      <li><b>Send Dinari</b> the 15 questions in research/06, plus the ones in research/19 §9. Are NY residents eligible? Is a one-tap "Roll it" after each deposit an acceptable pre-trade confirmation? Will Dinari write an App Review letter? Can the order fee be billed at actual gas?</li>
+      <li><b>Get a D-U-N-S number this week.</b> Both stores need an organization account, and D-U-N-S can take 30 days.</li>
+      <li><b>Apply to Coinbase</b> for the zero-fee USDC program (Apple Pay deposits at $0).</li>
+      <li><b>Talk to zerohash</b> about the bank backup: reserve size, pricing, Plaid resale.</li>
+      <li><b>Backup partner:</b> Atomic or Alpaca, if Dinari says no to the partner setup or NY.</li>
+      <li><b>Book securities counsel</b> to sign off on the Dinari partner setup, the user-signs-everything design, the fee, and Blunts+ perks.</li>
+      <li><b>Prototype the Roth blunt next:</b> a "Forever stash" with "withdrawable now" and "locked until 59½" shown side by side.</li>
+      <li><b>User-test the prototype</b> with 10 people from the target audience. Test the $25-quarter language and whether "Grown" beside "Put in" makes sense to them.</li>
+    </ul>
+    <div class="files">
+      <div class="file"><code>research/01-onramps-offramps.md</code>Provider-by-provider ramp comparison, costs, architecture</div>
+      <div class="file"><code>research/02-tokenized-stocks.md</code>Robinhood Chain, 10 issuers, basket designs, private names</div>
+      <div class="file"><code>research/03-legal-tax-compliance.md</code>Securities, fees, offshore, tax, KYC, brand, 15-item risk register</div>
+      <div class="file"><code>research/04-us-stack-dinari-alpaca.md</code>Dinari and Alpaca verified, spark fee, App Store fees</div>
+      <div class="file"><code>research/05-payout-methods.md</code>Which payout destinations actually work</div>
+      <div class="file"><code>research/06-dinari-basket-fees.md</code>Basket approval, partner fee, 15 questions for Dinari</div>
+      <div class="file"><code>research/07-alpaca-ria-turnkey.md</code>Alpaca no-license path, Atomic, registering as an adviser</div>
+      <div class="file"><code>research/08-monetization.md</code>Every revenue line, unit economics, break-even</div>
+      <div class="file"><code>research/09-cash-app-rails.md</code>Cash App USDC in and out, screen by screen</div>
+      <div class="file"><code>research/10-plaid-bank-fallback.md</code>Plaid + zerohash bank backup</div>
+      <div class="file"><code>research/11-qqq-returns-and-tutorial.md</code>QQQ yearly returns, tutorial script</div>
+      <div class="file"><code>research/12-gaps-and-profit-fee.md</code>Profit-fee verdict, launch blockers</div>
+      <div class="file"><code>research/13-apple-app-store.md</code>iOS review rules, Apple Pay, precedent, submission checklist</div>
+      <div class="file"><code>research/14-google-play-android.md</code>Play policies, crypto wallet rule, billing, Android checklist</div>
+      <div class="file"><code>research/15-cash-app-ux-and-login.md</code>Cash App deep links, why no Cash App login, passkeys</div>
+      <div class="file"><code>research/16-new-york-and-us-licensing.md</code>NY, BitLicense, CA DFAL, adviser route, legal checklist</div>
+      <div class="file"><code>research/17-apple-pay-and-bank-rails.md</code>Apple Pay via Coinbase, zerohash vs Bridge, costs</div>
+      <div class="file"><code>research/18-tech-stack-and-web.md</code>Expo stack, web version, backend, costs, build plan</div>
+      <div class="file"><code>research/19-ship-plan-feasibility.md</code>The end-to-end ship plan: every option and the pick</div>
+      <div class="file"><code>research/20-market-sizing-inputs.md</code>Population, Cash App, investing rates, comparable apps</div>
+      <div class="file"><code>research/21-transaction-fees.md</code>What others charge, who can legally take 1%, cost per rail</div>
+      <div class="file"><code>research/22-tam-sam-revenue.md</code>TAM, SAM, SOM and revenue at 1% per move</div>
+    </div>
+  </section>
+
+  <footer>Compiled Sept 28, 2026 from web research. Figures marked unverified in the source files should be confirmed with providers. Nothing here is legal, tax or investment advice.</footer>
+</div>
+
+</html>

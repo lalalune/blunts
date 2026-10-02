@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Blunts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Figtree:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme: dark;
+  --page:#120C08;
+  --ground:#1C130E;
+  --wrap:#2A1D15;
+  --wrap-2:#36271C;
+  --line:#4A3829;
+  --paper:#F3E7CF;
+  --paper-dim:#B8A487;
+  --paper-faint:#7E6D58;
+  --leaf:#8DBB50;
+  --leaf-deep:#4E7424;
+  --gold:#F2C14E;
+  --ember:#FF6B2C;
+  --ash:#8C8279;
+  --bad:#E5705A;
+  --good:#9BD36B;
+  --display:"Bungee", "Arial Black", Impact, sans-serif;
+  --body:"Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+html,body{height:100%}
+body{background:var(--page);color:var(--paper);font-family:var(--body);font-size:15px;line-height:1.45;
+  background-image:radial-gradient(1200px 700px at 70% -10%, #2a1a10 0%, transparent 60%),radial-gradient(900px 600px at 0% 110%, #1a2410 0%, transparent 55%);}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ===== stage ===== */
+.stage{display:flex;gap:48px;justify-content:center;align-items:flex-start;padding-block:32px;padding-inline:16px;flex-wrap:wrap}
+.guide{width:340px;max-width:100%;display:flex;flex-direction:column;gap:20px;order:2}
+.guide h1{font-family:var(--display);font-size:28px;letter-spacing:.02em;margin:0;line-height:1;color:var(--gold)}
+.guide .lede{color:var(--paper-dim);margin:0;font-size:14px;max-width:34ch}
+.gsec{display:flex;flex-direction:column;gap:8px}
+.gsec h2{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--paper-faint);margin:0;font-weight:700}
+.gsteps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;counter-reset:s}
+.gsteps button{width:100%;text-align:left;display:grid;grid-template-columns:26px 1fr;gap:8px;padding:8px 10px;border-radius:10px;color:var(--paper);font-size:14px}
+.gsteps button:hover{background:var(--wrap)}
+.gsteps button::before{counter-increment:s;content:counter(s);font-family:var(--mono);color:var(--gold);font-size:13px;padding-top:1px}
+.gsteps button>span{display:block}
+.gsteps small{display:block;color:var(--paper-faint);font-size:12.5px}
+.grow{display:flex;gap:8px;flex-wrap:wrap}
+.gbtn{border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600}
+.gbtn:hover{border-color:var(--paper-dim)}
+.gbtn.up{color:var(--good)} .gbtn.down{color:var(--bad)}
+.gnote{font-size:13px;color:var(--paper-dim);margin:0;padding-left:12px;border-left:2px solid var(--line)}
+.gnote b{color:var(--paper)}
+.market-read{font-size:13px;color:var(--paper-dim)}
+
+/* ===== device ===== */
+.device{order:1;width:390px;max-width:100%;height:812px;max-height:calc(100svh - 32px);min-height:640px;border-radius:44px;padding:10px;background:#0a0705;box-shadow:0 0 0 1.5px #3a2a1e,0 40px 80px -20px rgba(0,0,0,.7);flex:none}
+.screen{position:relative;width:100%;height:100%;border-radius:34px;overflow:hidden;background:var(--ground)}
+.scr{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:52px 20px 96px;display:flex;flex-direction:column;gap:18px;scrollbar-width:none}
+.scr::-webkit-scrollbar{display:none}
+.scr.full{padding-bottom:28px}
+.notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:104px;height:28px;border-radius:20px;background:#000;z-index:50}
+@media (max-width:440px){
+  .stage{padding-block:0;padding-inline:0;gap:24px}
+  .device{width:100%;height:100svh;max-height:none;border-radius:0;padding:0;box-shadow:none;min-height:560px}
+  .screen{border-radius:0}
+  .notch{display:none}
+  .guide{padding-inline:16px;padding-bottom:32px}
+}
+
+/* ===== shared ui ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between}
+.wordmark{font-family:var(--display);font-size:20px;color:var(--gold);letter-spacing:.02em}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--wrap-2);display:grid;place-items:center;font-weight:700;font-size:13px;color:var(--paper-dim)}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--paper-faint);font-weight:700}
+.h-screen{font-family:var(--display);font-size:26px;line-height:1.05;margin:0;text-wrap:balance}
+.sub{color:var(--paper-dim);margin:0;font-size:14.5px}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--paper-dim);font-weight:600;font-size:14px;align-self:flex-start}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border-radius:18px;font-weight:800;font-size:17px;width:100%;transition:transform .12s}
+.btn:active{transform:scale(.98)}
+.btn-go{background:var(--leaf);color:#15200a}
+.btn-gold{background:var(--gold);color:#2a1a05}
+.btn-ghost{border:1.5px solid var(--line);color:var(--paper)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.card{background:var(--wrap);border-radius:22px;padding:18px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--wrap-2);color:var(--paper-dim)}
+.pill.good{color:var(--good)} .pill.bad{color:var(--bad)}
+.spacer{flex:1}
+
+/* ===== blunt ===== */
+.blunt-card{background:linear-gradient(180deg,var(--wrap) 0%, #251a12 100%);border-radius:26px;padding:20px 16px 18px;display:flex;flex-direction:column;gap:12px;position:relative}
+.blunt-head{display:flex;justify-content:space-between;align-items:baseline;padding-inline:4px}
+.blunt-title{font-family:var(--display);font-size:18px}
+.blunt-pct{font-family:var(--mono);font-size:14px;color:var(--leaf)}
+.blunt-svg{width:100%;height:auto;display:block;overflow:visible}
+.blunt-svg.rollaway{animation:rollaway .7s cubic-bezier(.5,0,.8,.3) forwards}
+.blunt-svg.rollin{animation:rollin .45s ease-out}
+@keyframes rollaway{to{transform:translate(40%,160%) rotate(-12deg) scale(.25);opacity:0}}
+@keyframes rollin{from{transform:translateX(-30%);opacity:0}to{transform:none;opacity:1}}
+.quarters{display:grid;grid-template-columns:34px repeat(4,1fr);font-family:var(--mono);font-size:11px;color:var(--paper-faint);padding-inline:4px}
+.quarters span{text-align:right}
+.quarters span.hit{color:var(--leaf)}
+.blunt-foot{font-size:13.5px;color:var(--paper-dim);padding-inline:4px}
+.blunt-foot b{color:var(--paper)}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--wrap);border-radius:18px;padding:12px}
+.stat .k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--paper-faint);font-weight:700}
+.stat .v{font-family:var(--mono);font-size:18px;margin-top:2px;white-space:nowrap}
+.stat .v.good{color:var(--good)} .stat .v.bad{color:var(--bad)}
+.worth{display:flex;justify-content:space-between;align-items:baseline;padding-inline:4px;color:var(--paper-dim);font-size:14px}
+.worth .num{color:var(--paper);font-size:15px}
+.actions{display:grid;grid-template-columns:1.4fr 1fr;gap:10px}
+
+.list{display:flex;flex-direction:column}
+.li{display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.li:last-child{border-bottom:0}
+.li .ic{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--wrap-2)}
+.li .t{font-weight:700;font-size:14.5px}
+.li .d{font-size:12.5px;color:var(--paper-faint)}
+.li .a{font-family:var(--mono);font-size:14.5px;text-align:right}
+.li .a.in{color:var(--good)}
+.link{color:var(--gold);font-weight:700;font-size:13.5px}
+
+/* ===== tabbar ===== */
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:80px;padding:8px 12px 22px;display:grid;grid-template-columns:repeat(4,1fr);background:linear-gradient(180deg,rgba(28,19,14,0) 0%,var(--ground) 30%);z-index:20}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--paper-faint);position:relative}
+.tab svg{width:24px;height:24px}
+.tab.on{color:var(--gold)}
+.tab .badge{position:absolute;top:-4px;left:calc(50% + 6px);background:var(--ember);color:#fff;font-size:10px;font-family:var(--mono);border-radius:999px;padding:1px 5px;transform:scale(0);transition:transform .25s}
+.tab .badge.show{transform:scale(1)}
+
+/* ===== fx ===== */
+#fx{position:absolute;inset:0;pointer-events:none;z-index:40}
+.stamp{position:absolute;left:50%;top:32%;z-index:45;pointer-events:none;font-family:var(--display);font-size:40px;line-height:.95;text-align:center;color:var(--gold);transform:translate(-50%,-50%) rotate(-8deg) scale(.3);opacity:0;text-shadow:0 3px 0 #6b3d10,0 0 30px rgba(242,193,78,.45);white-space:nowrap}
+.stamp small{display:block;font-family:var(--body);font-weight:800;font-size:14px;letter-spacing:.14em;color:var(--paper);text-shadow:none;margin-top:8px}
+.stamp.go{animation:stamp 1.25s cubic-bezier(.2,1.4,.4,1) forwards}
+@keyframes stamp{0%{opacity:0;transform:translate(-50%,-50%) rotate(-8deg) scale(.3)}18%{opacity:1;transform:translate(-50%,-50%) rotate(-8deg) scale(1.08)}28%{transform:translate(-50%,-50%) rotate(-8deg) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-62%) rotate(-8deg) scale(1)}}
+.qpop{position:absolute;z-index:44;pointer-events:none;font-family:var(--display);font-size:18px;color:var(--leaf);transform:translate(-50%,0);animation:qpop 1s ease-out forwards;white-space:nowrap}
+@keyframes qpop{0%{opacity:0;transform:translate(-50%,10px) scale(.6)}20%{opacity:1;transform:translate(-50%,0) scale(1.1)}100%{opacity:0;transform:translate(-50%,-46px) scale(1)}}
+
+.toast{position:absolute;left:16px;right:16px;bottom:92px;z-index:60;background:var(--paper);color:#1C130E;border-radius:16px;padding:12px 14px;font-weight:600;font-size:14px;transform:translateY(20px);opacity:0;transition:.25s;pointer-events:none}
+.toast.show{transform:none;opacity:1}
+
+/* ===== sheets & flows ===== */
+.sheet-wrap{position:absolute;inset:0;z-index:70;background:rgba(0,0,0,.5);display:flex;align-items:flex-end}
+.sheet{width:100%;background:var(--wrap);border-radius:28px 28px 0 0;padding:14px 18px 28px;display:flex;flex-direction:column;gap:10px;max-height:85%;overflow:auto;animation:sheetin .25s ease-out}
+@keyframes sheetin{from{transform:translateY(40%)}to{transform:none}}
+.grab{width:40px;height:5px;border-radius:9px;background:var(--line);align-self:center}
+.opt{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;padding:12px;border-radius:16px;text-align:left;width:100%}
+.opt:hover{background:var(--wrap-2)}
+.opt.sel{background:var(--wrap-2);box-shadow:inset 0 0 0 1.5px var(--gold)}
+.opt .lg{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff}
+.opt .t{font-weight:700}
+.opt .d{font-size:12.5px;color:var(--paper-faint)}
+.opt .r{font-size:12.5px;font-weight:700;color:var(--good)}
+
+.amount{font-family:var(--mono);font-size:56px;text-align:center;line-height:1;letter-spacing:-.02em;padding-top:8px}
+.amount .cur{color:var(--paper-faint);font-size:36px;vertical-align:14px;margin-right:2px}
+.amount-note{text-align:center;color:var(--leaf);font-weight:700;font-size:14.5px;min-height:21px}
+.amount-note.warn{color:var(--bad)}
+.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.chip{padding:8px 14px;border-radius:999px;background:var(--wrap);font-weight:700;font-size:13.5px}
+.chip.on{background:var(--gold);color:#2a1a05}
+.chip small{font-weight:600;color:var(--paper-faint);margin-left:4px}
+.chip.on small{color:#6b4a10}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.key{height:52px;border-radius:14px;font-family:var(--mono);font-size:24px}
+.key:active{background:var(--wrap)}
+.method{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;background:var(--wrap);border-radius:16px;padding:10px 12px;text-align:left;width:100%}
+.method .lg{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:12px;color:#fff}
+.method .t{font-weight:700;font-size:14px}
+.method .d{font-size:12px;color:var(--paper-faint)}
+.method .chev{color:var(--paper-faint);font-size:13px;font-weight:700}
+
+.bd{display:flex;flex-direction:column;gap:8px;background:var(--wrap);border-radius:18px;padding:14px 16px}
+.bd .row{font-size:14px;color:var(--paper-dim)}
+.bd .row .num{color:var(--paper)}
+.bd .row.minus .num{color:var(--bad)}
+.bd .row.stash .num{color:var(--gold)}
+.bd hr{border:0;border-top:1px dashed var(--line);margin:2px 0;width:100%}
+.bd .row.total{color:var(--paper);font-weight:800;font-size:16px}
+.bd .row.total .num{font-size:18px}
+.fine{font-size:12px;color:var(--paper-faint);margin:0}
+
+.overlay{position:absolute;inset:0;z-index:80;background:var(--ground);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:32px;text-align:center}
+.spin{width:180px}
+.spin .blunt-svg{animation:puff 1.2s ease-in-out infinite}
+@keyframes puff{50%{transform:scale(1.04)}}
+.big-check{font-family:var(--display);font-size:34px;color:var(--leaf);line-height:1}
+
+/* ===== onboarding ===== */
+.splash{justify-content:space-between;padding-top:70px;background:radial-gradient(420px 360px at 50% 30%, #3a2515 0%, transparent 70%)}
+.logo{font-family:var(--display);font-size:64px;line-height:.9;color:var(--gold);text-shadow:0 5px 0 #6b3d10;margin:0}
+.tag{font-family:var(--display);font-size:22px;line-height:1.1;margin:0}
+.how{display:flex;flex-direction:column;gap:12px}
+.howrow{display:grid;grid-template-columns:92px 1fr;gap:14px;align-items:center;background:var(--wrap);border-radius:20px;padding:14px}
+.howrow .amt{font-family:var(--display);font-size:22px;color:var(--gold)}
+.howrow .w{font-weight:800}
+.howrow .d{font-size:13px;color:var(--paper-dim)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;font-weight:700;color:var(--paper-dim)}
+.field input{height:50px;border-radius:14px;border:1.5px solid var(--line);background:var(--wrap);color:var(--paper);padding:0 14px;font:inherit;font-size:16px}
+.field input::placeholder{color:var(--paper-faint)}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--paper-dim)}
+.check input{width:20px;height:20px;accent-color:var(--leaf);margin-top:1px;flex:none}
+.demo-flag{font-size:12px;color:var(--gold);background:rgba(242,193,78,.1);border-radius:10px;padding:8px 10px}
+.link-opt{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;background:var(--wrap);border-radius:16px;padding:12px;text-align:left;width:100%}
+.link-opt .lg{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff}
+.link-opt .st{font-size:12.5px;font-weight:800;color:var(--paper-faint)}
+.link-opt.linked .st{color:var(--good)}
+.dots{display:flex;gap:6px;justify-content:center}
+.dots i{width:6px;height:6px;border-radius:9px;background:var(--line)}
+.dots i.on{background:var(--gold);width:18px}
+
+/* ===== stash ===== */
+.stash-hero{display:flex;flex-direction:column;gap:4px}
+.stash-count{font-family:var(--display);font-size:44px;line-height:1;color:var(--gold)}
+.stash-count small{font-family:var(--body);font-size:15px;font-weight:700;color:var(--paper-dim);margin-left:6px}
+.bands{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+.band{position:relative;display:flex;flex-direction:column;gap:2px;padding:6px 4px;background:rgba(0,0,0,.18);border-radius:10px}
+.band::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:7px;margin-left:-3.5px;background:#C8412F;border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.3)}
+.mini{width:70px;height:10px;border-radius:5px;background:linear-gradient(90deg,#E8D9B8 0 16%, #6b8a34 16% 100%);box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
+.mini.partial{background:linear-gradient(90deg,#E8D9B8 0 16%, #6b8a34 16% var(--p), transparent var(--p));outline:1px dashed var(--paper-faint);outline-offset:-1px}
+.loose{display:flex;flex-direction:column;gap:3px;padding:6px 4px}
+.band-label{font-size:11px;font-family:var(--mono);color:var(--paper-faint);text-align:center;margin-top:4px}
+.slots{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.slots i{height:28px;border-radius:6px;background:var(--wrap-2)}
+.slots i.f{background:linear-gradient(180deg,#86b24a,#4E7424)}
+.slots i.p{background:linear-gradient(0deg,#86b24a var(--p),var(--wrap-2) var(--p))}
+.legend{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center}
+.legend div{background:var(--wrap);border-radius:16px;padding:10px 6px}
+.legend .a{font-family:var(--display);font-size:16px;color:var(--gold)}
+.legend .b{font-size:12px;color:var(--paper-dim)}
+
+/* ===== inside ===== */
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:54px 1fr 40px;gap:10px;align-items:center;font-size:13.5px}
+.bar .tk{font-family:var(--mono);font-weight:500}
+.bar .tr{height:10px;border-radius:9px;background:var(--wrap-2);overflow:hidden}
+.bar .tr i{display:block;height:100%;background:var(--leaf);border-radius:9px}
+.bar .pc{font-family:var(--mono);text-align:right;color:var(--paper-dim)}
+.bar .nm{grid-column:2/4;font-size:12px;color:var(--paper-faint);margin-top:-8px}
+.soon{display:flex;gap:8px;flex-wrap:wrap}
+.soon span{font-size:12.5px;padding:5px 10px;border-radius:999px;border:1px dashed var(--line);color:var(--paper-faint)}
+.steps{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none;counter-reset:st}
+.steps li{display:grid;grid-template-columns:28px 1fr;gap:10px;font-size:14px;color:var(--paper-dim)}
+.steps li::before{counter-increment:st;content:counter(st);width:28px;height:28px;border-radius:50%;background:var(--wrap-2);display:grid;place-items:center;font-family:var(--mono);font-size:13px;color:var(--gold)}
+.steps b{color:var(--paper);display:block}
+details.faq{background:var(--wrap);border-radius:16px;padding:14px 16px}
+details.faq summary{font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between}
+details.faq summary::after{content:"+";color:var(--gold);font-family:var(--mono)}
+details.faq[open] summary::after{content:"–"}
+details.faq p{color:var(--paper-dim);font-size:14px;margin:8px 0 0}
+.segs{display:flex;gap:6px;flex-wrap:wrap}
+.segs button{padding:8px 12px;border-radius:12px;background:var(--wrap-2);font-weight:700;font-size:13px;text-align:left}
+.segs button small{display:block;font-weight:500;font-size:11px;color:var(--paper-faint)}
+.segs button.on{background:var(--gold);color:#2a1a05}
+.segs button.on small{color:#6b4a10}
+.jar{display:flex;gap:14px;align-items:center}
+.jar .v{font-family:var(--mono);font-size:30px;color:var(--gold)}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+
+<div class="stage">
+  <div class="device" aria-label="Blunts app prototype">
+    <div class="screen" id="screen">
+      <div class="notch"></div>
+
+      <!-- ============ ONBOARDING ============ -->
+      <section class="scr full splash" data-s="splash" hidden>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <p class="logo">BLUNTS</p>
+          <p class="tag">Roll up your money.</p>
+          <p class="sub" style="max-width:30ch">Drop cash. Fill blunts. Big tech stocks do the growing. You don't have to know how the market works.</p>
+        </div>
+        <div id="splashBlunt" style="padding-inline:4px"></div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-gold" data-go="ob-how">Get started</button>
+          <button class="btn btn-ghost" data-go="home">I already have an account</button>
+          <p class="fine" style="text-align:center">18+ only. Investing has risk. Blunts can shrink.</p>
+        </div>
+      </section>
+
+      <section class="scr full" data-s="ob-how" hidden>
+        <div class="dots"><i class="on"></i><i></i><i></i></div>
+        <p class="eyebrow">How the math works</p>
+        <h2 class="h-screen">Every dollar fills a blunt.</h2>
+        <div class="how">
+          <div class="howrow"><div class="amt">$25</div><div><div class="w">A quarter</div><div class="d">Fills 25% of a blunt. Start with $5 if you want.</div></div></div>
+          <div class="howrow"><div class="amt">$100</div><div><div class="w">A blunt</div><div class="d">Four quarters. It rolls up and goes in your stash.</div></div></div>
+          <div class="howrow"><div class="amt">$1K</div><div><div class="w">A band</div><div class="d">Ten blunts. Rubber band on it.</div></div></div>
+        </div>
+        <div class="card" style="display:flex;flex-direction:column;gap:6px">
+          <div class="eyebrow">Where it goes</div>
+          <p class="sub" style="color:var(--paper)">Your money buys a slice of big tech: Nvidia, Apple, Microsoft, Google, Amazon and more. When they grow, you grow.</p>
+          <p class="fine">Your blunts count what you put in. What you earned shows up separately as <b style="color:var(--good)">Grown</b>.</p>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn btn-gold" data-go="ob-verify">Bet</button>
+      </section>
+
+      <section class="scr full" data-s="ob-verify" hidden>
+        <div class="dots"><i></i><i class="on"></i><i></i></div>
+        <button class="back" data-go="ob-how">‹ Back</button>
+        <h2 class="h-screen">Quick check it's you.</h2>
+        <p class="sub">The law makes every investing app ask. Takes about a minute. We never run your credit.</p>
+        <div class="demo-flag">Prototype: don't type real info. Tap Continue to skip.</div>
+        <div class="field"><label for="f-name">Legal name</label><input id="f-name" placeholder="Jay Carter" autocomplete="off"></div>
+        <div class="field"><label for="f-dob">Birthday</label><input id="f-dob" placeholder="MM / DD / YYYY" autocomplete="off"></div>
+        <div class="field"><label for="f-ssn">SSN or ITIN</label><input id="f-ssn" placeholder="•••-••-••••" autocomplete="off"></div>
+        <label class="check"><input type="checkbox" id="f-18" checked> I'm 18 or older and I get that investments can go down.</label>
+        <div class="spacer"></div>
+        <button class="btn btn-gold" data-go="ob-fund">Continue</button>
+      </section>
+
+      <section class="scr full" data-s="ob-fund" hidden>
+        <div class="dots"><i></i><i></i><i class="on"></i></div>
+        <button class="back" data-go="ob-verify">‹ Back</button>
+        <h2 class="h-screen">How you moving money?</h2>
+        <p class="sub">Link what you already use. No fees to put money in or take it out.</p>
+        <div id="linkList" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div class="spacer"></div>
+        <button class="btn btn-gold" id="finishOb">Let's roll</button>
+      </section>
+
+      <!-- ============ HOME ============ -->
+      <section class="scr" data-s="home" hidden>
+        <div class="topbar"><span class="wordmark">BLUNTS</span><span class="avatar">JC</span></div>
+        <div class="blunt-card" id="bluntCard">
+          <div class="blunt-head"><span class="blunt-title" id="bluntTitle">Blunt #5</span><span class="blunt-pct" id="bluntPct">37%</span></div>
+          <div id="homeBlunt"></div>
+          <div class="quarters" id="quarters"><span></span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+          <div class="blunt-foot" id="bluntFoot"></div>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="k">Rolled</div><div class="v" id="stRolled">4</div></div>
+          <div class="stat"><div class="k">Put in</div><div class="v" id="stIn">$437</div></div>
+          <div class="stat"><div class="k">Grown</div><div class="v good" id="stGrown">+$52</div></div>
+        </div>
+        <div class="worth"><span>Worth right now</span><span class="num" id="stWorth">$489.12</span></div>
+        <div class="actions">
+          <button class="btn btn-go" data-open="deposit">Deposit</button>
+          <button class="btn btn-ghost" data-open="withdraw">Withdraw</button>
+        </div>
+        <div class="card" style="padding-block:6px 4px">
+          <div class="row" style="padding-top:10px"><span class="eyebrow">Recent</span><button class="link" data-go="receipts">See all</button></div>
+          <div class="list" id="recentList"></div>
+        </div>
+      </section>
+
+      <!-- ============ STASH ============ -->
+      <section class="scr" data-s="stash" hidden>
+        <p class="eyebrow">Your stash</p>
+        <div class="stash-hero">
+          <div class="stash-count" id="stashCount">4<small>blunts rolled</small></div>
+          <p class="sub" id="stashSub"></p>
+        </div>
+        <div class="card" style="display:flex;flex-direction:column;gap:14px">
+          <div class="row"><span class="eyebrow">The rolls</span><span class="pill" id="bandPill">0 bands</span></div>
+          <div class="bands" id="bands"></div>
+        </div>
+        <div class="card" style="display:flex;flex-direction:column;gap:10px">
+          <div class="row"><span class="eyebrow">Next band</span><span class="num" style="font-size:13px;color:var(--paper-dim)" id="bandProg">4 / 10</span></div>
+          <div class="slots" id="slots"></div>
+          <p class="fine" id="bandHint"></p>
+        </div>
+        <div class="legend">
+          <div><div class="a">$25</div><div class="b">quarter</div></div>
+          <div><div class="a">$100</div><div class="b">blunt</div></div>
+          <div><div class="a">$1K</div><div class="b">band</div></div>
+        </div>
+        <div class="card" style="display:flex;flex-direction:column;gap:6px">
+          <div class="row"><span class="eyebrow">Grown on top</span><span class="pill good" id="grownPill">+11.9%</span></div>
+          <p class="sub">Your blunts only count what you put in. Stock gains stack on the side so you always know which part is yours and which part the market gave you.</p>
+        </div>
+      </section>
+
+      <!-- ============ RECEIPTS ============ -->
+      <section class="scr" data-s="receipts" hidden>
+        <p class="eyebrow">Receipts</p>
+        <h2 class="h-screen">Taxes handled.</h2>
+        <div class="card" style="display:flex;flex-direction:column;gap:12px">
+          <div class="row"><span class="eyebrow">Tax stash</span><span class="pill">Still your money</span></div>
+          <div class="jar"><span class="v" id="taxJar">$14.20</span><span class="sub" style="font-size:13px">set aside from gains you cashed out</span></div>
+          <p class="fine">When you cash out gains, we put a slice here so tax season doesn't hit you. In April we use it to pay what you owe and send back whatever's left.</p>
+          <div class="eyebrow" style="margin-top:4px">How much to set aside</div>
+          <div class="segs" id="taxSegs"></div>
+        </div>
+        <div class="card" style="display:flex;flex-direction:column;gap:6px">
+          <span class="eyebrow">Tax forms</span>
+          <div class="list">
+            <div class="li"><div class="ic">📄</div><div><div class="t">2025 Form 1099</div><div class="d">Ready since Feb 14</div></div><button class="link" data-toast="Would open your 1099 PDF">Get it</button></div>
+            <div class="li"><div class="ic">📄</div><div><div class="t">2026 Form 1099</div><div class="d">Ready Feb 2027</div></div><span class="d" style="color:var(--paper-faint);font-size:12.5px">Soon</span></div>
+          </div>
+          <button class="btn btn-ghost" style="height:46px;font-size:14.5px;margin-top:6px" data-toast="Would hand off to a free filing partner with your 1099 pre-filled">File for free with your 1099 pre-filled</button>
+        </div>
+        <div class="card" style="padding-block:6px 4px">
+          <div class="row" style="padding-top:10px"><span class="eyebrow">Activity</span></div>
+          <div class="list" id="allList"></div>
+        </div>
+      </section>
+
+      <!-- ============ INSIDE ============ -->
+      <section class="scr" data-s="inside" hidden>
+        <p class="eyebrow">What's inside</p>
+        <h2 class="h-screen">Every blunt is a slice of big tech.</h2>
+        <p class="sub">You own a piece of each of these, in the amounts below. We rebalance it so no single company takes over.</p>
+        <div class="card"><div class="bars" id="bars"></div><p class="fine" style="margin-top:14px">Illustrative mix. Final list depends on which stocks our custody partner can hold.</p></div>
+        <div class="card" style="display:flex;flex-direction:column;gap:8px">
+          <span class="eyebrow">On deck</span>
+          <div class="soon"><span>SpaceX</span><span>OpenAI</span><span>Anthropic</span></div>
+          <p class="fine">Private companies. We add them only if there's a legit, fully backed way to own them.</p>
+        </div>
+        <span class="eyebrow">How it works</span>
+        <ol class="steps">
+          <li><div><b>You drop cash</b>From Cash App, Venmo, PayPal, a debit card or your bank.</div></li>
+          <li><div><b>We buy the slice</b>Your money buys the whole mix above, down to fractions of a share.</div></li>
+          <li><div><b>It grows (or dips)</b>Stocks move every day. Long run, big tech has gone up, but there are down years.</div></li>
+          <li><div><b>Cash out anytime</b>No lockups. Tax stash handled on the way out.</div></li>
+        </ol>
+        <span class="eyebrow">How we get paid</span>
+        <div class="card"><p class="sub" style="color:var(--paper)" id="feeCopy"></p></div>
+        <details class="faq"><summary>Can I lose money?</summary><p>Yes. If the stocks drop, your worth drops below what you put in. Your blunts still show what you put in so you can see the difference. Don't put in money you need for rent.</p></details>
+        <details class="faq"><summary>Where is my money held?</summary><p>With a regulated custodian that holds the actual stocks for you. Blunts can't spend it. (Partner TBD in prototype.)</p></details>
+        <details class="faq"><summary>Why "blunts"?</summary><p>It's just how we count. $100 is a blunt, $1,000 is a band. There's no weed involved.</p></details>
+      </section>
+
+      <!-- ============ DEPOSIT ============ -->
+      <section class="scr full" data-s="deposit" hidden>
+        <div class="row"><button class="back" data-close>✕ Close</button><span class="eyebrow">Deposit</span><span style="width:52px"></span></div>
+        <div class="amount"><span class="cur">$</span><span id="dAmt">25</span></div>
+        <div class="amount-note" id="dNote">Fills a quarter</div>
+        <div class="chips" id="dChips"></div>
+        <div class="keypad" data-pad="d"></div>
+        <button class="method" id="dMethod"></button>
+        <button class="btn btn-go" id="dGo">Deposit $25</button>
+      </section>
+
+      <!-- ============ WITHDRAW ============ -->
+      <section class="scr full" data-s="withdraw" hidden>
+        <div class="row"><button class="back" data-close>✕ Close</button><span class="eyebrow">Withdraw</span><span style="width:52px"></span></div>
+        <div class="amount"><span class="cur">$</span><span id="wAmt">50</span></div>
+        <div class="amount-note" id="wNote"></div>
+        <div class="chips" id="wChips"></div>
+        <div class="bd" id="wBreak"></div>
+        <div class="keypad" data-pad="w"></div>
+        <button class="method" id="wMethod"></button>
+        <button class="btn btn-gold" id="wGo">Withdraw</button>
+      </section>
+
+      <!-- ============ TABBAR ============ -->
+      <nav class="tabbar" id="tabbar" hidden>
+        <button class="tab" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
+        <button class="tab" data-tab="stash"><span class="badge" id="stashBadge">+1</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h14M4 12h16M4 17h12"/><circle cx="20" cy="7" r="1" fill="currentColor"/><circle cx="18" cy="17" r="1" fill="currentColor"/></svg>Stash</button>
+        <button class="tab" data-tab="receipts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Receipts</button>
+        <button class="tab" data-tab="inside"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 12V3M12 12l7.5 5M12 12l-7.5 5"/></svg>Inside</button>
+      </nav>
+
+      <canvas id="fx"></canvas>
+      <div class="stamp" id="stamp"></div>
+      <div class="toast" id="toast"></div>
+      <div id="sheetHost"></div>
+      <div class="overlay" id="overlay" hidden></div>
+    </div>
+  </div>
+
+  <aside class="guide">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <h1>BLUNTS</h1>
+      <p class="lede">Click-through prototype. Deposit and withdraw are the only two actions. Every $25 fills a quarter of a blunt, every $100 rolls one into your stash, ten blunts make a band.</p>
+    </div>
+    <div class="gsec">
+      <h2>Walkthrough</h2>
+      <ol class="gsteps">
+        <li><button data-demo="new"><span>Start as a new user<small>Splash, the math, ID check, link Cash App</small></span></button></li>
+        <li><button data-demo="dep25"><span>Drop $25<small>Watch a quarter fill with flakes and cash</small></span></button></li>
+        <li><button data-demo="dep120"><span>Drop $120<small>Roll a full blunt into the stash</small></span></button></li>
+        <li><button data-demo="up"><span>Let the market run +15%<small>Blunts stay put, Grown goes up</small></span></button></li>
+        <li><button data-demo="wd"><span>Cash out<small>See our cut and the tax stash</small></span></button></li>
+        <li><button data-demo="stash"><span>Check the stash<small>Rolls, bands, next milestone</small></span></button></li>
+        <li><button data-demo="inside"><span>What's inside a blunt<small>The basket, how we get paid</small></span></button></li>
+      </ol>
+    </div>
+    <div class="gsec">
+      <h2>Simulate the market</h2>
+      <div class="grow">
+        <button class="gbtn down" data-mkt="-0.10">−10%</button>
+        <button class="gbtn down" data-mkt="-0.03">−3%</button>
+        <button class="gbtn up" data-mkt="0.03">+3%</button>
+        <button class="gbtn up" data-mkt="0.10">+10%</button>
+      </div>
+      <div class="market-read" id="mktRead"></div>
+    </div>
+    <div class="gsec">
+      <h2>Fee model</h2>
+      <div class="grow">
+        <button class="gbtn" data-fee="profit">10% of gains</button>
+        <button class="gbtn" data-fee="flat">$3/mo over $500</button>
+      </div>
+      <div class="market-read" id="feeRead"></div>
+    </div>
+    <div class="gsec">
+      <h2>Demo data</h2>
+      <div class="grow">
+        <button class="gbtn" data-demo="sample">Load sample stash</button>
+        <button class="gbtn" data-demo="band">Almost a band</button>
+        <button class="gbtn" data-demo="empty">Empty account</button>
+      </div>
+    </div>
+    <div class="gsec">
+      <h2>Design calls</h2>
+      <p class="gnote"><b>Blunts = money in, never gains.</b> A market dip never "un-rolls" a blunt. Gains live in a separate Grown number.</p>
+      <p class="gnote"><b>Tax stash, not withholding.</b> US brokers don't withhold capital-gains tax. We set aside an estimate that stays the user's money and settle it at filing time.</p>
+      <p class="gnote"><b>Fee shown at cash-out only.</b> Itemized every time. Toggle the fee model above: profit-share is off-limits for most US retail users, so the prototype shows the flat-fee fallback too.</p>
+      <p class="gnote"><b>No crypto words anywhere.</b> Tokens, chains and wallets stay under the hood.</p>
+    </div>
+  </aside>
+</div>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const FEE = 0.10;
+  let feeMode = 'profit';
+
+  /* ---------- state ---------- */
+  const METHODS = {
+    cashapp: { name: 'Cash App', short: 'CA', color: '#00C244', dIn: 'Instant', dOut: 'Instant' },
+    venmo:   { name: 'Venmo', short: 'V', color: '#3D95CE', dIn: 'Instant', dOut: 'Instant' },
+    paypal:  { name: 'PayPal', short: 'PP', color: '#1f4fa3', dIn: 'Instant', dOut: 'Minutes' },
+    apple:   { name: 'Apple Pay', short: '', color: '#000', dIn: 'Instant', dOut: null },
+    debit:   { name: 'Debit card', short: '••', color: '#6b4a2e', dIn: 'Instant', dOut: 'Instant' },
+    bank:    { name: 'Bank account', short: 'ACH', color: '#3b5b3a', dIn: '1–3 days, buys now', dOut: '1–2 days' },
+  };
+  const BASKET = [
+    ['NVDA','Nvidia',16],['MSFT','Microsoft',14],['AAPL','Apple',14],['GOOGL','Alphabet (Google)',12],
+    ['AMZN','Amazon',12],['META','Meta',10],['AVGO','Broadcom',8],['TSLA','Tesla',7],['PLTR','Palantir',7],
+  ];
+  const TAX_OPTS = [[0,'0%','Low income, held 1 yr+'],[0.12,'12%','Most people'],[0.22,'22%','Higher income']];
+
+  let S;
+  function sample() {
+    const P = 437, V = 489.12;
+    return {
+      principal: P, units: P, price: V / P, taxJar: 14.20, taxRate: 0.12, linked: ['cashapp','debit','bank'],
+      dMethod: 'cashapp', wMethod: 'cashapp', startPrice: V / P,
+      acts: [
+        { t: 'dep', amt: 25, m: 'cashapp', when: 'Sep 26' },
+        { t: 'dep', amt: 50, m: 'venmo', when: 'Sep 19' },
+        { t: 'dep', amt: 12, m: 'debit', when: 'Sep 12' },
+        { t: 'wd', amt: 40, m: 'cashapp', when: 'Aug 29', fee: 0.52, tax: 0.56 },
+        { t: 'dep', amt: 100, m: 'bank', when: 'Aug 15' },
+        { t: 'dep', amt: 100, m: 'bank', when: 'Jul 15' },
+        { t: 'dep', amt: 190, m: 'cashapp', when: 'Jun 30' },
+      ],
+    };
+  }
+  function empty() {
+    return { principal: 0, units: 0, price: 1, taxJar: 0, taxRate: 0.12, linked: [], dMethod: 'cashapp', wMethod: 'cashapp', startPrice: 1, acts: [] };
+  }
+  S = sample();
+  let disp = S.principal; // displayed principal (animated)
+  const value = () => S.units * S.price;
+  const grown = () => value() - S.principal;
+
+  /* ---------- format ---------- */
+  const f2 = n => '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const f0 = n => '$' + Math.round(n).toLocaleString('en-US');
+  const fShort = n => (Math.abs(n) >= 1000 ? f0(n) : f2(n));
+  const today = () => 'Sep 28';
+
+  /* ---------- blunt svg ---------- */
+  const BW = 266, BX = 40;
+  function bluntSVG(id) {
+    return `<svg class="blunt-svg" id="${id}" viewBox="0 0 320 64" aria-hidden="true">
+      <defs>
+        <clipPath id="${id}-clip"><path d="M18,15 L296,11 Q308,11 308,32 Q308,53 296,53 L18,49 Q10,49 10,32 Q10,15 18,15 Z"/></clipPath>
+        <linearGradient id="${id}-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9CC45E"/><stop offset=".55" stop-color="#5E8A2C"/><stop offset="1" stop-color="#3C5A1A"/></linearGradient>
+        <pattern id="${id}-wrap" width="14" height="64" patternUnits="userSpaceOnUse" patternTransform="skewX(-28)"><rect width="14" height="64" fill="none"/><line x1="0" y1="0" x2="0" y2="64" stroke="rgba(40,25,10,.35)" stroke-width="1.4"/></pattern>
+        <pattern id="${id}-flecks" width="22" height="18" patternUnits="userSpaceOnUse"><rect width="22" height="18" fill="none"/><circle cx="4" cy="5" r="1.3" fill="#C9E08F" opacity=".7"/><circle cx="15" cy="11" r="1" fill="#2E4513"/><circle cx="9" cy="14" r=".9" fill="#B7D67A" opacity=".6"/><circle cx="19" cy="3" r=".8" fill="#6B4A20"/></pattern>
+        <radialGradient id="${id}-ember"><stop offset="0" stop-color="#FFE08A"/><stop offset=".4" stop-color="#FF6B2C"/><stop offset="1" stop-color="#FF6B2C" stop-opacity="0"/></radialGradient>
+      </defs>
+      <g clip-path="url(#${id}-clip)">
+        <rect x="0" y="0" width="320" height="64" fill="#2F2118"/>
+        <rect x="0" y="0" width="320" height="64" fill="url(#${id}-wrap)" opacity=".5"/>
+        <rect class="fillr" x="${BX}" y="0" width="0" height="64" fill="url(#${id}-fill)"/>
+        <rect class="fillr" x="${BX}" y="0" width="0" height="64" fill="url(#${id}-flecks)"/>
+        <rect class="fillr" x="${BX}" y="0" width="0" height="64" fill="url(#${id}-wrap)"/>
+        <rect x="0" y="0" width="${BX}" height="64" fill="#E8D9B8"/>
+        <line x1="${BX}" y1="0" x2="${BX}" y2="64" stroke="#B9A57E" stroke-width="1.5"/>
+        <rect x="0" y="14" width="320" height="8" fill="rgba(255,255,255,.07)"/>
+      </g>
+      ${[1,2,3].map(k => `<line x1="${BX + BW * k / 4}" y1="13" x2="${BX + BW * k / 4}" y2="51" stroke="#F3E7CF" stroke-opacity=".22" stroke-dasharray="3 3"/>`).join('')}
+      <path d="M18,15 L296,11 Q308,11 308,32 Q308,53 296,53 L18,49 Q10,49 10,32 Q10,15 18,15 Z" fill="none" stroke="#5A4332" stroke-width="1.5"/>
+      <circle class="ember" cx="308" cy="32" r="22" fill="url(#${id}-ember)" opacity="0"/>
+    </svg>`;
+  }
+  function setFill(svg, pct) {
+    if (!svg) return;
+    const w = Math.max(0, Math.min(1, pct)) * (BW + 2);
+    svg.querySelectorAll('.fillr').forEach(r => r.setAttribute('width', w));
+  }
+  $('#homeBlunt').innerHTML = bluntSVG('hb');
+  $('#splashBlunt').innerHTML = bluntSVG('sb');
+  setFill($('#sb'), .75); $('#sb .ember').setAttribute('opacity', '1');
+
+  /* ---------- navigation ---------- */
+  const TABS = ['home', 'stash', 'receipts', 'inside'];
+  let cur = 'home';
+  function go(name) {
+    $$('.scr').forEach(s => s.hidden = s.dataset.s !== name);
+    cur = name;
+    $('#tabbar').hidden = !TABS.includes(name);
+    $$('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === name));
+    if (name === 'stash') $('#stashBadge').classList.remove('show');
+    const scr = $(`.scr[data-s="${name}"]`); if (scr) scr.scrollTop = 0;
+    closeSheet();
+    render();
+  }
+  document.addEventListener('click', e => {
+    const g = e.target.closest('[data-go]'); if (g) go(g.dataset.go);
+    const t = e.target.closest('[data-tab]'); if (t) go(t.dataset.tab);
+    const o = e.target.closest('[data-open]'); if (o) openFlow(o.dataset.open);
+    const c = e.target.closest('[data-close]'); if (c) go('home');
+    const ts = e.target.closest('[data-toast]'); if (ts) toast(ts.dataset.toast);
+  });
+
+  /* ---------- render ---------- */
+  function renderBlunt(p) {
+    const n = Math.floor(p / 100 + 1e-9);
+    const inBlunt = p - n * 100;
+    const pct = inBlunt / 100;
+    setFill($('#hb'), pct);
+    $('#bluntTitle').textContent = `Blunt #${n + 1}`;
+    $('#bluntPct').textContent = Math.floor(pct * 100) + '%';
+    $$('#quarters span').forEach((s, i) => s.classList.toggle('hit', i > 0 && pct * 4 >= i));
+    $('#stRolled').textContent = n;
+    $('#stIn').textContent = fShort(p);
+    const left = 100 - inBlunt;
+    const nextQ = 25 - (inBlunt % 25);
+    $('#bluntFoot').innerHTML = S.principal <= 0 && p <= 0
+      ? `Deposit <b>$25</b> to fill your first quarter.`
+      : `<b>${f2(left)}</b> to roll it · next quarter in <b>${f2(nextQ)}</b>`;
+  }
+  function actRow(a) {
+    const m = METHODS[a.m];
+    const isIn = a.t === 'dep';
+    const detail = isIn ? `From ${m.name} · ${a.when}` : `To ${m.name} · ${a.when}${a.fee ? ` · our cut ${f2(a.fee)}` : ''}`;
+    const icon = isIn ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9BD36B" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>`
+                      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F2C14E" stroke-width="2.4" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
+    return `<div class="li"><div class="ic">${icon}</div><div><div class="t">${isIn ? 'Deposit' : 'Withdraw'}</div><div class="d">${detail}</div></div><div class="a num ${isIn ? 'in' : ''}">${isIn ? '+' : '−'}${f2(a.amt)}</div></div>`;
+  }
+  function render() {
+    renderBlunt(disp);
+    const g = grown();
+    const gEl = $('#stGrown');
+    gEl.textContent = (g >= 0 ? '+' : '−') + f2(g).replace('.00', '');
+    gEl.className = 'v ' + (g >= 0 ? 'good' : 'bad');
+    $('#stWorth').textContent = f2(value());
+    $('#recentList').innerHTML = S.acts.length ? S.acts.slice(0, 3).map(actRow).join('')
+      : `<p class="fine" style="padding:12px 0">Nothing yet. Your first deposit shows up here.</p>`;
+    $('#allList').innerHTML = S.acts.length ? S.acts.map(actRow).join('') : `<p class="fine" style="padding:12px 0">No activity yet.</p>`;
+    $('#taxJar').textContent = f2(S.taxJar);
+    $('#taxSegs').innerHTML = TAX_OPTS.map(([r, l, d]) => `<button class="${S.taxRate === r ? 'on' : ''}" data-rate="${r}">${l}<small>${d}</small></button>`).join('');
+    // stash
+    const n = Math.floor(S.principal / 100 + 1e-9);
+    const bands = Math.floor(n / 10), loose = n % 10;
+    const partial = (S.principal - n * 100) / 100;
+    $('#stashCount').innerHTML = `${n}<small>${n === 1 ? 'blunt' : 'blunts'} rolled</small>`;
+    $('#stashSub').textContent = `${f2(S.principal)} put in${bands ? ` · ${bands} ${bands === 1 ? 'band' : 'bands'}` : ''}`;
+    $('#bandPill').textContent = `${bands} ${bands === 1 ? 'band' : 'bands'}`;
+    let html = '';
+    const showBands = Math.min(bands, 12);
+    for (let b = 0; b < showBands; b++) html += `<div><div class="band">${'<i class="mini"></i>'.repeat(10)}</div><div class="band-label">$1K</div></div>`;
+    if (bands > showBands) html += `<div class="band-label" style="align-self:center">+${bands - showBands} more</div>`;
+    if (loose || partial > 0) {
+      html += `<div><div class="loose">${'<i class="mini"></i>'.repeat(loose)}${partial > 0 ? `<i class="mini partial" style="--p:${16 + partial * 84}%"></i>` : ''}</div><div class="band-label">loose</div></div>`;
+    }
+    if (!html) html = `<p class="fine">No rolls yet. Your first $100 rolls a blunt.</p>`;
+    $('#bands').innerHTML = html;
+    $('#bandProg').textContent = `${loose} / 10`;
+    $('#slots').innerHTML = Array.from({ length: 10 }, (_, i) => i < loose ? '<i class="f"></i>' : (i === loose && partial > 0 ? `<i class="p" style="--p:${partial * 100}%"></i>` : '<i></i>')).join('');
+    const toBand = (bands + 1) * 1000 - S.principal;
+    $('#bandHint').textContent = `${f2(toBand)} more and you've got ${bands ? 'another' : 'your first'} band.`;
+    const gp = S.principal > 0 ? (g / S.principal) * 100 : 0;
+    const gpEl = $('#grownPill');
+    gpEl.textContent = `${gp >= 0 ? '+' : '−'}${Math.abs(gp).toFixed(1)}% · ${g >= 0 ? '+' : '−'}${f2(g)}`;
+    gpEl.className = 'pill ' + (g >= 0 ? 'good' : 'bad');
+    $('#feeCopy').innerHTML = feeMode === 'profit'
+      ? `We take <b style="color:var(--gold)">10% of what you grow</b>, only when you cash out gains. Nothing to put money in. Nothing to take it out. If you don't make money, we don't either.`
+      : `Free until you've put in $500. After that it's <b style="color:var(--gold)">$3 a month</b>, flat. No cut of your gains, no fee to put money in or take it out.`;
+    $$('[data-fee]').forEach(b => b.style.borderColor = b.dataset.fee === feeMode ? 'var(--gold)' : '');
+    $('#feeRead').textContent = feeMode === 'profit' ? 'Your pitch. Research: not allowed for everyday US users (Advisers Act rule 205-3). Offshore brand only.' : 'US-legal alternative (Acorns-style subscription). Changes cash-out breakdown and the Inside tab.';
+    $('#mktRead').textContent = `Basket ${((S.price / S.startPrice - 1) * 100).toFixed(1)}% since demo start · worth ${f2(value())}`;
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-rate]'); if (!b) return;
+    S.taxRate = +b.dataset.rate; render(); toast(`We'll set aside ${Math.round(S.taxRate * 100)}% of gains you cash out`);
+  });
+  $('#bars').innerHTML = BASKET.map(([tk, nm, w]) => `<div class="bar"><span class="tk">${tk}</span><span class="tr"><i style="width:${w / 16 * 100}%"></i></span><span class="pc">${w}%</span><span class="nm">${nm}</span></div>`).join('');
+
+  /* ---------- toast ---------- */
+  let tt;
+  function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2400); }
+
+  /* ---------- onboarding links ---------- */
+  function renderLinks() {
+    $('#linkList').innerHTML = ['cashapp', 'venmo', 'paypal', 'apple', 'debit', 'bank'].map(k => {
+      const m = METHODS[k]; const on = S.linked.includes(k);
+      return `<button class="link-opt ${on ? 'linked' : ''}" data-link="${k}"><span class="lg" style="background:${m.color}">${m.short || ''}</span><span><div style="font-weight:700">${m.name}</div><div class="d" style="font-size:12.5px;color:var(--paper-faint)">${k === 'bank' ? 'Cheapest way to move big money' : k === 'apple' ? 'Deposits only' : 'Deposit and withdraw'}</div></span><span class="st">${on ? '✓ Linked' : 'Link'}</span></button>`;
+    }).join('');
+  }
+  document.addEventListener('click', e => {
+    const l = e.target.closest('[data-link]'); if (!l) return;
+    const k = l.dataset.link; S.linked = S.linked.includes(k) ? S.linked.filter(x => x !== k) : [...S.linked, k]; renderLinks();
+  });
+  $('#finishOb').addEventListener('click', () => {
+    if (!S.linked.length) S.linked = ['cashapp'];
+    S.dMethod = S.linked[0]; S.wMethod = S.linked.find(k => METHODS[k].dOut) || 'bank';
+    go('home'); toast("You're in. Deposit $5 to start your first blunt.");
+  });
+
+  /* ---------- keypad / flows ---------- */
+  const amt = { d: '25', w: '50' };
+  $$('[data-pad]').forEach(p => {
+    const k = p.dataset.pad;
+    p.innerHTML = ['1','2','3','4','5','6','7','8','9','.','0','⌫'].map(x => `<button class="key" data-key="${x}" data-pk="${k}" aria-label="${x === '⌫' ? 'Delete' : x}">${x}</button>`).join('');
+  });
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-key]'); if (!b) return;
+    const k = b.dataset.pk, x = b.dataset.key; let s = amt[k];
+    if (x === '⌫') s = s.length > 1 ? s.slice(0, -1) : '0';
+    else if (x === '.') { if (!s.includes('.')) s += '.'; }
+    else {
+      if (s === '0') s = x;
+      else if (s.includes('.') ? s.split('.')[1].length < 2 : s.length < 6) s += x;
+    }
+    amt[k] = s; k === 'd' ? drawDeposit() : drawWithdraw();
+  });
+
+  function methodBtn(el, key, dir) {
+    const m = METHODS[key];
+    el.innerHTML = `<span class="lg" style="background:${m.color}">${m.short}</span><span><div class="t">${dir === 'in' ? 'From' : 'To'} ${m.name}</div><div class="d">${dir === 'in' ? m.dIn : m.dOut} · Free</div></span><span class="chev">Change</span>`;
+  }
+  function openFlow(which) {
+    if (which === 'withdraw' && value() <= 0) { toast('Nothing to withdraw yet. Deposit first.'); return; }
+    if (which === 'deposit') { amt.d = '25'; go('deposit'); drawDeposit(); }
+    else { amt.w = String(Math.min(50, Math.floor(value()))); go('withdraw'); drawWithdraw(); }
+  }
+  const DCHIPS = [[5, ''], [10, ''], [25, 'a quarter'], [100, 'a blunt']];
+  function drawDeposit() {
+    const a = parseFloat(amt.d) || 0;
+    $('#dAmt').textContent = amt.d;
+    $('#dChips').innerHTML = DCHIPS.map(([v, l]) => `<button class="chip ${a === v ? 'on' : ''}" data-dchip="${v}">$${v}${l ? `<small>${l}</small>` : ''}</button>`).join('');
+    const note = $('#dNote'); note.classList.remove('warn');
+    if (a <= 0) note.textContent = 'Min $1';
+    else if (a > 5000) { note.textContent = 'Max $5,000 per deposit'; note.classList.add('warn'); }
+    else {
+      const before = S.principal, after = before + a;
+      const rolls = Math.floor(after / 100 + 1e-9) - Math.floor(before / 100 + 1e-9);
+      const pctAdd = Math.round(a);
+      if (rolls >= 10 || Math.floor(after / 1000) > Math.floor(before / 1000)) note.textContent = rolls >= 10 ? `Rolls ${rolls} blunts. That's a band.` : `Rolls ${rolls} ${rolls === 1 ? 'blunt' : 'blunts'} and completes a band`;
+      else if (rolls > 0) note.textContent = `Rolls ${rolls} ${rolls === 1 ? 'blunt' : 'blunts'}`;
+      else note.textContent = a === 25 ? 'Fills a quarter' : `Fills ${pctAdd}% of this blunt`;
+    }
+    if (!S.linked.includes(S.dMethod)) S.dMethod = S.linked[0] || 'cashapp';
+    methodBtn($('#dMethod'), S.dMethod, 'in');
+    const go_ = $('#dGo'); go_.disabled = a <= 0 || a > 5000; go_.textContent = `Deposit ${a % 1 ? f2(a) : '$' + a}`;
+  }
+  document.addEventListener('click', e => {
+    const c = e.target.closest('[data-dchip]'); if (c) { amt.d = c.dataset.dchip; drawDeposit(); }
+    const w = e.target.closest('[data-wchip]'); if (w) { const v = w.dataset.wchip; amt.w = v === 'max' ? (Math.floor(value() * 100) / 100).toFixed(2) : String(Math.floor(value() * +v * 100) / 100); drawWithdraw(); }
+  });
+
+  function wMath(W) {
+    const V = value(); if (V <= 0) return null;
+    const f = Math.min(1, W / V);
+    const basis = S.principal * f;
+    const gain = W - basis;
+    const fee = feeMode === 'profit' ? Math.max(0, gain) * FEE : 0;
+    const tax = Math.max(0, gain - fee) * S.taxRate;
+    return { f, basis, gain, fee, tax, net: W - fee - tax };
+  }
+  function drawWithdraw() {
+    const W = parseFloat(amt.w) || 0, V = value();
+    $('#wAmt').textContent = amt.w;
+    $('#wChips').innerHTML = [['0.25', '25%'], ['0.5', 'Half'], ['max', 'All of it']].map(([v, l]) => `<button class="chip" data-wchip="${v}">${l}</button>`).join('');
+    const note = $('#wNote'); note.classList.remove('warn');
+    const over = W > V + 0.001;
+    if (over) { note.textContent = `You've got ${f2(V)}`; note.classList.add('warn'); }
+    else if (W <= 0) note.textContent = '';
+    else {
+      const m = wMath(W);
+      const bluntsOut = m.basis / 100;
+      note.textContent = bluntsOut >= 1 ? `Takes ${bluntsOut.toFixed(1)} blunts off your stash` : `Takes ${Math.round(bluntsOut * 100)}% of a blunt`;
+    }
+    const m = wMath(Math.min(W, V)) || { basis: 0, gain: 0, fee: 0, tax: 0, net: 0 };
+    const gainRow = m.gain >= 0
+      ? `<div class="row"><span>Gains in this</span><span class="num">${f2(m.gain)}</span></div>
+         ${feeMode === 'profit' ? `<div class="row minus"><span>Our cut · 10% of gains</span><span class="num">−${f2(m.fee)}</span></div>` : `<div class="row"><span>Our cut · covered by membership</span><span class="num">$0.00</span></div>`}
+         <div class="row stash"><span>To your tax stash · ${Math.round(S.taxRate * 100)}%</span><span class="num">−${f2(m.tax)}</span></div>`
+      : `<div class="row"><span>Down from what you put in</span><span class="num" style="color:var(--bad)">−${f2(m.gain)}</span></div>
+         <div class="row"><span>Our cut</span><span class="num">$0.00</span></div>`;
+    $('#wBreak').innerHTML = `<div class="row"><span>Your money back</span><span class="num">${f2(m.basis)}</span></div>${gainRow}<hr><div class="row total"><span>You get</span><span class="num">${f2(m.net)}</span></div>`;
+    if (!METHODS[S.wMethod]?.dOut || !S.linked.includes(S.wMethod)) S.wMethod = S.linked.find(k => METHODS[k].dOut) || 'bank';
+    methodBtn($('#wMethod'), S.wMethod, 'out');
+    const b = $('#wGo'); b.disabled = W <= 0 || over; b.textContent = W > 0 && !over ? `Withdraw ${f2(m.net)}` : 'Withdraw';
+  }
+
+  /* ---------- method sheet ---------- */
+  function closeSheet() { $('#sheetHost').innerHTML = ''; }
+  function methodSheet(dir) {
+    const keys = Object.keys(METHODS).filter(k => dir === 'in' || METHODS[k].dOut);
+    const sel = dir === 'in' ? S.dMethod : S.wMethod;
+    $('#sheetHost').innerHTML = `<div class="sheet-wrap" data-sheetbg><div class="sheet" role="dialog" aria-label="Choose method"><div class="grab"></div>
+      <div class="eyebrow" style="padding:4px 4px 2px">${dir === 'in' ? 'Pay with' : 'Send to'}</div>
+      ${keys.map(k => { const m = METHODS[k]; return `<button class="opt ${k === sel ? 'sel' : ''}" data-pick="${k}" data-dir="${dir}"><span class="lg" style="background:${m.color}">${m.short}</span><span><div class="t">${m.name}</div><div class="d">${dir === 'in' ? m.dIn : m.dOut}${S.linked.includes(k) ? '' : ' · tap to link'}</div></span><span class="r">Free</span></button>`; }).join('')}
+      <p class="fine" style="padding:4px">We cover the processing fees. Credit cards aren't accepted. Investing borrowed money is how people get hurt.</p>
+    </div></div>`;
+  }
+  $('#dMethod').addEventListener('click', () => methodSheet('in'));
+  $('#wMethod').addEventListener('click', () => methodSheet('out'));
+  document.addEventListener('click', e => {
+    const p = e.target.closest('[data-pick]');
+    if (p) { const k = p.dataset.pick; if (!S.linked.includes(k)) S.linked.push(k); if (p.dataset.dir === 'in') { S.dMethod = k; drawDeposit(); } else { S.wMethod = k; drawWithdraw(); } closeSheet(); return; }
+    if (e.target.matches('[data-sheetbg]')) closeSheet();
+  });
+
+  /* ---------- deposit / withdraw execution ---------- */
+  let busy = false;
+  function processing(title, sub) {
+    const o = $('#overlay');
+    o.innerHTML = `<div class="spin">${bluntSVG('pb')}</div><div class="big-check" style="color:var(--paper)">${title}</div><p class="sub">${sub}</p>`;
+    setFill($('#pb'), 0); o.hidden = false;
+    let t0 = performance.now();
+    return new Promise(res => {
+      const step = now => { const k = Math.min(1, (now - t0) / 1100); setFill($('#pb'), k); if (k < 1) requestAnimationFrame(step); else setTimeout(() => { o.hidden = true; res(); }, 150); };
+      requestAnimationFrame(step);
+    });
+  }
+  $('#dGo').addEventListener('click', async () => {
+    const a = parseFloat(amt.d) || 0; if (a <= 0 || busy) return;
+    busy = true;
+    await processing('Rolling up…', `${f2(a)} from ${METHODS[S.dMethod].name}`);
+    const from = S.principal;
+    S.principal += a; S.units += a / S.price;
+    S.acts.unshift({ t: 'dep', amt: a, m: S.dMethod, when: today() });
+    disp = from; go('home');
+    await sleep(250);
+    await animateUp(from, S.principal);
+    busy = false; render();
+  });
+  $('#wGo').addEventListener('click', async () => {
+    const W = parseFloat(amt.w) || 0; if (W <= 0 || busy) return;
+    const m = wMath(Math.min(W, value())); if (!m) return;
+    busy = true;
+    const dest = METHODS[S.wMethod];
+    await processing('Sending…', `${f2(m.net)} to ${dest.name}`);
+    const from = S.principal;
+    S.units *= (1 - m.f); S.principal -= m.basis; if (S.principal < 0.005) { S.principal = 0; S.units = 0; }
+    S.taxJar += m.tax;
+    S.acts.unshift({ t: 'wd', amt: m.net, m: S.wMethod, when: today(), fee: m.fee, tax: m.tax });
+    disp = from; go('home');
+    await sleep(200);
+    await animateDown(from, S.principal);
+    toast(`${f2(m.net)} on the way to ${dest.name} · ${dest.dOut}${m.tax > 0 ? ` · ${f2(m.tax)} to tax stash` : ''}`);
+    busy = false; render();
+  });
+
+  const sleep = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
+  function tween(a, b, ms, onStep) {
+    return new Promise(res => {
+      if (reduce || ms <= 0) { onStep(b); return res(); }
+      const t0 = performance.now();
+      const ease = t => 1 - Math.pow(1 - t, 2.2);
+      const step = now => { const k = Math.min(1, (now - t0) / ms); onStep(a + (b - a) * ease(k)); k < 1 ? requestAnimationFrame(step) : res(); };
+      requestAnimationFrame(step);
+    });
+  }
+  async function animateUp(from, to) {
+    const total = to - from;
+    const perDollar = total > 400 ? 3 : total > 150 ? 9 : 22;
+    let p = from;
+    FX.rain(true);
+    while (p < to - 1e-9) {
+      const nextB = Math.min(to, (Math.floor(p / 25 + 1e-9) + 1) * 25);
+      await tween(p, nextB, Math.max(220, (nextB - p) * perDollar), v => { disp = v; renderBlunt(v); });
+      p = nextB; disp = p;
+      if (Math.abs(p / 25 - Math.round(p / 25)) < 1e-9 && p > from + 1e-9) {
+        const q = Math.round(p / 25) % 4;
+        if (q === 0) await rolled(Math.round(p / 100));
+        else quarterPop(q);
+      }
+    }
+    FX.rain(false);
+    disp = to; renderBlunt(to);
+  }
+  async function animateDown(from, to) {
+    FX.ash(true);
+    await tween(from, to, Math.min(2200, Math.max(700, (from - to) * 14)), v => { disp = v; renderBlunt(v); });
+    FX.ash(false);
+    disp = to; renderBlunt(to);
+  }
+  function quarterPop(q) {
+    const svg = $('#hb'); const r = svg.getBoundingClientRect(), sr = $('#screen').getBoundingClientRect();
+    const x = r.left - sr.left + r.width * (BX + BW * q / 4) / 320, y = r.top - sr.top - 6;
+    const el = document.createElement('div'); el.className = 'qpop'; el.textContent = ['', '¼', '½', '¾'][q] + ' ROLLED';
+    el.style.left = x + 'px'; el.style.top = y + 'px'; $('#screen').appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+    FX.burst(x, y + 30, 26);
+  }
+  async function rolled(count) {
+    const svg = $('#hb');
+    svg.querySelector('.ember').setAttribute('opacity', '1');
+    const r = svg.getBoundingClientRect(), sr = $('#screen').getBoundingClientRect();
+    FX.burst(r.left - sr.left + r.width * .6, r.top - sr.top + r.height / 2, 70, true);
+    const band = count % 10 === 0;
+    stamp(band ? 'BAND UP' : 'BLUNT<br>ROLLED', band ? `${count / 10} ${count / 10 === 1 ? 'band' : 'bands'} · ${f0(count * 100)} put in` : `#${count} in the stash`);
+    await sleep(band ? 1100 : 800);
+    svg.classList.add('rollaway');
+    await sleep(650);
+    svg.classList.remove('rollaway');
+    svg.querySelector('.ember').setAttribute('opacity', '0');
+    setFill(svg, 0);
+    svg.classList.add('rollin'); setTimeout(() => svg.classList.remove('rollin'), 460);
+    const bd = $('#stashBadge'); bd.textContent = '+' + (parseInt(bd.dataset.n || '0') + 1); bd.dataset.n = parseInt(bd.dataset.n || '0') + 1; bd.classList.add('show');
+    await sleep(300);
+  }
+  function stamp(html, sub) {
+    const s = $('#stamp'); s.innerHTML = `${html}<small>${sub}</small>`;
+    s.classList.remove('go'); void s.offsetWidth; s.classList.add('go');
+  }
+  $('.tab[data-tab="stash"]').addEventListener('click', () => { const b = $('#stashBadge'); b.dataset.n = 0; });
+
+  /* ---------- particles ---------- */
+  const FX = (() => {
+    const cv = $('#fx'), ctx = cv.getContext('2d');
+    let W = 0, H = 0, dpr = 1, parts = [], raining = false, ashing = false, running = false;
+    function size() { const r = cv.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+    new ResizeObserver(size).observe(cv); size();
+    const GREENS = ['#6F9A3A', '#89B24C', '#4F7A2A', '#A8CB6C', '#5E4A26', '#7FA844'];
+    function flake(x, y, vx, vy) {
+      const np = 6 + (Math.random() * 3 | 0); const pts = Array.from({ length: np }, (_, i) => { const ang = i / np * Math.PI * 2; const rr = 2 + Math.random() * 4.5; return [Math.cos(ang) * rr, Math.sin(ang) * rr]; });
+      return { k: 'f', x, y, vx, vy, rot: Math.random() * 6, vr: (Math.random() - .5) * .2, c: GREENS[Math.random() * GREENS.length | 0], pts, life: 1, sway: Math.random() * 6 };
+    }
+    function cash(x, y, vx, vy) { return { k: '$', x, y, vx, vy, rot: (Math.random() - .5) * .6, vr: (Math.random() - .5) * .05, s: 14 + Math.random() * 10, life: 1, tw: Math.random() * 6, sway: Math.random() * 6 }; }
+    function ashP(x, y) { return { k: 'a', x, y, vx: (Math.random() - .5) * .6, vy: .6 + Math.random() * 1.2, r: 1 + Math.random() * 2.2, life: 1, sway: Math.random() * 6, c: Math.random() < .3 ? '#C9BFB4' : '#8C8279' }; }
+    function spark(x, y, s, a) {
+      ctx.save(); ctx.translate(x, y); ctx.globalAlpha *= a; ctx.fillStyle = '#FFF4C8';
+      ctx.beginPath(); ctx.moveTo(0, -s); ctx.quadraticCurveTo(0, 0, s, 0); ctx.quadraticCurveTo(0, 0, 0, s); ctx.quadraticCurveTo(0, 0, -s, 0); ctx.quadraticCurveTo(0, 0, 0, -s); ctx.fill(); ctx.restore();
+    }
+    function loop() {
+      ctx.clearRect(0, 0, W, H);
+      if (raining) for (let i = 0; i < 2; i++) { parts.push(Math.random() < .72 ? flake(Math.random() * W, -10, (Math.random() - .5) * .6, 1 + Math.random() * 1.6) : cash(Math.random() * W, -20, (Math.random() - .5) * .4, 1.2 + Math.random() * 1.4)); }
+      if (ashing) for (let i = 0; i < 2; i++) { const r = $('#hb').getBoundingClientRect(), sr = $('#screen').getBoundingClientRect(); parts.push(ashP(r.left - sr.left + 40 + Math.random() * (r.width - 60), r.top - sr.top + r.height * .6)); }
+      const t = performance.now() / 1000;
+      parts = parts.filter(p => p.y < H + 30 && p.life > 0);
+      for (const p of parts) {
+        p.vy += p.k === 'a' ? .01 : .035; if (p.vy > 3.2) p.vy = 3.2;
+        p.vx *= .99;
+        p.x += p.vx + Math.sin(t * 2 + p.sway) * .35; p.y += p.vy;
+        if (p.vr) p.rot += p.vr;
+        if (p.k === 'a') p.life -= .008;
+        ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, p.life)); ctx.translate(p.x, p.y);
+        if (p.k === 'f') { ctx.rotate(p.rot); ctx.fillStyle = p.c; ctx.beginPath(); p.pts.forEach(([a, b], i) => i ? ctx.lineTo(a, b) : ctx.moveTo(a, b)); ctx.closePath(); ctx.fill(); }
+        else if (p.k === '$') {
+          ctx.rotate(p.rot); ctx.font = `500 ${p.s}px "DM Mono", monospace`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.shadowColor = 'rgba(242,193,78,.8)'; ctx.shadowBlur = 10; ctx.fillStyle = '#F2C14E'; ctx.fillText('$', 0, 0); ctx.shadowBlur = 0;
+          const tw = (Math.sin(t * 7 + p.tw) + 1) / 2;
+          spark(p.s * .7, -p.s * .55, 2 + tw * 3.5, .4 + tw * .6);
+          spark(-p.s * .65, p.s * .4, 1.5 + (1 - tw) * 3, .3 + (1 - tw) * .7);
+          spark(p.s * .1, -p.s * .95, 1 + tw * 2, tw);
+        } else { ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(0, 0, p.r, 0, 7); ctx.fill(); }
+        ctx.restore();
+      }
+      if (parts.length || raining || ashing) requestAnimationFrame(loop); else { running = false; ctx.clearRect(0, 0, W, H); }
+    }
+    function kick() { if (reduce) return; if (!running) { running = true; requestAnimationFrame(loop); } }
+    return {
+      rain(on) { raining = on && !reduce; kick(); },
+      ash(on) { ashing = on && !reduce; kick(); },
+      burst(x, y, n, big) {
+        if (reduce) return;
+        for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, sp = (big ? 2 : 1) + Math.random() * (big ? 5 : 3); parts.push(Math.random() < (big ? .5 : .65) ? flake(x, y, Math.cos(a) * sp, Math.sin(a) * sp - 2) : cash(x, y, Math.cos(a) * sp, Math.sin(a) * sp - 2.5)); }
+        kick();
+      },
+    };
+  })();
+
+  /* ---------- guide controls ---------- */
+  function reset(state) { S = state; disp = S.principal; const b = $('#stashBadge'); b.dataset.n = 0; b.classList.remove('show'); }
+  async function demoDeposit(a) {
+    if (busy) return;
+    if (!S.linked.length) S.linked = ['cashapp'];
+    if (cur !== 'home') go('home');
+    openFlow('deposit'); amt.d = String(a); drawDeposit();
+    await sleep(700); $('#dGo').click();
+  }
+  document.addEventListener('click', e => {
+    const d = e.target.closest('[data-demo]'); if (!d) return;
+    const k = d.dataset.demo;
+    if (k === 'new') { reset(empty()); renderLinks(); go('splash'); }
+    if (k === 'sample') { reset(sample()); go('home'); toast('Sample stash loaded'); }
+    if (k === 'empty') { reset(empty()); S.linked = ['cashapp', 'bank']; go('home'); }
+    if (k === 'band') { reset(sample()); S.principal = 980; S.units = 980; S.price = 1.08; S.startPrice = 1.08; S.units = 1040 / 1.08; disp = 980; go('home'); toast('$980 in. Drop $20 to band up.'); }
+    if (k === 'dep25') demoDeposit(25);
+    if (k === 'dep120') demoDeposit(120);
+    if (k === 'up') { S.price *= 1.15; if (cur !== 'home') go('home'); else render(); toast('Market up 15%. Blunts stay the same. Grown went up.'); }
+    if (k === 'wd') { if (value() <= 0) { reset(sample()); } go('home'); openFlow('withdraw'); amt.w = String(Math.min(100, Math.floor(value()))); drawWithdraw(); }
+    if (k === 'stash') go('stash');
+    if (k === 'inside') go('inside');
+  });
+  $$('[data-fee]').forEach(b => b.addEventListener('click', () => { feeMode = b.dataset.fee; if (cur === 'withdraw') drawWithdraw(); render(); }));
+  $$('[data-mkt]').forEach(b => b.addEventListener('click', () => {
+    const r = +b.dataset.mkt; S.price *= 1 + r;
+    if (cur === 'withdraw') drawWithdraw(); render();
+    toast(`Market ${r > 0 ? 'up' : 'down'} ${Math.abs(r * 100)}%. ${r > 0 ? 'Grown went up.' : 'Grown went down.'} Blunts didn't move.`);
+  }));
+
+  renderLinks();
+  go('home');
+})();
+</script>
+
+</html>
