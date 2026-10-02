@@ -11,7 +11,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: python -m compileall -q ad research/model
+      - run: python -m compileall -q ad research/model research/2026-10-02
       - run: python -m unittest discover -s tests
       - run: node --test tests/prototype.test.cjs
       - run: python research/model/market_model.py > /tmp/model_output.md
