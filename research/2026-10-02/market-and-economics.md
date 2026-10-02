@@ -57,7 +57,7 @@ Do not use unverified competitor subscriber counts, old prices, or app downloads
 
 ## Fee-only economics and the threshold for pursuing the wallet
 
-**Subscriptions are excluded by product decision, not held as an optional revenue rescue.** The [executable model](business_model.py), [inputs/results](model-results.json) and [generated tables](model-output.md) now contain only load/unload conversion revenue. The recommended price to validate is **1% each way, capped at $10 per successful action**. Holding and ordinary USDC transfers earn no platform fee. The [wallet strategy](wallet-strategy.md) defines inclusive pricing, partial fills, retries, minimums, direct transfers and the approved collection boundary.
+**Subscriptions are excluded by product decision, not held as an optional revenue rescue.** The [executable model](business_model.py), [inputs/results](model-results.json) and [generated tables](model-output.md) now contain only load/unload conversion revenue. The recommended price to validate is **1% each way, with no dollar cap per successful action**. Holding and ordinary USDC transfers earn no platform fee. The [wallet strategy](wallet-strategy.md) defines inclusive pricing, partial fills, retries, minimums, direct transfers and the approved collection boundary.
 
 The baseline assumes a single wallet rail with **0% bank/ACH mix**. This changes the previous 25% bank mix; no reduction in acquisition, support or fixed compliance assumptions is silently assumed. The model still deducts normal provider/network, quote, screening, wallet, support, variable infrastructure, loss-reserve and actual acquisition/onboarding costs. Its 0/50/100% retained-fee cases distinguish the customer's charge from Blunts' lawful revenue entitlement. Public API fee collection is not legal permission to keep it.
 
@@ -71,7 +71,7 @@ The baseline assumes a single wallet rail with **0% bank/ACH mix**. This changes
 | Service costs | $15.52 | $22.04 | $25.52 |
 | Margin after replacement CAC/KYC | **−$24.54** | **$5.50** | **$40.07** |
 
-Volumes mean successful fee-bearing conversions through Blunts, not all wallet receipts, all outgoing transfers, user balances or external trading. Fee caps assume equal action sizes within a scenario; actual distributions change the result. The load fee is deducted from the submitted total and the unload fee from gross proceeds; the model does not forecast AUM or investment returns. Unexecuted deposits earn no fee. Production accounting must reconcile exact provider fills, rounding and refunds.
+Volumes mean successful fee-bearing conversions through Blunts, not all wallet receipts, all outgoing transfers, user balances or external trading. The fee is an uncapped percentage of completed volume; execution counts still affect provider costs. Per-action currency rounding must be implemented separately. The load fee is deducted from the submitted total and the unload fee from gross proceeds; the model does not forecast AUM or investment returns. Unexecuted deposits earn no fee. Production accounting must reconcile exact provider fills, rounding and refunds.
 
 [Dinari's public fees](https://docs.dinari.com/docs/fees) list API access starting at $2,000/month and a standard $0.20 network charge per order, with Ethereum exceptions. Those anchors do not replace a US commercial quote. The model absorbs the ordinary assumed $0.20 charge; it does not add that same gas expense a second time. API minimums belong in fixed costs. Wallet/support/screening/infra costs and a 10-bp gross-flow loss reserve remain assumptions. Four dollars of onboarding per funded user includes failed-applicant allocation.
 
@@ -89,7 +89,7 @@ Casual behavior does not cover variable costs. At half fee entitlement, Strong m
 
 ### Compare fee schedules before choosing one
 
-The model isolates price while keeping activity/costs unchanged. Free loading plus 1% unloading loses money even in the Strong case (−$7.93 maintained margin). At 0.85% each way, Strong margin is $29.27 but Habitual is approximately zero (−$0.08). At 1% each way they are $40.07 and $5.50. At 1.5% the arithmetic improves, but willingness to pay and retention may worsen; it is not automatically the most viable choice. Start with the understandable 1%/$10-cap hypothesis and measure behavior rather than raising fees to make a spreadsheet work.
+The model isolates price while keeping activity/costs unchanged. Free loading plus 1% unloading loses money even in the Strong case (−$7.93 maintained margin). At 0.85% each way, Strong margin is $29.27 but Habitual is approximately zero (−$0.08). At 1% each way they are $40.07 and $5.50. At 1.5% the arithmetic improves, but willingness to pay and retention may worsen; it is not automatically the most viable choice. Start with the understandable uncapped 1% hypothesis and measure behavior rather than raising fees to make a spreadsheet work.
 
 Adding 25% bank usage makes Habitual negative again (−$0.90), without subscriptions to mask it. CAC of $60 or support cost of $12/year also breaks that case. The wallet rail is a cost advantage only if handoff friction does not erase the savings. A recommended initial $50 conversion minimum leaves more margin than $25; retain a safe full-balance exit/dust policy and do not charge a second percentage on the payout transfer.
 

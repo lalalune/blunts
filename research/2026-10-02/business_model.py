@@ -26,7 +26,8 @@ class Case:
     retained_fee_fraction: float = 1.0
     load_fee_rate: float = 0.01
     unload_fee_rate: float = 0.01
-    fee_cap: float = 10.0
+    onramp_volume_share: float = 0.0
+    absorbed_onramp_fee_rate: float = 0.0
     bank_share: float = 0.0
     bank_in_cost: float = 0.75
     bank_out_cost: float = 1.0
@@ -57,19 +58,23 @@ def unit(c):
     for name in (
         "retained_fee_fraction",
         "bank_share",
+        "onramp_volume_share",
+        "absorbed_onramp_fee_rate",
     ):
         if not 0 <= getattr(c, name) <= 1:
             raise ValueError(f"{name} must be a fraction between zero and one")
     for name, value in asdict(c).items():
         if name != "name" and (not math.isfinite(value) or value < 0):
             raise ValueError(f"{name} must be finite and non-negative")
-    fee_pool = c.loads * min(
-        c.annual_load_volume / c.loads * c.load_fee_rate, c.fee_cap
-    ) + c.unloads * min(
-        c.annual_unload_volume / c.unloads * c.unload_fee_rate, c.fee_cap
+    fee_pool = (
+        c.annual_load_volume * c.load_fee_rate
+        + c.annual_unload_volume * c.unload_fee_rate
     )
     orders = c.loads + c.unloads
     costs = {
+        "absorbed_onramp": c.annual_load_volume
+        * c.onramp_volume_share
+        * c.absorbed_onramp_fee_rate,
         "bank_and_payouts": c.bank_share
         * (c.loads * c.bank_in_cost + c.unloads * c.bank_out_cost)
         + (1 - c.bank_share) * c.unloads * c.chain_payout_cost,
@@ -260,7 +265,7 @@ def main():
     out = [
         "# Reproducible business model outputs",
         "",
-        "No subscriptions or holding fees. Wallet-only launch; bank mix is a sensitivity. All commercial inputs are planning assumptions. 100% load/unload fee capture is a conditional upper case, not approved Blunts revenue. Profit is pre-tax, includes modeled salaries, excludes financing costs, equity dilution and extraordinary losses.",
+        "Uncapped percentage fees; no subscriptions or holding fees. Wallet settlement; bank mix is a sensitivity. All commercial inputs are planning assumptions. 100% load/unload fee capture is a conditional upper case, not approved Blunts revenue. Profit is pre-tax, includes modeled salaries, excludes financing costs, equity dilution and extraordinary losses.",
         "",
         "## Population and conditional SAM",
         "",
@@ -390,6 +395,9 @@ def main():
         "CAC $60": replace(base, funded_cac=60),
         "Churn 40%": replace(base, annual_churn=0.4),
         "Support $12/year": replace(base, support_year=12),
+        "Absorb assumed 3% ramp fee on 25% of loads": replace(
+            base, onramp_volume_share=0.25, absorbed_onramp_fee_rate=0.03
+        ),
         "25% bank funding": replace(base, bank_share=0.25),
         "All bank funding": replace(base, bank_share=1),
         "Network $0.05/order": replace(base, broker_network_per_order=0.05),

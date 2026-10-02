@@ -1,6 +1,6 @@
 # Reproducible business model outputs
 
-No subscriptions or holding fees. Wallet-only launch; bank mix is a sensitivity. All commercial inputs are planning assumptions. 100% load/unload fee capture is a conditional upper case, not approved Blunts revenue. Profit is pre-tax, includes modeled salaries, excludes financing costs, equity dilution and extraordinary losses.
+Uncapped percentage fees; no subscriptions or holding fees. Wallet settlement; bank mix is a sensitivity. All commercial inputs are planning assumptions. 100% load/unload fee capture is a conditional upper case, not approved Blunts revenue. Profit is pre-tax, includes modeled salaries, excludes financing costs, equity dilution and extraordinary losses.
 
 ## Population and conditional SAM
 
@@ -91,6 +91,7 @@ Peak cash deficit $7,445,980; with 25% headroom $9,307,475. Additional regulator
 | CAC $60 | $-3.03 |
 | Churn 40% | $-1.84 |
 | Support $12/year | $-0.50 |
+| Absorb assumed 3% ramp fee on 25% of loads | $-12.50 |
 | 25% bank funding | $-0.90 |
 | All bank funding | $-20.10 |
 | Network $0.05/order | $10.30 |

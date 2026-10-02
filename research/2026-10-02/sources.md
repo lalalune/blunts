@@ -66,6 +66,17 @@ The [wallet recommendation](wallet-strategy.md) rechecked the SEC interface stat
 
 No new demand evidence or private partner agreement was obtained. Subscription revenue was removed from the executable model; the recommended rail mix changed from 25% bank to 0%, with bank usage retained as sensitivity. Source-backed capability and conditional product recommendation remain distinct.
 
+## Uncapped fees and browser funding update
+
+The [browser funding and securities review](browser-funding-and-securities.md) checked these primary sources on October 2, 2026:
+
+- [MoonPay Arbitrum integration](https://www.moonpay.com/newsroom/arbitrumbridge), [Cash App FAQ](https://support.moonpay.com/en/articles/755167-cash-app-faqs), [web SDK quickstart](https://moonpay.readme.io/docs/quickstart), [integration controls](https://support.moonpay.com/en/articles/694414-managing-your-api-keys-domains-and-webhooks) and [partner fees](https://support.moonpay.com/en/articles/694907-partner-pricing-fees-and-the-removed-paywall).
+- [Ramp supported assets](https://support.rampnetwork.com/en/articles/432-what-cryptoassets-does-ramp-network-support), [Transak on-ramp](https://docs.transak.com/products/on-ramp) and [API integration](https://docs.transak.com/integration/api).
+- [Circle native Arbitrum USDC](https://www.circle.com/blog/usdc-on-arbitrum-now-available) and [Dinari US program](https://docs.dinari.com/docs/us).
+- [QQQx product](https://assets.backed.fi/products/nasdaq-xstock), [xStocks FAQ](https://docs.xstocks.fi/docs/frequently-asked-questions) and [legal overview](https://docs.xstocks.fi/docs/product-legal-overview).
+
+Consumer payment-method support, network support and partner-widget entitlement are separate claims. Their combination for Blunts remains unverified. No live quote, token liquidity test or funded transaction was performed. The model's 3% absorbed-ramp sensitivity is an illustrative assumption, not a provider quote. Uncapped fees implement the user's pricing direction without establishing legal fee entitlement.
+
 ## Provenance and limitations
 
 - Census: downloaded the official vintage-2025 resident single-year age CSV. The manifest records source URL, retrieval date, SHA-256 and exact filters. Totals are recomputed by the model, not copied from a secondary TAM report.

@@ -2,7 +2,7 @@
 
 Reviewed source baseline: `9e91c76d1d4f8905d83459e0afed551dce6e83c3`. October 2, 2026. Read alongside the [120-item audit](../../docs/launch-readiness-audit.md) and [implementation plan](implementation-plan.md). This is a prototype review and production design, not proof of provider or device acceptance.
 
-**Product decision update:** implement the [fee-based wallet specification](wallet-strategy.md). Replace the 10%-of-gains demo with approved 1%/$10-cap conversion previews in production; no subscription surfaces. This document records existing code behavior, not a claim that the prototype has already changed.
+**Product decision update:** implement the [fee-based wallet specification](wallet-strategy.md). Replace the 10%-of-gains demo with approved uncapped 1% conversion previews in production; no subscription surfaces. This document records existing code behavior, not a claim that the prototype has already changed.
 
 ## Observed browser evidence
 

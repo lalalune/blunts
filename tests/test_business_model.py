@@ -38,14 +38,26 @@ class BusinessModelTests(unittest.TestCase):
         self.assertAlmostEqual(exit_only["revenue"], 13.2)
         self.assertEqual(exit_only["service_cost"], model.unit(case)["service_cost"])
 
-    def test_fee_cap_applies_per_order(self):
+    def test_percentage_fees_are_uncapped_and_not_dependent_on_split_count(self):
         case = replace(
             model.CASES[0], annual_load_volume=100000, annual_unload_volume=100000
         )
+        self.assertEqual(model.unit(case)["customer_fee_pool"], 2000)
+        split = replace(case, loads=100, unloads=100)
         self.assertEqual(
             model.unit(case)["customer_fee_pool"],
-            (case.loads + case.unloads) * case.fee_cap,
+            model.unit(split)["customer_fee_pool"],
         )
+
+    def test_onramp_cost_is_only_absorbed_when_explicitly_modeled(self):
+        case = model.CASES[2]
+        base = model.unit(case)
+        subsidized = model.unit(
+            replace(case, onramp_volume_share=0.25, absorbed_onramp_fee_rate=0.03)
+        )
+        self.assertEqual(base["costs"]["absorbed_onramp"], 0)
+        self.assertEqual(subsidized["costs"]["absorbed_onramp"], 36)
+        self.assertAlmostEqual(base["steady_margin"] - subsidized["steady_margin"], 36)
 
     def test_churn_uses_monthly_replacement_not_only_first_cohort(self):
         case = model.CASES[1]
