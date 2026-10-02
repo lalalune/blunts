@@ -27,6 +27,12 @@ The [browser funding and securities review](browser-funding-and-securities.md) d
 | 007 | Visual units and balance vocabulary | Principal/current value/withdrawable cash rules; moderated comprehension acceptance |
 | 008 | Build/buy/vendor exit | Contracts, costs, data portability, service levels, termination and continuity plan |
 
+## Browser-first refinement from the permissionless review
+
+The [latest build decision](permissionless-options-and-build-decision.md) adds F01–F06 as concrete qualification and browser milestones. React/TypeScript/Vite is the recommended browser-first stack for ADR006; the Expo layout below remains a cross-platform alternative, not a second app to build concurrently. Share domain/types with later native clients rather than making native UI reuse a prerequisite for web. E03/F02 can begin with deterministic providers while F01/E00 qualifies actual live capability; physical native spikes do not block the simulated browser foundation.
+
+Separate the partner US order adapter from a potential thin self-custodial swap interface. Solana/Jupiter and Base/ST0x are researched alternatives; the approved USDC/Arbitrum baseline remains. No custom securities token, bridge or venue is added. The new review also records actual Jupiter fee sharing and Cash App payment-cost evidence; do not transplant the current US business model unchanged to a non-US swap product.
+
 ## 2. Work packages, effort, dependencies and exit gates
 
 Effort is **person-weeks**, not elapsed weeks. Ranges are engineering/design estimates before partner discovery, excluding licensing and review waiting. Staff assignments are roles to fill. Do not add overlapping specialist effort as if it were a guaranteed budget. One technical lead owns cross-package integration; one release owner maintains the evidence register.

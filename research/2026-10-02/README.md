@@ -6,6 +6,8 @@
 
 ## Read in this order
 
+**Latest decision:** [Permissionless alternatives and lowest-friction build](permissionless-options-and-build-decision.md) compares QQQx, QQQon, ST0x QQQM, perps and US infrastructure; separates the thin wallet interface from brokerage execution; and specifies the MoonPay Cash App integration spike.
+
 1. **[Browser completion, MoonPay funding and Solana QQQ review](browser-funding-and-securities.md)** — current approved direction and remaining production gates.
 2. **[Current recommendation: fee-based wallet](wallet-strategy.md)** — product, pricing, chosen rail, collection and updated economics.
 3. [Market, TAM/SAM/SOM, economics and capital decision](market-and-economics.md)

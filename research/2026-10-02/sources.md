@@ -77,6 +77,12 @@ The [browser funding and securities review](browser-funding-and-securities.md) c
 
 Consumer payment-method support, network support and partner-widget entitlement are separate claims. Their combination for Blunts remains unverified. No live quote, token liquidity test or funded transaction was performed. The model's 3% absorbed-ramp sensitivity is an illustrative assumption, not a provider quote. Uncapped fees implement the user's pricing direction without establishing legal fee entitlement.
 
+## Permissionless alternatives follow-up
+
+The [latest comparative review](permissionless-options-and-build-decision.md) contains claim-level primary-source links for Ondo global and US products, ST0x's specific QQQM instrument and issuer-creditor terms, Ostium, XYZ, Superstate, DTC, Nasdaq/Payward, Alpaca ITN, the SEC interface/venue statements, MoonPay's partner Cash App launch, Ramp payment methods, Privy and Jupiter Swap API V2. Sources were checked October 2, 2026. The report distinguishes published capabilities from tested integration and planned infrastructure from available retail APIs.
+
+Material unresolved discrepancy: ST0x's current FAQ describes unsecured holders and a hedge not segregated from the issuer's estate, while its investor's April announcement describes segregated custody. The controlling prospectus/final terms were not obtained. No unrestricted US distribution conclusion is drawn from the absence of a prominent website ban. Cash App pricing is a published component, not an all-in quote. No live provider or liquidity test was performed.
+
 ## Provenance and limitations
 
 - Census: downloaded the official vintage-2025 resident single-year age CSV. The manifest records source URL, retrieval date, SHA-256 and exact filters. Totals are recomputed by the model, not copied from a secondary TAM report.

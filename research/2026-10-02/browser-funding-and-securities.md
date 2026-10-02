@@ -2,6 +2,9 @@
 
 **October 2, 2026. User-approved product direction: USDC on Arbitrum. Proposed existing 1% Fill/Spark fee is now uncapped; subscriptions remain excluded.** User approval resolves the chain/product choice. It does not stand in for a provider contract, production enablement, or legal clearance.
 
+
+**Follow-up:** [Permissionless alternatives and build decision](permissionless-options-and-build-decision.md) adds QQQon, ST0x QQQM, recent SEC interface developments, Cash App partner evidence and the concrete browser stack. It is the newest comparison.
+
 ## Recommendation
 
 Build a browser-first wallet with **MoonPay as the first hosted on/off-ramp candidate, Ramp Network as the fallback, and Dinari's US securities program as the investment-provider candidate**. Keep manual native-USDC funding from compatible wallets/Cash App available. Use one approved Arbitrum asset/network combination end to end, without a bridge. The provider must confirm native USDC rather than silently delivering USDC.e or another representation.

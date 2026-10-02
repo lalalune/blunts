@@ -2,6 +2,9 @@
 
 **User-approved direction, October 2, 2026: USDC on Arbitrum; uncapped load/unload percentage fees.** User approval selects the product route; provider acceptance and securities permissions remain external gates. Subscriptions are rejected, not deferred. No holding fee, paid tier, AUM fee, performance fee, or subscription revenue belongs in the launch model. This supersedes the earlier optional-subscription discussion. The existing investment concept is retained: a wallet experience whose Fill/Spark actions enter and exit an approved investment. If the product instead holds only USDC, that is a different product with less reason for users to pay Blunts.
 
+
+**Latest implementation research:** [permissionless options and build decision](permissionless-options-and-build-decision.md). MoonPay Cash App partner support is documented; exact Blunts entitlement remains open. A thin user-controlled interface is an explicit alternative architecture, with the existing US/Arbitrum investment route retained as the launch candidate.
+
 ## The best route to validate
 
 Build **one-chain, USDC-funded, user-controlled wallet software with a regulated investment provider behind the investment conversion**. Charge once on each successful Fill or Spark. Let the provider handle regulated execution, custody/settlement and required customer records under its approved program. Use an embedded wallet for usability only after its actual key/recovery authority is verified; do not advertise self-custody merely because the SDK does.
