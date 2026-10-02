@@ -1,6 +1,7 @@
 """Blunts conditional business model. All commercial inputs are assumptions, not quotes.
 Run from any directory: python3 research/2026-10-02/business_model.py
-No customer-money balances are treated as company revenue. No market return forecast.
+Subscription revenue is deliberately unsupported. Volume is fee-bearing conversion activity,
+not all wallet receipts or transfers. No customer-money balances are treated as company revenue. No market return forecast.
 """
 
 from dataclasses import dataclass, asdict, replace
@@ -15,20 +16,18 @@ ROOT = Path(__file__).resolve().parent
 @dataclass(frozen=True)
 class Case:
     name: str
-    annual_deposits: float
-    annual_withdrawals: float
-    buys: int
-    sells: int
-    plus_conversion: float
+    annual_load_volume: float
+    annual_unload_volume: float
+    loads: int
+    unloads: int
     annual_churn: float
     funded_cac: float
     # A legally approved right to receive these revenues is REQUIRED, not assumed proven.
-    retained_trade_fee_fraction: float = 1.0
-    fee_rate: float = 0.01
+    retained_fee_fraction: float = 1.0
+    load_fee_rate: float = 0.01
+    unload_fee_rate: float = 0.01
     fee_cap: float = 10.0
-    plus_monthly: float = 3.0
-    plus_net_fraction: float = 0.85
-    bank_share: float = 0.25
+    bank_share: float = 0.0
     bank_in_cost: float = 0.75
     bank_out_cost: float = 1.0
     chain_payout_cost: float = 0.05
@@ -44,21 +43,19 @@ class Case:
 
 
 CASES = (
-    Case("Casual", 600, 360, 12, 4, 0.05, 0.35, 40),
-    Case("Habitual", 2400, 1320, 24, 8, 0.08, 0.25, 30),
-    Case("Strong", 4800, 2400, 24, 8, 0.10, 0.20, 25),
+    Case("Casual", 600, 360, 12, 4, 0.35, 40),
+    Case("Habitual", 2400, 1320, 24, 8, 0.25, 30),
+    Case("Strong", 4800, 2400, 24, 8, 0.20, 25),
 )
 
 
 def unit(c):
     if not 0 < c.annual_churn < 1:
         raise ValueError("annual_churn must be strictly between zero and one")
-    if c.buys <= 0 or c.sells <= 0:
+    if c.loads <= 0 or c.unloads <= 0:
         raise ValueError("scenario requires positive buy and sell counts")
     for name in (
-        "plus_conversion",
-        "retained_trade_fee_fraction",
-        "plus_net_fraction",
+        "retained_fee_fraction",
         "bank_share",
     ):
         if not 0 <= getattr(c, name) <= 1:
@@ -66,32 +63,32 @@ def unit(c):
     for name, value in asdict(c).items():
         if name != "name" and (not math.isfinite(value) or value < 0):
             raise ValueError(f"{name} must be finite and non-negative")
-    fee_pool = c.buys * min(
-        c.annual_deposits / c.buys * c.fee_rate, c.fee_cap
-    ) + c.sells * min(c.annual_withdrawals / c.sells * c.fee_rate, c.fee_cap)
-    subscription = c.plus_conversion * c.plus_monthly * 12 * c.plus_net_fraction
-    orders = c.buys + c.sells
+    fee_pool = c.loads * min(
+        c.annual_load_volume / c.loads * c.load_fee_rate, c.fee_cap
+    ) + c.unloads * min(
+        c.annual_unload_volume / c.unloads * c.unload_fee_rate, c.fee_cap
+    )
+    orders = c.loads + c.unloads
     costs = {
         "bank_and_payouts": c.bank_share
-        * (c.buys * c.bank_in_cost + c.sells * c.bank_out_cost)
-        + (1 - c.bank_share) * c.sells * c.chain_payout_cost,
+        * (c.loads * c.bank_in_cost + c.unloads * c.bank_out_cost)
+        + (1 - c.bank_share) * c.unloads * c.chain_payout_cost,
         "broker_network": orders * c.broker_network_per_order,
         "quotes": orders * c.quotes_per_order * c.quote_cost,
         "support": c.support_year,
         "wallet": c.wallet_year,
         "screening": c.screening_year,
         "infra": c.infra_year,
-        "loss_reserve": (c.annual_deposits + c.annual_withdrawals)
+        "loss_reserve": (c.annual_load_volume + c.annual_unload_volume)
         * c.loss_rate_on_gross_flow,
     }
-    revenue = fee_pool * c.retained_trade_fee_fraction + subscription
+    revenue = fee_pool * c.retained_fee_fraction
     service = sum(costs.values())
     contribution = revenue - service
     turnover = 12 * (1 - (1 - c.annual_churn) ** (1 / 12))
     replacement = turnover * (c.funded_cac + c.onboarding_per_funded)
     return dict(
         customer_fee_pool=fee_pool,
-        subscription=subscription,
         revenue=revenue,
         service_cost=service,
         costs=costs,
@@ -116,7 +113,7 @@ def target(c, fixed, profit):
     return dict(
         users=n,
         revenue=n * u["revenue"],
-        gross_flow=n * (c.annual_deposits + c.annual_withdrawals),
+        fee_bearing_volume=n * (c.annual_load_volume + c.annual_unload_volume),
         profit=n * u["steady_margin"] - fixed,
     )
 
@@ -257,20 +254,13 @@ def main():
         sam=sam(),
         units=units,
         targets=targets,
-        subscription_free_targets={
-            c.name: {
-                name: target(replace(c, plus_conversion=0), *amounts)
-                for name, amounts in goals.items()
-            }
-            for c in CASES
-        },
         ramps=ramps,
     )
     (ROOT / "model-results.json").write_text(json.dumps(data, indent=2) + "\n")
     out = [
         "# Reproducible business model outputs",
         "",
-        "All commercial inputs are planning assumptions. 100% trade-fee capture is a conditional upper case, not approved Blunts revenue. Profit is pre-tax, includes modeled salaries, excludes financing costs, equity dilution and extraordinary losses.",
+        "No subscriptions or holding fees. Wallet-only launch; bank mix is a sensitivity. All commercial inputs are planning assumptions. 100% load/unload fee capture is a conditional upper case, not approved Blunts revenue. Profit is pre-tax, includes modeled salaries, excludes financing costs, equity dilution and extraordinary losses.",
         "",
         "## Population and conditional SAM",
         "",
@@ -296,8 +286,8 @@ def main():
             + " | ".join(
                 money(x)
                 for x in [
-                    c.annual_deposits,
-                    c.annual_withdrawals,
+                    c.annual_load_volume,
+                    c.annual_unload_volume,
                     u["revenue"],
                     u["service_cost"],
                     u["contribution"],
@@ -311,7 +301,7 @@ def main():
         "",
         "## Profit targets: average maintained active funded users",
         "",
-        "| Case | Goal | Users | Annual company revenue | Annual gross flow |",
+        "| Case | Goal | Users | Annual company revenue | Annual fee-bearing volume |",
         "|---|---|---:|---:|---:|",
     ]
     for c in CASES:
@@ -319,7 +309,7 @@ def main():
             out.append(
                 f"| {c.name} | {name} | "
                 + (
-                    f"{r['users']:,} | {money(r['revenue'])} | {money(r['gross_flow'])}"
+                    f"{r['users']:,} | {money(r['revenue'])} | {money(r['fee_bearing_volume'])}"
                     if r
                     else "No break-even | — | —"
                 )
@@ -338,7 +328,7 @@ def main():
             + c.name
             + " | "
             + " | ".join(
-                money(unit(replace(c, retained_trade_fee_fraction=r))["steady_margin"])
+                money(unit(replace(c, retained_fee_fraction=r))["steady_margin"])
                 for r in [0, 0.5, 1]
             )
             + " |"
@@ -388,7 +378,7 @@ def main():
         ]
     out += [
         "",
-        "## Cost and conversion sensitivity: Habitual case steady margin",
+        "## Cost sensitivity: Habitual case steady margin",
         "",
         "| Change | Margin / user / year |",
         "|---|---:|",
@@ -396,18 +386,46 @@ def main():
     base = CASES[1]
     variants = {
         "Base": base,
-        "No subscription buyers": replace(base, plus_conversion=0),
         "CAC $10": replace(base, funded_cac=10),
         "CAC $60": replace(base, funded_cac=60),
         "Churn 40%": replace(base, annual_churn=0.4),
         "Support $12/year": replace(base, support_year=12),
-        "All wallet funding": replace(base, bank_share=0),
+        "25% bank funding": replace(base, bank_share=0.25),
         "All bank funding": replace(base, bank_share=1),
         "Network $0.05/order": replace(base, broker_network_per_order=0.05),
         "Loss reserve 50 bps": replace(base, loss_rate_on_gross_flow=0.005),
     }
     for name, c in variants.items():
         out.append(f"| {name} | {money(unit(c)['steady_margin'])} |")
+    out += [
+        "",
+        "## Pricing alternatives: steady margin per active user",
+        "",
+        "Costs unchanged to isolate pricing; behavior and fee willingness remain unproven.",
+        "",
+        "| Load fee / unload fee | Casual | Habitual | Strong |",
+        "|---|---:|---:|---:|",
+    ]
+    pricing = [
+        (0, 0.01),
+        (0.005, 0.005),
+        (0.0085, 0.0085),
+        (0.01, 0.01),
+        (0.015, 0.015),
+    ]
+    for load_rate, unload_rate in pricing:
+        out.append(
+            f"| {load_rate:.2%} / {unload_rate:.2%} | "
+            + " | ".join(
+                money(
+                    unit(
+                        replace(c, load_fee_rate=load_rate, unload_fee_rate=unload_rate)
+                    )["steady_margin"]
+                )
+                for c in CASES
+            )
+            + " |"
+        )
     (ROOT / "model-output.md").write_text("\n".join(out) + "\n")
 
 

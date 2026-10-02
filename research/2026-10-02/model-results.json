@@ -3,19 +3,17 @@
   "inputs": [
     {
       "name": "Casual",
-      "annual_deposits": 600,
-      "annual_withdrawals": 360,
-      "buys": 12,
-      "sells": 4,
-      "plus_conversion": 0.05,
+      "annual_load_volume": 600,
+      "annual_unload_volume": 360,
+      "loads": 12,
+      "unloads": 4,
       "annual_churn": 0.35,
       "funded_cac": 40,
-      "retained_trade_fee_fraction": 1.0,
-      "fee_rate": 0.01,
+      "retained_fee_fraction": 1.0,
+      "load_fee_rate": 0.01,
+      "unload_fee_rate": 0.01,
       "fee_cap": 10.0,
-      "plus_monthly": 3.0,
-      "plus_net_fraction": 0.85,
-      "bank_share": 0.25,
+      "bank_share": 0.0,
       "bank_in_cost": 0.75,
       "bank_out_cost": 1.0,
       "chain_payout_cost": 0.05,
@@ -31,19 +29,17 @@
     },
     {
       "name": "Habitual",
-      "annual_deposits": 2400,
-      "annual_withdrawals": 1320,
-      "buys": 24,
-      "sells": 8,
-      "plus_conversion": 0.08,
+      "annual_load_volume": 2400,
+      "annual_unload_volume": 1320,
+      "loads": 24,
+      "unloads": 8,
       "annual_churn": 0.25,
       "funded_cac": 30,
-      "retained_trade_fee_fraction": 1.0,
-      "fee_rate": 0.01,
+      "retained_fee_fraction": 1.0,
+      "load_fee_rate": 0.01,
+      "unload_fee_rate": 0.01,
       "fee_cap": 10.0,
-      "plus_monthly": 3.0,
-      "plus_net_fraction": 0.85,
-      "bank_share": 0.25,
+      "bank_share": 0.0,
       "bank_in_cost": 0.75,
       "bank_out_cost": 1.0,
       "chain_payout_cost": 0.05,
@@ -59,19 +55,17 @@
     },
     {
       "name": "Strong",
-      "annual_deposits": 4800,
-      "annual_withdrawals": 2400,
-      "buys": 24,
-      "sells": 8,
-      "plus_conversion": 0.1,
+      "annual_load_volume": 4800,
+      "annual_unload_volume": 2400,
+      "loads": 24,
+      "unloads": 8,
       "annual_churn": 0.2,
       "funded_cac": 25,
-      "retained_trade_fee_fraction": 1.0,
-      "fee_rate": 0.01,
+      "retained_fee_fraction": 1.0,
+      "load_fee_rate": 0.01,
+      "unload_fee_rate": 0.01,
       "fee_cap": 10.0,
-      "plus_monthly": 3.0,
-      "plus_net_fraction": 0.85,
-      "bank_share": 0.25,
+      "bank_share": 0.0,
       "bank_in_cost": 0.75,
       "bank_out_cost": 1.0,
       "chain_payout_cost": 0.05,
@@ -143,11 +137,10 @@
   "units": {
     "Casual": {
       "customer_fee_pool": 9.6,
-      "subscription": 1.5300000000000002,
-      "revenue": 11.129999999999999,
-      "service_cost": 18.72,
+      "revenue": 9.6,
+      "service_cost": 15.52,
       "costs": {
-        "bank_and_payouts": 3.4,
+        "bank_and_payouts": 0.2,
         "broker_network": 3.2,
         "quotes": 0.36,
         "support": 6.0,
@@ -156,20 +149,19 @@
         "infra": 1.2,
         "loss_reserve": 0.96
       },
-      "contribution": -7.59,
+      "contribution": -5.92,
       "replacement": 18.61826430132288,
-      "steady_margin": -26.20826430132288,
-      "simple_ltv_before_cac": -21.937225221164745,
+      "steady_margin": -24.538264301322883,
+      "simple_ltv_before_cac": -17.990563018352475,
       "simple_payback_months": null,
       "cac_ceiling_3x": 0
     },
     "Habitual": {
       "customer_fee_pool": 37.2,
-      "subscription": 2.448,
-      "revenue": 39.648,
-      "service_cost": 28.44,
+      "revenue": 37.2,
+      "service_cost": 22.04,
       "costs": {
-        "bank_and_payouts": 6.8,
+        "bank_and_payouts": 0.4,
         "broker_network": 6.4,
         "quotes": 0.72,
         "support": 6.0,
@@ -178,20 +170,19 @@
         "infra": 1.2,
         "loss_reserve": 3.72
       },
-      "contribution": 11.208000000000002,
+      "contribution": 15.160000000000004,
       "replacement": 9.664877082823555,
-      "steady_margin": 1.5431229171764471,
-      "simple_ltv_before_cac": 35.42854075994843,
-      "simple_payback_months": 36.402569593147746,
-      "cac_ceiling_3x": 9.14284691998281
+      "steady_margin": 5.495122917176449,
+      "simple_ltv_before_cac": 49.33125249115081,
+      "simple_payback_months": 26.912928759894452,
+      "cac_ceiling_3x": 13.777084163716939
     },
     "Strong": {
       "customer_fee_pool": 72.0,
-      "subscription": 3.0600000000000005,
-      "revenue": 75.06,
-      "service_cost": 31.92,
+      "revenue": 72.0,
+      "service_cost": 25.52,
       "costs": {
-        "bank_and_payouts": 6.8,
+        "bank_and_payouts": 0.4,
         "broker_network": 6.4,
         "quotes": 0.72,
         "support": 6.0,
@@ -200,12 +191,12 @@
         "infra": 1.2,
         "loss_reserve": 7.2
       },
-      "contribution": 43.14,
+      "contribution": 46.480000000000004,
       "replacement": 6.411367603934423,
-      "steady_margin": 36.72863239606558,
-      "simple_ltv_before_cac": 191.13153468727484,
-      "simple_payback_months": 8.066759388038943,
-      "cac_ceiling_3x": 61.04384489575828
+      "steady_margin": 40.06863239606558,
+      "simple_ltv_before_cac": 206.23907585221454,
+      "simple_payback_months": 7.48709122203098,
+      "cac_ceiling_3x": 66.07969195073818
     }
   },
   "targets": {
@@ -216,74 +207,42 @@
     },
     "Habitual": {
       "Lean owner business": {
-        "users": 550832,
-        "revenue": 21839387.136,
-        "gross_flow": 2049095040,
-        "profit": 250001.4827141367
+        "users": 154683,
+        "revenue": 5754207.600000001,
+        "fee_bearing_volume": 575420760,
+        "profit": 250002.09819760465
       },
       "Durable company": {
-        "users": 1620092,
-        "revenue": 64233407.616000004,
-        "gross_flow": 6026742240,
-        "profit": 1000001.0931342244
+        "users": 454949,
+        "revenue": 16924102.8,
+        "fee_bearing_volume": 1692410280,
+        "profit": 1000000.6760465084
       },
       "Scale company": {
-        "users": 9720548,
-        "revenue": 385400287.10400003,
-        "gross_flow": 36160438560,
-        "profit": 10000000.386313679
+        "users": 2729694,
+        "revenue": 101544616.80000001,
+        "fee_bearing_volume": 10154461680,
+        "profit": 10000004.05627905
       }
     },
     "Strong": {
       "Lean owner business": {
-        "users": 23143,
-        "revenue": 1737113.58,
-        "gross_flow": 166629600,
-        "profit": 250010.73954214563
+        "users": 21214,
+        "revenue": 1527408.0,
+        "fee_bearing_volume": 152740800,
+        "profit": 250015.96765013528
       },
       "Durable company": {
-        "users": 68067,
-        "revenue": 5109109.0200000005,
-        "gross_flow": 490082400,
-        "profit": 1000007.8213029956
+        "users": 62393,
+        "revenue": 4492296.0,
+        "fee_bearing_volume": 449229600,
+        "profit": 1000002.1810877197
       },
       "Scale company": {
-        "users": 408401,
-        "revenue": 30654579.060000002,
-        "gross_flow": 2940487200,
-        "profit": 10000010.199185578
-      }
-    }
-  },
-  "subscription_free_targets": {
-    "Casual": {
-      "Lean owner business": null,
-      "Durable company": null,
-      "Scale company": null
-    },
-    "Habitual": {
-      "Lean owner business": null,
-      "Durable company": null,
-      "Scale company": null
-    },
-    "Strong": {
-      "Lean owner business": {
-        "users": 25247,
-        "revenue": 1817784.0,
-        "gross_flow": 181778400,
-        "profit": 250031.96210346755
-      },
-      "Durable company": {
-        "users": 74254,
-        "revenue": 5346288.0,
-        "gross_flow": 534628800,
-        "profit": 1000030.6299374532
-      },
-      "Scale company": {
-        "users": 445519,
-        "revenue": 32077368.0,
-        "gross_flow": 3207736800,
-        "profit": 10000015.43646274
+        "users": 374358,
+        "revenue": 26953776.0,
+        "fee_bearing_volume": 2695377600,
+        "profit": 10000013.08652632
       }
     }
   },
@@ -295,64 +254,64 @@
           "active_eoy": 827.1447730444874,
           "avg_active": 442.96807259972337,
           "new_funded": 1000,
-          "revenue": 4930.234648034921,
-          "service_cost": 8292.362319066822,
+          "revenue": 4252.493496957344,
+          "service_cost": 6874.864486747707,
           "acquisition_and_kyc": 43999.99999999999,
           "fixed": 600000,
-          "operating_profit": -647362.1276710319,
-          "cumulative_cash": -797362.127671032
+          "operating_profit": -646622.3709897903,
+          "cumulative_cash": -796622.3709897902
         },
         {
           "year": 2,
           "active_eoy": 3019.0784216123775,
           "avg_active": 2001.0101654337539,
           "new_funded": 3000,
-          "revenue": 22271.24314127768,
-          "service_cost": 37458.91029691988,
+          "revenue": 19209.69758816404,
+          "service_cost": 31055.67776753186,
           "acquisition_and_kyc": 132000.0,
           "fixed": 750000,
-          "operating_profit": -897187.6671556422,
-          "cumulative_cash": -1694549.7948266743
+          "operating_profit": -893845.9801793678,
+          "cumulative_cash": -1690468.3511691582
         },
         {
           "year": 3,
           "active_eoy": 6925.269612314969,
           "avg_active": 5110.995144464572,
           "new_funded": 6000,
-          "revenue": 56885.37595789068,
-          "service_cost": 95677.82910437678,
+          "revenue": 49065.55338685989,
+          "service_cost": 79322.64464209016,
           "acquisition_and_kyc": 264000.0,
           "fixed": 900000,
-          "operating_profit": -1202792.453146486,
-          "cumulative_cash": -2897342.2479731604
+          "operating_profit": -1194257.0912552304,
+          "cumulative_cash": -2884725.442424388
         },
         {
           "year": 4,
           "active_eoy": 12772.872978449604,
           "avg_active": 10056.887772567788,
           "new_funded": 10000,
-          "revenue": 111933.16090867946,
-          "service_cost": 188264.939102469,
+          "revenue": 96546.12261665077,
+          "service_cost": 156082.8982302521,
           "acquisition_and_kyc": 440000.0000000002,
           "fixed": 1100000,
-          "operating_profit": -1616331.7781937898,
-          "cumulative_cash": -4513674.02616695
+          "operating_profit": -1599536.7756136016,
+          "cumulative_cash": -4484262.218037989
         },
         {
           "year": 5,
           "active_eoy": 20709.53903165955,
           "avg_active": 17023.265145612553,
           "new_funded": 15000,
-          "revenue": 189468.9410706677,
-          "service_cost": 318675.52352586697,
+          "revenue": 163423.3453978805,
+          "service_cost": 264201.07505990687,
           "acquisition_and_kyc": 660000.0,
           "fixed": 1300000,
-          "operating_profit": -2089206.5824551992,
-          "cumulative_cash": -6602880.608622148
+          "operating_profit": -2060777.7296620263,
+          "cumulative_cash": -6545039.947700013
         }
       ],
-      "peak_cash_deficit": 6602880.608622148,
-      "funding_with_25pct_headroom": 8253600.760777685
+      "peak_cash_deficit": 6545039.947700013,
+      "funding_with_25pct_headroom": 8181299.9346250165
     },
     "Habitual": {
       "rows": [
@@ -361,64 +320,64 @@
           "active_eoy": 1758.9463222675038,
           "avg_active": 921.2903899277434,
           "new_funded": 2000,
-          "revenue": 36527.32137985517,
-          "service_cost": 26201.498689545027,
+          "revenue": 34272.00250531206,
+          "service_cost": 20305.240194007467,
           "acquisition_and_kyc": 67999.99999999999,
           "fixed": 900000,
-          "operating_profit": -957674.1773096898,
-          "cumulative_cash": -1107674.1773096898
+          "operating_profit": -954033.2376886954,
+          "cumulative_cash": -1104033.2376886953
         },
         {
           "year": 2,
           "active_eoy": 8354.995030770644,
           "avg_active": 5213.785284496542,
           "new_funded": 8000,
-          "revenue": 206716.15895971894,
-          "service_cost": 148280.05349108166,
+          "revenue": 193952.81258327138,
+          "service_cost": 114911.8276703038,
           "acquisition_and_kyc": 271999.99999999994,
           "fixed": 1200000,
-          "operating_profit": -1413563.8945313627,
-          "cumulative_cash": -2521238.0718410523
+          "operating_profit": -1392959.0150870322,
+          "cumulative_cash": -2496992.2527757273
         },
         {
           "year": 3,
           "active_eoy": 23855.709495753017,
           "avg_active": 16473.866592008882,
           "new_funded": 20000,
-          "revenue": 653155.8626399682,
-          "service_cost": 468516.7658767326,
+          "revenue": 612827.8372227304,
+          "service_cost": 363084.01968787576,
           "acquisition_and_kyc": 680000.0,
           "fixed": 1500000,
-          "operating_profit": -1995360.9032367645,
-          "cumulative_cash": -4516598.975077816
+          "operating_profit": -1930256.1824651454,
+          "cumulative_cash": -4427248.435240872
         },
         {
           "year": 4,
           "active_eoy": 53070.70856716485,
           "avg_active": 39157.767065959146,
           "new_funded": 40000,
-          "revenue": 1552527.1486311483,
-          "service_cost": 1113646.8953558782,
+          "revenue": 1456668.9348536802,
+          "service_cost": 863037.1861337394,
           "acquisition_and_kyc": 1360000.0,
           "fixed": 2000000,
-          "operating_profit": -2921119.74672473,
-          "cumulative_cash": -7437718.721802545
+          "operating_profit": -2766368.251280059,
+          "cumulative_cash": -7193616.686520931
         },
         {
           "year": 5,
           "active_eoy": 101366.15270473626,
           "avg_active": 78366.6075937356,
           "new_funded": 70000,
-          "revenue": 3107079.257876429,
-          "service_cost": 2228746.3199658403,
+          "revenue": 2915237.8024869645,
+          "service_cost": 1727200.0313659317,
           "acquisition_and_kyc": 2379999.9999999995,
           "fixed": 2500000,
-          "operating_profit": -4001667.062089411,
-          "cumulative_cash": -11439385.783891955
+          "operating_profit": -3691962.2288789665,
+          "cumulative_cash": -10885578.915399898
         }
       ],
-      "peak_cash_deficit": 11439385.783891955,
-      "funding_with_25pct_headroom": 14299232.229864944
+      "peak_cash_deficit": 10885578.915399898,
+      "funding_with_25pct_headroom": 13606973.644249871
     },
     "Strong": {
       "rows": [
@@ -427,64 +386,64 @@
           "active_eoy": 4523.215917646616,
           "avg_active": 2345.064680483305,
           "new_funded": 5000,
-          "revenue": 176020.5549170769,
-          "service_cost": 74854.46460102711,
+          "revenue": 168844.656994798,
+          "service_cost": 59846.05064593395,
           "acquisition_and_kyc": 145000.0,
           "fixed": 1200000,
-          "operating_profit": -1243833.9096839502,
-          "cumulative_cash": -1393833.9096839502
+          "operating_profit": -1236001.393651136,
+          "cumulative_cash": -1386001.393651136
         },
         {
           "year": 2,
           "active_eoy": 21711.43640470376,
           "avg_active": 13434.461703483175,
           "new_funded": 20000,
-          "revenue": 1008390.6954634472,
-          "service_cost": 428828.01757518307,
+          "revenue": 967281.2426507886,
+          "service_cost": 342847.46267289063,
           "acquisition_and_kyc": 580000.0,
           "fixed": 1800000,
-          "operating_profit": -1800437.3221117358,
-          "cumulative_cash": -3194271.2317956863
+          "operating_profit": -1755566.220022102,
+          "cumulative_cash": -3141567.6136732385
         },
         {
           "year": 3,
           "active_eoy": 62601.30830022914,
           "avg_active": 42910.82111627283,
           "new_funded": 50000,
-          "revenue": 3220886.2329874383,
-          "service_cost": 1369713.4100314288,
+          "revenue": 3089579.1203716444,
+          "service_cost": 1095084.1548872828,
           "acquisition_and_kyc": 1450000.0,
           "fixed": 2500000,
-          "operating_profit": -2098827.17704399,
-          "cumulative_cash": -5293098.408839677
+          "operating_profit": -1955505.0345156384,
+          "cumulative_cash": -5097072.648188878
         },
         {
           "year": 4,
           "active_eoy": 140545.3649931156,
           "avg_active": 103011.46287431743,
           "new_funded": 100000,
-          "revenue": 7732040.403346266,
-          "service_cost": 3288125.894948213,
+          "revenue": 7416825.326950856,
+          "service_cost": 2628852.5325525813,
           "acquisition_and_kyc": 2900000.0,
           "fixed": 3500000,
-          "operating_profit": -1956085.4916019477,
-          "cumulative_cash": -7249183.900441625
+          "operating_profit": -1612027.2056017257,
+          "cumulative_cash": -6709099.8537906045
         },
         {
           "year": 5,
           "active_eoy": 248132.76952389092,
           "avg_active": 196324.1354572193,
           "new_funded": 150000,
-          "revenue": 14736089.60741888,
-          "service_cost": 6266666.4037944395,
+          "revenue": 14135337.752919786,
+          "service_cost": 5010191.936868236,
           "acquisition_and_kyc": 4350000.0,
           "fixed": 5000000,
-          "operating_profit": -880576.7963755596,
-          "cumulative_cash": -8129760.696817185
+          "operating_profit": -224854.1839484498,
+          "cumulative_cash": -6933954.037739052
         }
       ],
-      "peak_cash_deficit": 8345092.836452913,
-      "funding_with_25pct_headroom": 10431366.045566142
+      "peak_cash_deficit": 7445980.13266991,
+      "funding_with_25pct_headroom": 9307475.165837387
     }
   }
 }

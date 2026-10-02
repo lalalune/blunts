@@ -57,6 +57,15 @@ Research completed October 2, 2026. Sources are primary government, regulator, p
 | [specific crypto-wallet policy](https://support.google.com/googleplay/android-developer/answer/16329703?hl=en-EN) | [publishing.md](publishing.md) |
 | [Android developer verification](https://developer.android.com/developer-verification?authuser=0) | [publishing.md](publishing.md) |
 
+## Wallet strategy update
+
+The [wallet recommendation](wallet-strategy.md) rechecked the SEC interface statement, Dinari US flow/fees and added these primary commercial comparisons on October 2, 2026:
+
+- [MetaMask fee explanation](https://metamask.io/faqs): wallet-service pricing analogy, not securities authorization or measured Blunts willingness to pay.
+- [Phantom swap fee explanation](https://help.phantom.com/articles/5985106844435): selected-pair fee comparison, not a fee on every wallet transfer.
+
+No new demand evidence or private partner agreement was obtained. Subscription revenue was removed from the executable model; the recommended rail mix changed from 25% bank to 0%, with bank usage retained as sensitivity. Source-backed capability and conditional product recommendation remain distinct.
+
 ## Provenance and limitations
 
 - Census: downloaded the official vintage-2025 resident single-year age CSV. The manifest records source URL, retrieval date, SHA-256 and exact filters. Totals are recomputed by the model, not copied from a secondary TAM report.

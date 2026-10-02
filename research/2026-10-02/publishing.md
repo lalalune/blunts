@@ -2,6 +2,8 @@
 
 October 2, 2026. Platform requirements can change before submission: release owner must recheck official documentation and the actual developer consoles. A signed binary or accepted upload is not App Review/Play approval, and store approval is not legal clearance.
 
+**Revenue decision:** no subscription, paid tier, StoreKit or Play Billing integration. Fill/Spark are financial conversion charges collected through the approved financial route. Wallet architecture and legal responsibilities follow the [current strategy](wallet-strategy.md).
+
 ## Platform strategy
 
 Build the shared funded product and mobile adapters together; release a controlled web beta first, then iOS and Android after device and store acceptance. Use Expo/React Native as a **candidate**, subject to a two-week SDK spike. Shared domain logic and API contracts are valuable; forcing every bank/KYC/wallet flow into the same renderer is not. [Expo web](https://docs.expo.dev/workflow/web/) supports a shared project; [DOM components](https://docs.expo.dev/guides/dom-components/) can retain the scene but involve an asynchronous bridge and separate execution context. Keep secrets, signing authority and ledger logic outside it. Native UI owns account controls. A static accessible scene is an acceptable fallback.
@@ -29,7 +31,7 @@ Start the legal publishing arrangement in phase zero. Do not wait until the web 
 | Provider adapters | Camera/hosted KYC, allowed bank/wallet handoff, app absent/cancel/return/cold-start recovery on physical devices |
 | Privacy | Inventory every SDK; privacy manifest/required-reason API entries, accurate privacy labels, support/privacy URLs, account-deletion initiation and lawful financial-record retention |
 | Permissions | Purpose-specific camera/photo/notification descriptions; request only when needed; export/encryption declarations reviewed |
-| Optional push/billing | APNs and token rotation if included; StoreKit/server entitlements for approved digital extras, with restore/refund/revocation; investment funding is separate |
+| Optional push; billing excluded | APNs/token rotation if included. No StoreKit, digital products or subscription entitlements; approved investment fees are collected by the financial flow |
 | Review packet | Approved financial disclosures/brand, accurate screenshots and age rating, licensing/publisher evidence, functioning review account with isolated data, detailed explanation of restricted flows |
 | Acceptance | Physical older supported and current iPhone; VoiceOver/Dynamic Type, backgrounding, degraded network, low power, recovery; TestFlight; App Review approval; phased release and monitoring |
 
@@ -46,7 +48,7 @@ Start the legal publishing arrangement in phase zero. Do not wait until the web 
 | Authentication | Keystore-backed storage, Credential Manager/passkeys, Digital Asset Links with Play-signing fingerprint, app/browser return verification and recovery |
 | UX/lifecycle | Edge-to-edge insets, keyboard, text scaling, system/predictive back, process death, low-memory GPU, denied permissions and app-not-installed cases |
 | Privacy | Accurate Data safety answers from actual SDK/network behavior; privacy URL, in-app account deletion plus [external deletion-request page](https://support.google.com/googleplay/android-developer/answer/13327111?hl=en) |
-| Optional push/billing | FCM/token lifecycle and permission; current Play Billing/server entitlements only for applicable digital extras; [payments policy](https://support.google.com/googleplay/android-developer/answer/10281818?hl=en-EN) evaluated separately from stock funding |
+| Optional push; billing excluded | FCM/token lifecycle and permission if included. No Play Billing products or subscriptions; apply [payments policy](https://support.google.com/googleplay/android-developer/answer/10281818?hl=en-EN) to the actual financial service |
 | Review/testing | IARC/target audience, truthful screenshots, functioning reviewer access, pre-launch reports, internal/closed tests and any account-specific production-access conditions |
 | Acceptance | Signed physical Pixel, Samsung and low-end device tests, TalkBack, Play approval, staged rollout, Android vitals, incident/rollback plan |
 

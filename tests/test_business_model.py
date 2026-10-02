@@ -21,24 +21,30 @@ spec.loader.exec_module(model)
 class BusinessModelTests(unittest.TestCase):
     def test_revenue_is_not_customer_money_and_respects_fee_right(self):
         case = model.CASES[1]
-        zero = model.unit(
-            replace(case, retained_trade_fee_fraction=0, plus_conversion=0)
-        )
+        zero = model.unit(replace(case, retained_fee_fraction=0))
         self.assertEqual(zero["revenue"], 0)
         full = model.unit(case)
-        half = model.unit(replace(case, retained_trade_fee_fraction=0.5))
+        half = model.unit(replace(case, retained_fee_fraction=0.5))
         self.assertAlmostEqual(
             full["revenue"] - half["revenue"], full["customer_fee_pool"] / 2
         )
         self.assertEqual(full["service_cost"], half["service_cost"])
 
+    def test_fee_only_pricing_and_one_sided_fee(self):
+        case = model.CASES[1]
+        self.assertNotIn("subscription", model.unit(case))
+        self.assertEqual(model.unit(case)["revenue"], 37.2)
+        exit_only = model.unit(replace(case, load_fee_rate=0))
+        self.assertAlmostEqual(exit_only["revenue"], 13.2)
+        self.assertEqual(exit_only["service_cost"], model.unit(case)["service_cost"])
+
     def test_fee_cap_applies_per_order(self):
         case = replace(
-            model.CASES[0], annual_deposits=100000, annual_withdrawals=100000
+            model.CASES[0], annual_load_volume=100000, annual_unload_volume=100000
         )
         self.assertEqual(
             model.unit(case)["customer_fee_pool"],
-            (case.buys + case.sells) * case.fee_cap,
+            (case.loads + case.unloads) * case.fee_cap,
         )
 
     def test_churn_uses_monthly_replacement_not_only_first_cohort(self):
@@ -87,7 +93,7 @@ class BusinessModelTests(unittest.TestCase):
             {"annual_churn": 1},
             {"bank_share": 2},
             {"funded_cac": -1},
-            {"buys": 0},
+            {"loads": 0},
         ):
             with self.assertRaises(ValueError):
                 model.unit(replace(model.CASES[0], **changes))

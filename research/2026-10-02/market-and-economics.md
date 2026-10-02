@@ -4,7 +4,7 @@ Research date: **October 2, 2026**. US-first, adult retail investing is the work
 
 ## Recommendation
 
-Fund a bounded discovery/partner-validation phase. Do not yet fund a nationwide real-money launch. Blunts has a distinctive visual language, but the current product makes a more expensive, more complex route to an ETF that users can already buy elsewhere. The company must prove that its experience produces durable investing behavior and customer value sufficient to overcome that disadvantage. A stablecoin rail is useful only if it materially improves acquisition, funding success, or operating cost for the chosen audience.
+The recommended product is a wallet with a fee on each successful load/unload conversion, no subscription or holding charge, and one approved USDC/EVM investment route. See the [wallet strategy](wallet-strategy.md) for the current product/pricing decision. Fund a bounded discovery/partner-validation phase. Do not yet fund a nationwide real-money launch. Blunts has a distinctive visual language, but the current product makes a more expensive, more complex route to an ETF that users can already buy elsewhere. The company must prove that its experience produces durable investing behavior and customer value sufficient to overcome that disadvantage. A stablecoin rail is useful only if it materially improves acquisition, funding success, or operating cost for the chosen audience.
 
 The investable proposition is **a simple, understandable investing habit for adults with genuinely discretionary money**. A cannabis-themed trading toy, a promise of rapid gains, or an emergency-cash replacement is a weaker product and creates avoidable partner, customer-harm, and distribution risks. Retain the creative identity only if customers understand it and providers accept it.
 
@@ -18,7 +18,7 @@ The investable proposition is **a simple, understandable investing habit for adu
 
 Population is calculated from the [Census single-year age dataset](https://www2.census.gov/programs-surveys/popest/datasets/2020-2025/national/asrh/nc-est2025-alldata-r-file12.csv), retaining July 2025 single ages. [FINRA's 2024 survey, published in 2025](https://www.finrafoundation.org/sites/finrafoundation/files/2025-11/NFCS_Investor_Survey_Report_White_Paper.pdf), reports 26% nonretirement investment participation among adults under 35, down from 32% in 2021. Applying its complement to Census ages is an approximation: surveys, definitions, and dates differ. Someone without taxable investments may have retirement investments, prefer debt repayment, or lack spare money.
 
-At the model's $11.13–$75.06 conditional annual company revenue per funded user, 58.09m people mechanically imply **$647m–$4.36bn annual revenue TAM**. That multiplication assumes every person becomes funded, uses the service at the modeled intensity, and generates legally collectible fees; it is a ceiling illustration, not an addressable revenue forecast. Cash inflows, AUM, stock-market capitalization, deposits, and customers' capital gains are **not Blunts revenue**.
+At the model's $9.60–$72.00 conditional annual company revenue per funded user, 58.09m people mechanically imply **$558m–$4.18bn annual revenue TAM**. That multiplication assumes every person becomes funded, uses the service at the modeled intensity, and generates legally collectible fees; it is a ceiling illustration, not an addressable revenue forecast. Cash inflows, AUM, stock-market capitalization, deposits, and customers' capital gains are **not Blunts revenue**.
 
 The [Federal Reserve's 2025 household survey](https://www.federalreserve.gov/publications/2026-economic-well-being-of-us-households-in-2025-savings-investments.htm) reports three-month emergency savings for only 37% of 18–29-year-olds. Its separate asset table reports outside-retirement securities ownership of 18% for ages **18–24** and 33% for **25–54**; those age bands must not be mislabeled 18–29 and 30–44. This supports a need for accessible financial tools, but also limits discretionary investing capacity. Do not market volatile equities as protected savings.
 
@@ -41,7 +41,7 @@ Every factor needs measurement; they are not independently observed probabilitie
 
 For an external-wallet-first product, assumed eligible US **person** populations of 0.5m/2m/5m, multiplied by 20%/30%/40% relevant appetite, produce 0.10m/0.60m/2m conditional SAM. These inputs are deliberately labeled assumptions: address counts, chain transaction counts, and exchange accounts cannot establish unique retail users. [Pew's June 2026 survey](https://www.pewresearch.org/short-reads/2026/06/08/about-1-in-5-americans-have-used-crypto-republicans-use-has-ticked-up/) reports 19% of US adults have ever used crypto, including 26% ages 18–29; “ever used” is not active self-custody or demand for tokenized equities. Cash App and wallet populations overlap. **Do not add their SAMs.**
 
-At Habitual/Strong modeled ARPU, planning Cash App SAM represents $123m/$232m conditional annual revenue capacity. Even the stronger $1m-profit target below needs about 2.2% of this assumed SAM; that is a meaningful competitive share, not effortless distribution.
+At Habitual/Strong modeled ARPU, planning Cash App SAM represents $115m/$223m conditional annual revenue capacity. Even the stronger $1m-profit target below needs about 2.0% of this assumed SAM; that is a meaningful competitive share, not effortless distribution.
 
 ## Competition and customer reasons to switch
 
@@ -55,63 +55,64 @@ At Habitual/Strong modeled ARPU, planning Cash App SAM represents $123m/$232m co
 
 Do not use unverified competitor subscriber counts, old prices, or app downloads as demand evidence. Acorns' current public page was reviewed, but its pricing presentation did not provide a reliable extracted dollar schedule; no stale dollar comparison is used here. Blunts' largest competitor may be “do nothing,” not another tokenized-stock app. The visual metaphor is copyable; potential defensibility lies in distribution, trusted brand, low-cost service, retention, and partner execution, none proven yet.
 
-## Unit economics: actual company revenue, not fees passing through
+## Fee-only economics and the threshold for pursuing the wallet
 
-The executable [model](business_model.py), [inputs/results](model-results.json), and [tables](model-output.md) are the authoritative arithmetic. All behavioral inputs are hypotheses. It models a proposed 1% buy/sell fee, capped at $10 per order, with **0%, 50%, and 100% legally retained fee shares**. The prototype instead charges 10% of gains; that conflicting performance-fee design is excluded pending legal review.
+**Subscriptions are excluded by product decision, not held as an optional revenue rescue.** The [executable model](business_model.py), [inputs/results](model-results.json) and [generated tables](model-output.md) now contain only load/unload conversion revenue. The recommended price to validate is **1% each way, capped at $10 per successful action**. Holding and ordinary USDC transfers earn no platform fee. The [wallet strategy](wallet-strategy.md) defines inclusive pricing, partial fills, retries, minimums, direct transfers and the approved collection boundary.
 
-| Annual per funded active user | Casual | Habitual | Strong |
+The baseline assumes a single wallet rail with **0% bank/ACH mix**. This changes the previous 25% bank mix; no reduction in acquisition, support or fixed compliance assumptions is silently assumed. The model still deducts normal provider/network, quote, screening, wallet, support, variable infrastructure, loss-reserve and actual acquisition/onboarding costs. Its 0/50/100% retained-fee cases distinguish the customer's charge from Blunts' lawful revenue entitlement. Public API fee collection is not legal permission to keep it.
+
+| Annual per active funded user | Casual | Habitual | Strong |
 |---|---:|---:|---:|
-| Deposits / withdrawals | $600 / $360 | $2,400 / $1,320 | $4,800 / $2,400 |
-| Buy / sell count | 12 / 4 | 24 / 8 | 24 / 8 |
-| Optional $3 subscription conversion | 5% | 8% | 10% |
+| Fee-bearing load / unload volume | $600 / $360 | $2,400 / $1,320 | $4,800 / $2,400 |
+| Load / unload count | 12 / 4 | 24 / 8 | 24 / 8 |
 | Annual cohort churn | 35% | 25% | 20% |
-| Fully loaded funded CAC | $40 | $30 | $25 |
-| Revenue at 100% fee retention | $11.13 | $39.65 | $75.06 |
-| Service cost | $18.72 | $28.44 | $31.92 |
-| Margin after maintenance acquisition/onboarding | **−$26.21** | **$1.54** | **$36.73** |
+| Funded CAC | $40 | $30 | $25 |
+| Fee-only revenue at full entitlement | $9.60 | $37.20 | $72.00 |
+| Service costs | $15.52 | $22.04 | $25.52 |
+| Margin after replacement CAC/KYC | **−$24.54** | **$5.50** | **$40.07** |
 
-Service costs include assumed 25% bank funding mix, bank/payout costs, network orders, quotes, wallet infrastructure, screening, support, variable infrastructure, and a 10-bp gross-flow loss reserve. KYC/onboarding is $4 per newly funded person including failed-applicant allocation. Fixed costs cover staffing, legal/compliance overhead, vendor minimums, insurance, audits, and administration; replace with actual quotes and a hiring plan. [Dinari's published fees](https://docs.dinari.com/docs/fees) start at $2,000/month API access and show a $0.20 standard network order fee with Ethereum gas exceptions. The model's other costs are **not vendor quotes**, and US commercial terms may differ. Avoid double counting its network charge and the same settlement gas.
+Volumes mean successful fee-bearing conversions through Blunts, not all wallet receipts, all outgoing transfers, user balances or external trading. Fee caps assume equal action sizes within a scenario; actual distributions change the result. The load fee is deducted from the submitted total and the unload fee from gross proceeds; the model does not forecast AUM or investment returns. Unexecuted deposits earn no fee. Production accounting must reconcile exact provider fills, rounding and refunds.
 
-The fee calculation assumes equally sized orders within each case; real order-size distributions change cap effects. Deposits/withdrawals are simplified traded-notional proxies for this scenario, not an account cash-flow forecast. The final contract must define fees inclusive versus added to payment, and the model must then reconcile exact customer cash movements. No portfolio return or AUM accumulation is assumed.
+[Dinari's public fees](https://docs.dinari.com/docs/fees) list API access starting at $2,000/month and a standard $0.20 network charge per order, with Ethereum exceptions. Those anchors do not replace a US commercial quote. The model absorbs the ordinary assumed $0.20 charge; it does not add that same gas expense a second time. API minimums belong in fixed costs. Wallet/support/screening/infra costs and a 10-bp gross-flow loss reserve remain assumptions. Four dollars of onboarding per funded user includes failed-applicant allocation.
 
-Subscription net proceeds use an assumed 85% factor; this is a modeling haircut, not a statement that every app qualifies for a 15% store fee. Revenue recognition should follow accountant-reviewed principal/agent treatment. No subscription customer evidence exists; without subscription revenue, the Habitual maintained-user margin turns negative (−$0.90). No interest, securities lending, spread revenue, payment-for-order-flow, referral revenue, or token appreciation is included without a contractual right and approved disclosure.
+### How much must the wallet make to be worth it?
 
-### How much must it make to be worth it?
+Pre-tax operating profit after modeled salaries; maintained users are average active funded users. Company revenue is not customer money or gross transferred volume.
 
-All goals are **annual pre-tax operating profit after modeled salaries**, not founder take-home or investment return. “Owner earnings” requires clarifying whether the founder's salary is already included. Maintained users are an average active funded base, not cumulative signups.
-
-| Goal | Fixed annual operating cost | Desired profit | Users needed: Habitual | Users needed: Strong | Strong annual revenue |
+| Goal | Annual fixed costs | Desired profit | Habitual users | Strong users | Strong annual revenue |
 |---|---:|---:|---:|---:|---:|
-| Lean owner business | $600k | $250k | 550,832 | **23,143** | **$1.74m** |
-| Durable company | $1.5m | $1m | 1,620,092 | **68,067** | **$5.11m** |
-| Scale company | $5m | $10m | 9,720,548 | **408,401** | **$30.65m** |
+| Lean owner business | $600k | $250k | 154,683 | **21,214** | **$1.53m** |
+| Durable company | $1.5m | $1m | 454,949 | **62,393** | **$4.49m** |
+| Scale company | $5m | $10m | 2,729,694 | **374,358** | **$26.95m** |
 
-The recommended v1 excludes subscriptions: without them, the Strong $1m-profit target is **74,254 maintained users and $5.35m annual revenue**. The main table preserves optional subscription sensitivity; do not use its smaller target as the subscription-free release forecast.
+Casual behavior does not cover variable costs. At half fee entitlement, Strong maintained margin falls to $4.07/year; at zero it is −$31.93. Getting the fee agreement right is the primary commercial gate. Holding fees and spread/rebate/AUM/performance revenue are not assumed. Basic stablecoin transfers alone do not establish a valuable paid service.
 
-Casual behavior never covers its own variable and replacement costs at these assumptions. More unprofitable customers make losses larger. At 50% fee retention, even the Strong steady margin is only $0.73/year; at 0% it is negative $35.27. The legal/commercial revenue agreement is a **business-model gate**, not paperwork to postpone.
+### Compare fee schedules before choosing one
 
-A $3/month compulsory subscription costs $36/year, or 36% of a $100 average balance and 7.2% of $500 before market movement. Optional extras must create real value; a subscription cannot simply conceal unacceptable trading costs. An illustrative 0.35% annual AUM fee produces only $1.75 on a $500 average balance, which does not fund this service structure. No fee level is recommended to an individual investor here.
+The model isolates price while keeping activity/costs unchanged. Free loading plus 1% unloading loses money even in the Strong case (−$7.93 maintained margin). At 0.85% each way, Strong margin is $29.27 but Habitual is approximately zero (−$0.08). At 1% each way they are $40.07 and $5.50. At 1.5% the arithmetic improves, but willingness to pay and retention may worsen; it is not automatically the most viable choice. Start with the understandable 1%/$10-cap hypothesis and measure behavior rather than raising fees to make a spreadsheet work.
 
-### Growth consumes cash even when steady economics work
+Adding 25% bank usage makes Habitual negative again (−$0.90), without subscriptions to mask it. CAC of $60 or support cost of $12/year also breaks that case. The wallet rail is a cost advantage only if handoff friction does not erase the savings. A recommended initial $50 conversion minimum leaves more margin than $25; retain a safe full-balance exit/dust policy and do not charge a second percentage on the payout transfer.
 
-The model uses monthly cohort survival, acquisition spending when incurred, average active balances for revenue, and separately counted incremental setup costs. Maintenance acquisition uses 12 × monthly churn rather than annual cohort churn, because replacement users can also leave. It does not charge replacement CAC again inside the growth simulation. LTV is an undiscounted approximation with constant behavior and indefinite survival; it is not a valuation or observed lifetime.
+### Growth and capital
 
-Under the Strong **hypothetical** five-year acquisition ramp (5k, 20k, 50k, 100k, 150k newly funded annually), year five ends with 248k active users and averages 196k. It earns $14.74m revenue but loses **$881k operating cash in that year** after $4.35m acquisition/onboarding and $5m fixed expenses. Peak modeled funding need plus 25% headroom is **$10.43m**, excluding regulatory capital, collateral/reserves, financing, taxes, and extraordinary losses. This is not a claim that $10.43m guarantees that growth.
+Monthly cohort survival, actual acquisition spending, average active users for revenue and separately identified setup expense are modeled. Maintenance replacement uses monthly churn; the growth model does not double charge replacement CAC. LTV assumes constant behavior, is undiscounted and is not a valuation.
 
-The Habitual ramp needs $14.30m headroom funding while still losing $4.00m in year five. Continuing that plan without improving unit economics would be poor capital allocation. The Casual ramp also fails. These are scenario demonstrations, not three equally likely forecasts; there is insufficient evidence to assign probabilities.
+The Strong hypothetical acquisition ramp of 5k/20k/50k/100k/150k newly funded users annually reaches 248k users at year five end and averages 196k in that year. Year-five revenue is **$14.14m**, with **$225k operating loss** after growth spending and fixed costs. Peak cash deficit plus 25% headroom is **$9.31m**, excluding regulatory capital/reserves, financing, taxes and extraordinary losses. These are conditional scenarios with no assigned probability. They do not establish that this money can purchase the modeled users.
+
+The Habitual ramp needs **$13.61m** with headroom and still loses **$3.69m** in year five. It is not attractive growth merely because a maintained user has positive contribution. The Casual case fails. Model slower growth and organic distribution separately before committing capital.
 
 ### Acquisition and SOM must be earned through a funnel
 
-Example, **assumed** quarterly test funnel: 100,000 qualified landing visits × 8% signup × 60% KYC completion × 50% first funding = 2,400 funded customers. At 60% 90-day funded retention, 1,440 remain. A $72,000 all-in channel/campaign spend implies $30 per first-funded customer and $50 per 90-day retained customer, before the separately modeled onboarding cost. If funding conversion halves, funded CAC doubles. Track attributable creator fees, creative production, rewards, and allocated growth labor; do not call organic labor free.
+Illustrative quarterly assumptions: 100,000 qualified visits × 8% signup × 60% KYC completion × 50% first funding = 2,400 funded customers. At 60% 90-day retention, 1,440 remain. At $72,000 all-in acquisition spend, CAC is $30 per first-funded user and $50 per 90-day retained user, before separately modeled onboarding. Halving funding conversion doubles CAC. Count creative/creator/reward costs and growth labor; organic traffic is not automatically free.
 
-Strong modeled acquisition payback is 8.1 months before survival adjustment; Habitual is 36.4 months. The approximate CAC ceilings for a 3× lifetime contribution/acquisition ratio are $61.04 and **$9.14**, respectively. Therefore a $30 Habitual CAC is not attractive even though maintained-unit margin is barely positive. Grow only from cohort evidence. Paid reach does not turn 3m hypothetical SAM into achievable SOM.
+Strong simple acquisition payback is **7.5 months**, Habitual **26.9 months**, before survival adjustment. Approximate maximum CAC for a 3× lifetime contribution/acquisition ratio is **$66.08** and **$13.78**, respectively. Actual affordable CAC is determined by cohort retention, contribution and cash runway. Track receipt-to-paid-conversion rate: a funded wallet that never uses Fill/Spark generates no modeled revenue.
 
 ## Validation gates and stopping rules
 
 1. **2–4 weeks, 30–50 interviews and 15 moderated tasks:** compare the same fund through Blunts and existing Cash App investing. Sample both crypto users and nonusers. Test understanding of losses, fees, account ownership, settlement and the metaphor; do not recruit only friends. Planning targets: at least 80% correctly explain all five, at least 90% complete a simulated withdrawal, zero misunderstanding that returns are guaranteed. These are product gates, not legal safe harbors.
 2. **Partner/legal gate:** obtain written customer/asset/chain/fee/publisher scope, binding commercial quote and responsibility matrix. Rebuild economics with the actual retained revenue. Stop the proposed route if its legal model or unit contribution fails; evaluate conventional brokerage instead of disguising compensation.
 3. **Private approved beta, initially 50–100 adults:** authorized operators validate the real money cycle, support workload, reconciliation, and customer understanding. No paid broad acquisition before this. Increase to 300–500 only after operational acceptance.
-4. **90–180-day cohort gate:** measure funding completion, net deposits, churn, service cost, fraud loss, complaints, and fully loaded funded/retained CAC by channel. Target contribution payback ≤12 months under conservative survival; stress CAC +50%, funding −50%, support ×2, loss 50 bps, and zero subscriptions. Small cohorts do not establish annual retention or rare fraud tails; reserve accordingly.
+4. **90–180-day cohort gate:** measure funding completion, net deposits, churn, service cost, fraud loss, complaints, and fully loaded funded/retained CAC by channel. Target contribution payback ≤12 months under conservative survival; stress CAC +50%, funding −50%, support ×2, loss 50 bps, and a 50% fee-bearing conversion-volume decline. Small cohorts do not establish annual retention or rare fraud tails; reserve accordingly.
 5. **Scale gate:** finance owner signs a twelve-month cash forecast with downside runway ≥12 months, legally collectible revenue, provider minimums/reserves, and no unresolved high-severity security or money breaks. Do not buy growth to rescue negative contribution.
 
 ## Capital allocation before committing to scale

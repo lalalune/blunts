@@ -2,13 +2,15 @@
 
 October 2, 2026 · baseline `9e91c76d1d4f8905d83459e0afed551dce6e83c3`
 
-**Objective:** turn the concept into a lawful, understandable, supportable US retail investing product, release funded web first, then signed iOS/Android apps. This document addresses the known concerns with decisions, implementation work and closure evidence. It does not mark unbuilt functionality or external approvals complete. The [requirements traceability register](requirements-traceability.md) maps every original audit item to a work package; the legal register L01–L26 adds current-law diligence.
+**Objective:** turn the concept into a lawful, understandable, supportable US retail investing product, release funded web first, then signed iOS/Android apps. This document addresses the known concerns with decisions, implementation work and closure evidence. It does not mark unbuilt functionality or external approvals complete. The [requirements traceability register](requirements-traceability.md) maps every original audit item to a work package, with I10/G10 subscription billing explicitly excluded; the legal register L01–L26 adds current-law diligence.
 
 ## 1. Product boundary and decisions
 
-Candidate v1: US adults in explicitly approved states, one approved instrument, individual accounts, one funding/payout rail, explicit user-confirmed orders, statements/taxes, support, recovery and closure. The brand/scene is optional presentation; core finance works without it. No performance fee, automatic investing, crypto trading, leverage, options, DeFi, own token, bridge, social ranking, referral rewards, multiple funding networks or subscription in the release baseline. Optional items are deferred explicitly, not forgotten.
+Candidate v1: US adults in explicitly approved states, one approved instrument, individual accounts, one funding/payout rail, explicit user-confirmed orders, statements/taxes, support, recovery and closure. The brand/scene is optional presentation; core finance works without it. No performance fee, automatic investing, crypto trading, leverage, options, DeFi, own token, bridge, social ranking, referral rewards, multiple funding networks or subscription in the release baseline. Subscriptions and paid tiers are excluded by user decision. Other optional items are deferred explicitly, not forgotten.
 
-Choose between direct broker-held fractional ETF access and an approved Dinari US arrangement based on evidence, not sunk research. Only select a chain after written US asset/network/funding approval. Working token-path spike: embedded EVM wallet on an approved low-cost chain, manual Cash App-origin USDC as a potential source. No standard Cash App Pay checkout. Legal scope and monetization must be decided together; a legally permissible zero-revenue route is not a viable business by default.
+**Chosen product direction:** [fee-based wallet](wallet-strategy.md), with one 1% fee per successful Fill/Spark conversion, capped at $10; free holding and ordinary wallet transfers. No subscription business, entitlements or store billing. First investigate a dedicated user wallet with Dinari-approved US investment conversion/managed funding on Arbitrum; conventional brokerage is a fallback if this exact route cannot be approved. Cash App is a potential source/destination, not merchant checkout. Defer bank/ACH, cards, Solana and bridges. Fee-bearing volume means conversions through the paid service, not all wallet transfers.
+
+Update E05/E07 to implement inclusive fee quotes, one fee per original conversion, cap aggregation across partial fills, duplicate/retry protection and refunds. E06 does not implement an ACH adapter for v1; it does verify USDC finality, exact network/destination, screening and actual payout status. Build a safe full-balance exit even below the proposed $50 normal conversion minimum. No automatic conversion of unsolicited receipts. Preserve all applicable securities/provider/security/support/record obligations; wallet branding does not remove them.
 
 ### Decision records required before production implementation
 
@@ -158,7 +160,7 @@ E13. Increase users only while reconciliation, support, loss and cohort economic
 
 ## 8. Scope completeness and unresolved evidence
 
-The [traceability file](requirements-traceability.md) contains each D/A/M/B/U/W/I/G/T item with its original closure criterion, owner, work package, dependency and release gate. All remain **open**, except expressly deferred optional features and inapplicable alternative rails after an ADR decision. Browser smoke evidence is partial progress on U16/T05, not closure. L01–L26 remain external/combined gates owned by E00 and the relevant engineering packages.
+The [traceability file](requirements-traceability.md) contains each D/A/M/B/U/W/I/G/T item with its original closure criterion, owner, work package, dependency and release gate. Applicable launch items remain **open**, except expressly excluded subscriptions, deferred optional features and inapplicable alternative rails after an ADR decision. Browser smoke evidence is partial progress on U16/T05, not closure. L01–L26 remain external/combined gates owned by E00 and the relevant engineering packages.
 
 Additional requirements introduced by this research:
 

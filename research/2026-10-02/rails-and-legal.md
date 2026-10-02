@@ -6,7 +6,7 @@ As of October 2, 2026. **Confirmed here means a public primary source supports t
 
 Cash App, Solana and EVM describe different layers. Cash App can be a user's source/destination of money; Solana/EVM are networks; a wallet provides keys/signatures; a regulated securities arrangement supplies the investment and accounts. Connecting a wallet solves none of the securities-access questions on its own.
 
-**First preference to validate:** conventional broker-held fractional ETF ownership with an approved bank funding rail, compared against a Dinari-approved US program using **one EVM network**. Prefer the simpler lawful customer experience if tokenization offers no measured advantage. For the token route, Arbitrum is the first published-network intersection to investigate, not an already approved production choice. Do not build a cross-chain bridge or issuer/AMM as v1.
+**Current preference to validate:** the [fee-based wallet strategy](wallet-strategy.md): a dedicated customer wallet, one approved EVM network (Arbitrum is the candidate), USDC funding, an approved Dinari US investment conversion and user-paid Fill/Spark fees. Conventional brokerage is the fallback if it better satisfies that experience and lawful economics. Subscriptions are excluded. This recommendation selects a route for diligence, not a claim of contracted production availability. Do not build a bridge, issuer or AMM as v1.
 
 | Route | Public feasibility | Friction / dependency | Decision |
 |---|---|---|---|
@@ -80,7 +80,7 @@ The [Dinari US guide](https://docs.dinari.com/docs/us) identifies its securities
 | L19 | App-store publisher and financial permissions not established | Institution publishing/distribution agreement, licenses/letters, verified console organization and review packet | Founder/broker |
 | L20 | Customer age, residency, tax status and restrictions not established | Provider-approved eligibility rules enforced server-side; no minors or international rollout by assumption | Compliance |
 | L21 | Terms and consumer treatment incomplete | Approved terms, risk/fee/conflict disclosures, complaints/error resolution, accessibility and support obligations | Counsel/operations |
-| L22 | Recurring/automatic investments, advisory features and subscriptions expand obligations | Separate consent/cancellation/renewal/billing review and signed feature approval before adding | Product/counsel |
+| L22 | Recurring/automatic investments and advisory features expand obligations; subscriptions are excluded | Separate consent, scope review and signed feature approval before adding automation/advice; no subscription implementation | Product/counsel |
 | L23 | Business continuity, vendor failure and wind-down need funding | Export/transfer/closure rights, communication plan, escrow/access if appropriate, insurance and runway | Founder/operations |
 | L24 | 2026 SEC interface statement is conditional staff guidance, not blanket law | Counsel evaluates every condition against final UI, remuneration, routing and control; tracks expiration/change | Securities counsel |
 | L25 | September 2026 innovation exemption is venue-specific conditional relief | Do not rely on it for this broker-app route; separate counsel project if proposing an eligible TSV | Securities counsel |

@@ -6,6 +6,8 @@
 
 Scope: tracked source, launch research, tests, CI, and selected current official documentation. External contracts, business accounts, credentials, domains and developer-console approvals were not inspected. “No evidence” below means not established by this audit, not proof that the founder has not arranged it elsewhere. The earlier browser smoke test timed out. A subsequent [bounded browser review](../research/2026-10-02/ux-and-technical-review.md) rendered the demo and exercised simulated Fill/Spark, bank selection, history and tutorial; production and full cross-device acceptance remain unverified. No paid financial transactions or provider API calls were attempted.
 
+**Subsequent product decision:** the [wallet strategy](../research/2026-10-02/wallet-strategy.md) excludes subscriptions and selects fee-funded Fill/Spark conversions for validation. I10/G10 store-billing work is excluded, and ACH is deferred for the wallet-first release. Remaining applicable production gates are unchanged.
+
 ## 1. What exists and what the green checks prove
 
 | Area | Evidence | Actual status |
@@ -34,7 +36,7 @@ These block a real-money launch on every platform. Suggested accountable owners 
 | D06 | Which contracts and credentials exist? | Signed KYB/partner agreements, US enablement, sandbox and production access, volume limits, reserves, fees, SLAs, incident and support duties. No evidence in repo. | Founder |
 | D07 | Who publishes the iOS app? | Agree financial-institution publisher/authorized distribution arrangement and review evidence. A partner letter or becoming an RIA is not a guaranteed review workaround. | Founder + broker |
 | D08 | Is the branding accepted? | Review name, rolling/burning animation, imagery, claims and gamification with financial partners and platform policy owners. Do not conceal real functionality from reviewers. | Brand + compliance |
-| D09 | What is v1? | Choose one asset, approved geography, one funding/payout route and explicit user-confirmed orders. Decide whether crypto is genuinely necessary. Defer uncontracted rails and subscriptions. | Product |
+| D09 | What is v1? | Choose one asset, approved geography, one funding/payout route and explicit user-confirmed orders. Decide whether crypto is genuinely necessary. Defer uncontracted rails; subscriptions are excluded by the wallet strategy. | Product |
 | D10 | What is a “blunt” after price changes? | Specify deposited principal vs current value, partial units, gains/losses, sales, dividend cash and fractional residuals. Align visuals with authoritative positions and tax basis. | Product + finance |
 
 The performance-fee experiment requires counsel review under the [SEC performance-fee framework](https://www.sec.gov/rules-regulations/2021/11/performance-based-investment-advisory-fees). Switching to a transaction fee does not itself resolve registration/compensation questions; see [FINRA Rule 2040](https://www.finra.org/rules-guidance/rulebooks/finra-rules/2040). This audit does not determine Blunts' legal status.
@@ -164,7 +166,7 @@ All items below are absent as production capabilities. Some have visual mockups 
 | I07 | Apple configuration | Icons/splash, permission reasons, privacy manifest/required-reason API and SDK audit, encryption/export declarations as applicable. |
 | I08 | Privacy/account controls | Accurate privacy label/policy/support; account-deletion initiation; consent/ATT only if tracking is actually introduced; compliant login choices if social sign-in is added. |
 | I09 | Push, if offered | APNs entitlements/credentials, permissions, delivery/token replacement and notification navigation. |
-| I10 | Digital subscription, only if retained | StoreKit products, approved billing flow, server entitlements, purchase/restore/refund/expiry handling. Not a prerequisite for investing and not the route for brokerage funding. |
+| I10 | Subscription billing excluded | No StoreKit or paid-tier work; approved financial conversion fee collection follows M21 and the wallet strategy. |
 | I11 | Store submission | Truthful rating, screenshots/text, financial/brand review packet, working reviewer access with isolated test funds, and functioning support/legal URLs. No production-wide KYC bypass. |
 | I12 | Acceptance and rollout | Physical iPhone testing, VoiceOver/text size, TestFlight feedback, crash/performance review, phased rollout and operational rollback plan. |
 
@@ -185,7 +187,7 @@ Apple's [Review Guidelines](https://developer.apple.com/app-store/review/guideli
 | G07 | Android UI/lifecycle | System back/predictive back, edge-to-edge insets, keyboard, font scaling, rotation, process death and low-memory GPUs. |
 | G08 | Privacy and deletion | Data safety form reflecting actual SDK behavior; privacy URL; in-app deletion and functioning external deletion request page with justified retention. |
 | G09 | Notifications, if offered | FCM credentials, Android notification permission/channels, token updates, background restrictions and navigation. |
-| G10 | Billing, if retained | Supported Play Billing integration, server validation/entitlements and purchase restore/refund/expiry behavior for digital extras. |
+| G10 | Subscription billing excluded | No Play Billing or paid-tier work; approved financial conversion fee collection follows M21 and the wallet strategy. |
 | G11 | Store review | IARC/content/target-audience answers, screenshots/listing, financial and any tokenized-asset disclosures, reviewer access, applicable testing track requirements. |
 | G12 | Acceptance and rollout | Physical Pixel and Samsung plus lower-end device, TalkBack, internal/closed testing as applicable, pre-launch reports, Android vitals and staged rollout. |
 
@@ -233,7 +235,7 @@ infra/                 environments, deployment, migrations, monitoring
 
 No dependable calendar or cost estimate exists until phase 0 and the native/provider spikes close. The earlier 16–18 week figure is a research estimate, not a delivery commitment. Re-estimate from accepted provider scope, engineering staffing and acceptance gates.
 
-Defer unless essential to the chosen v1: Blunts+, Apple Pay/Google Pay, additional funding providers, recurring/automatic investments, multi-asset portfolios, referrals, social features and extensive PWA offline features. They are not required merely to publish the first funded app.
+Exclude Blunts+ and subscriptions. Defer unless essential to a later approved scope: Apple Pay/Google Pay, additional funding providers, recurring/automatic investments, multi-asset portfolios, referrals, social features and extensive PWA offline features. They are not required merely to publish the first funded app.
 
 ## 10. Explicit corrections to the earlier plan
 

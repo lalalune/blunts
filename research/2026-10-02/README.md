@@ -2,10 +2,11 @@
 
 **October 2, 2026 · US-first assumption · prototype baseline `9e91c76`**
 
-The project is a working visual simulation with substantial research, not a funded investing service. It is worth a bounded validation phase; there is not yet evidence to justify a broad financial-app build or profitable-growth forecast. The highest-risk decisions are lawful company revenue, approved securities/funding structure, repeat customer demand, financial clarity, and native publisher/brand acceptance.
+**Current product decision: a wallet funded by load/unload conversion fees. Subscriptions are excluded.** The project is a working visual simulation with substantial research, not a funded investing service. It is worth a bounded validation phase; there is not yet evidence to justify a broad financial-app build or profitable-growth forecast. The highest-risk decisions are lawful company revenue, approved securities/funding structure, repeat customer demand, financial clarity, and native publisher/brand acceptance.
 
 ## Read in this order
 
+0. **[Current recommendation: fee-based wallet](wallet-strategy.md)** — product, pricing, chosen rail, collection and updated economics.
 1. [Market, TAM/SAM/SOM, economics and capital decision](market-and-economics.md)
 2. [Cash App versus EVM/Solana and legal closure register](rails-and-legal.md)
 3. [Observed UI/UX and technical review, with screenshots](ux-and-technical-review.md)
@@ -17,12 +18,12 @@ The project is a working visual simulation with substantial research, not a fund
 ## Decisions supported by the research
 
 - **Market:** approximately 78.5m US residents aged 18–34; about 58.1m is an illustrative nonretirement-noninvestor proxy. Actual eligible, interested and reachable customers are much fewer. The 0.87m–8.50m Cash App SAM range is an explicit assumption exercise, not a measured customer count.
-- **Economics:** at hypothetical Strong behavior, approved full fee retention and optional subscription conversion, about **68,067 maintained funded users / $5.11m annual company revenue** support $1m operating profit after $1.5m fixed costs. Habitual behavior requires about **1.62m users**. Casual behavior loses money per user. Without subscriptions the Strong $1m-profit target rises to **74,254 users / $5.35m revenue**. No right to those transaction revenues is yet established.
+- **Economics:** no subscriptions, holding charges or gains share. Test **1% per successful Fill/Spark conversion, capped at $10**. On the recommended wallet-only rail, the conditional Strong case needs **62,393 maintained funded users / $4.49m annual revenue / $449m annual fee-bearing volume** for $1m operating profit after $1.5m fixed costs. Habitual behavior needs about 455k users; Casual loses money. Full legal entitlement to the customer fee is a gate, not an established fact.
 - **Cash App:** standard merchant checkout is not the proposed financial-service route. Manual consumer USDC transfers are a conditional option. This is different from having a partner API integration, guaranteed deep link or automatic debit.
 - **Networks:** the published Cash App/Dinari intersection suggests investigating Arbitrum/Ethereum, subject to US-program approval. Solana wallet connectivity exists, but no approved end-to-end US Blunts securities route was demonstrated. xStocks' US restrictions make it unsuitable as the assumed substitute.
 - **Legal:** 26 topics have defined closure evidence. Current rules and provider requirements were researched; **Blunts itself is not legally cleared**. Signed agreements and a facts-specific legal review remain necessary.
 - **Product:** the visual concept renders; actual banking, settlement, trading, account recovery, tax records, support and backend money truth do not exist. Current fee/speed/connection presentation cannot ship as live finance.
-- **Execution:** one instrument, one approved rail, explicit orders and a complete durable money cycle first. Validate native SDKs and publisher early; release controlled funded web before app stores. The plan has 14 work packages, all original 120 requirements, 26 legal gates and 10 additional research requirements.
+- **Execution:** wallet-first; one instrument, one approved USDC/EVM rail, explicit conversions and a complete durable money cycle first. Validate native SDKs and publisher early; release controlled funded web before app stores. The plan has 14 work packages, all original 120 requirements, 26 legal gates and 10 additional research requirements.
 
 ## Model and evidence
 
@@ -34,7 +35,7 @@ python3 -m unittest discover -s tests
 node --test tests/prototype.test.cjs
 ```
 
-[Generated tables](model-output.md) and [machine-readable assumptions/results](model-results.json) include fee-retention sensitivities, contribution, replacement acquisition, break-even/profit targets and five-year cohort/cash scenarios. The source CSV has a [provenance/checksum manifest](sources/manifest.json). The model uses ordinary floating-point arithmetic for business scenarios; production financial accounting must use fixed-decimal money types. The model is not a ledger or investment-return forecast.
+[Generated tables](model-output.md) and [machine-readable assumptions/results](model-results.json) include fee-retention and alternative fee-schedule sensitivities, contribution, replacement acquisition, break-even/profit targets and five-year cohort/cash scenarios. The source CSV has a [provenance/checksum manifest](sources/manifest.json). The model uses ordinary floating-point arithmetic for business scenarios; production financial accounting must use fixed-decimal money types. The model is not a ledger or investment-return forecast.
 
 Browser evidence covers one simulated fill/withdrawal, bank selection, history and tutorial at selected browser sizes. It does not establish actual phone, provider, legal, security or production acceptance. No money moved, partner was contacted, account enrolled, or app submitted in this research.
 
