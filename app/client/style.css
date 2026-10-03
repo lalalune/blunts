@@ -109,71 +109,33 @@ main {
 .brand span {
   color: var(--leaf);
 }
-.network {
-  font-size: 12px;
-  color: var(--muted);
-  margin-left: auto;
-  border: 1px solid var(--line);
-  border-radius: 30px;
-  padding: 6px 12px;
-}
+
 .sandbox {
   text-align: center;
-  background: #d9e7c0;
-  color: #20310e;
+  background: var(--bg);
+  color: var(--muted);
   font-size: 12px;
   font-weight: 650;
   padding: 8px 14px;
   letter-spacing: 0.02em;
 }
-.sandbox-note {
-  margin-left: 24px;
-  opacity: 0.8;
-}
-.dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #416522;
-  margin-right: 7px;
-}
+
 .welcome {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 80px;
+  max-width: 420px;
+  margin: 0 auto;
+  gap: 0;
   align-items: center;
   padding: 40px 0;
 }
-.intro h1 {
-  font-size: clamp(52px, 6vw, 76px);
-  margin: 16px 0 26px;
-}
-.intro em {
-  font-style: normal;
-  color: var(--leaf);
-}
-.intro > p {
-  max-width: 410px;
-}
+
 .eyebrow {
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.17em;
   color: var(--leaf);
 }
-.principles {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin: 28px 0;
-}
-.principles span {
-  border: 1px solid var(--line);
-  padding: 8px 12px;
-  border-radius: 30px;
-  font-size: 12px;
-}
+
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -293,69 +255,16 @@ nav {
   margin-bottom: 32px;
 }
 nav button {
+  border-radius: 0;
   background: transparent;
   color: var(--muted);
   border-color: transparent;
 }
 nav button[aria-current] {
-  background: var(--surface2);
   color: var(--text);
-  border-color: var(--line);
+  border-bottom-color: var(--leaf);
 }
-.balance-hero {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 200px;
-}
-.balance-hero h1 {
-  margin-bottom: 14px;
-}
-.leaf-art {
-  position: relative;
-  width: 240px;
-  height: 190px;
-  flex-shrink: 0;
-  filter: drop-shadow(0 10px 24px #7bab351a);
-}
-.leaf-art i {
-  position: absolute;
-  width: 60px;
-  height: 120px;
-  left: 90px;
-  top: 8px;
-  border-radius: 80% 10% 80% 10%;
-  background: linear-gradient(35deg, #395727, #8fa85b);
-  transform: rotate(-40deg);
-  transform-origin: bottom center;
-  border: 1px solid #a5ba6b55;
-}
-.leaf-art i:nth-child(2) {
-  transform: rotate(-72deg);
-  height: 105px;
-}
-.leaf-art i:nth-child(3) {
-  transform: rotate(0deg);
-  background: linear-gradient(35deg, #456330, #bad47e);
-}
-.leaf-art i:nth-child(4) {
-  transform: rotate(35deg);
-  height: 108px;
-}
-.leaf-art i:nth-child(5) {
-  transform: rotate(65deg);
-  height: 90px;
-}
-.leaf-art span {
-  position: absolute;
-  bottom: 16px;
-  width: 100%;
-  text-align: center;
-  color: var(--leaf);
-  font-size: 28px;
-  letter-spacing: -2px;
-  font-weight: 850;
-}
+
 .balance-grid,
 .settings-grid {
   display: grid;
@@ -420,19 +329,17 @@ nav button[aria-current] {
   text-align: right;
 }
 .activity-row .status {
-  border-radius: 20px;
-  padding: 3px 9px;
-  border: 1px solid var(--line);
+  padding: 0;
   font-size: 11px;
   color: var(--text);
-  display: inline-block;
+  display: block;
 }
 .status.completed {
-  background: #2b4220;
+  color: var(--leaf);
 }
 .status.failed,
 .status.returned {
-  background: #512f23;
+  color: var(--ember);
 }
 .row-actions {
   flex-basis: 100%;
@@ -606,12 +513,7 @@ button:active:not(:disabled) {
     gap: 30px;
     padding: 12px 0;
   }
-  .intro > p {
-    max-width: none;
-  }
-  .intro h1 {
-    font-size: 58px;
-  }
+
   .intro .muted {
     font-size: 13px;
   }
@@ -619,22 +521,7 @@ button:active:not(:disabled) {
   .settings-grid {
     grid-template-columns: 1fr;
   }
-  .leaf-art {
-    width: 125px;
-    transform: scale(0.65);
-    transform-origin: right center;
-    margin-left: -80px;
-    opacity: 0.65;
-  }
-  .balance-hero {
-    min-height: 145px;
-  }
-  .balance-hero h1 {
-    font-size: 32px;
-  }
-  .balance-hero p {
-    font-size: 12px;
-  }
+
   .card {
     padding: 22px;
   }
@@ -644,16 +531,11 @@ button:active:not(:disabled) {
   .activity-row {
     padding: 18px;
   }
-  .network {
-    font-size: 10px;
-    padding: 4px 8px;
-  }
+
   .brand {
     font-size: 28px;
   }
-  .sandbox-note {
-    display: none;
-  }
+
   header {
     gap: 8px;
   }
@@ -687,20 +569,11 @@ button:active:not(:disabled) {
   }
 }
 @media (max-width: 760px) {
-  .leaf-art {
-    display: none;
-  }
-  .balance-hero > div {
-    min-width: 0;
-  }
   .eyebrow {
     overflow-wrap: anywhere;
   }
 }
 @media (max-width: 380px) {
-  .network {
-    display: none;
-  }
   .brand {
     margin-right: auto;
   }
@@ -719,4 +592,8 @@ button:active:not(:disabled) {
   .activity-right {
     margin-left: auto;
   }
+}
+
+header > button {
+  margin-left: auto;
 }

@@ -29,7 +29,7 @@ type Quote = {
   expiresAt: number;
 };
 const labels: Record<Kind, string> = {
-  fund: "Add USDC",
+  fund: "Add money",
   buy: "Fill · Buy investment",
   sell: "Spark · Sell investment",
   payout: "Withdraw USDC",
@@ -231,7 +231,6 @@ function App() {
         <div>
           <strong>{labels[i.kind]}</strong>
           <span>{new Date(Number(i.created_at)).toLocaleString()}</span>
-          <code>{i.id.slice(0, 8)}</code>
         </div>
         <div className="activity-right">
           <strong>{dollars(i.data.gross)}</strong>
@@ -250,7 +249,7 @@ function App() {
                 })
               }
             >
-              Authorize simulated deposit
+              Add demo funds
             </button>
             <button
               className="quiet"
@@ -271,15 +270,11 @@ function App() {
   }
   return (
     <>
-      <div className="sandbox">
-        <span className="dot" /> Sandbox · simulated funds only{" "}
-        <span className="sandbox-note">Never send real money</span>
-      </div>
+      <div className="sandbox">Demo · no real money</div>
       <header>
         <a className="brand" href="/" aria-label="Blunts home">
           blunt<span>$</span>
         </a>
-        <span className="network">USDC / Arbitrum concept</span>
         {me && (
           <button
             className="quiet"
@@ -303,39 +298,15 @@ function App() {
           <p role="status">Opening your wallet…</p>
         ) : !me ? (
           <section className="welcome">
-            <div className="intro">
-              <p className="eyebrow">A LITTLE AT A TIME.</p>
-              <h1>
-                Your wallet.
-                <br />
-                <em>Your pace.</em>
-              </h1>
-              <p>
-                Add funds. Fill an investment. Spark it back into your wallet.
-                Try the whole journey with simulated USDC.
-              </p>
-              <div className="principles">
-                <span>1% per conversion</span>
-                <span>No fee cap</span>
-                <span>No subscription</span>
-              </div>
-              <p className="muted">
-                This build has no real wallet, Cash App connection or brokerage
-                account. Prices and execution are test fixtures.
-              </p>
-            </div>
             <section className="card auth">
               <h2>
                 {authMode === "register"
-                  ? "Create a sandbox wallet"
+                  ? "Your wallet."
                   : authMode === "login"
                     ? "Welcome back"
                     : "Recover your wallet"}
               </h2>
-              <p>
-                Use a made-up handle. No email or identity documents needed for
-                this simulation.
-              </p>
+
               <form onSubmit={authenticate}>
                 <label>
                   Handle
@@ -407,10 +378,7 @@ function App() {
             {recovery && (
               <section className="callout">
                 <h2>Save your recovery code</h2>
-                <p>
-                  This is shown once. Store it privately to recover this sandbox
-                  account if you forget your password.
-                </p>
+                <p>Keep this code to recover your account. It’s shown once.</p>
                 <code className="recovery">{recovery}</code>
                 <button onClick={() => setRecovery("")}>
                   I saved my recovery code
@@ -419,12 +387,8 @@ function App() {
             )}
             {me.status === "new" ? (
               <section className="card onboarding">
-                <p className="eyebrow">BEFORE YOU FILL</p>
-                <h1>Make yourself at home.</h1>
-                <p>
-                  This is a testing environment, not identity verification or
-                  approval to invest.
-                </p>
+                <h1>Try it out.</h1>
+                <p>All money and investments in this demo are simulated.</p>
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -439,20 +403,12 @@ function App() {
                   }}
                 >
                   <label className="check">
-                    <input type="checkbox" required /> I am 18 or older.
-                  </label>
-                  <label className="check">
-                    <input type="checkbox" required /> I understand all funds,
-                    investments, payment methods and outcomes here are
-                    simulated.
-                  </label>
-                  <label className="check">
-                    <input type="checkbox" required /> I accept the sandbox
-                    terms: use test data only; no investment advice, actual
-                    custody or tax reporting is provided.
+                    <input type="checkbox" required /> I’m 18 or older and agree
+                    to use test data only. No real money, investments or tax
+                    documents.
                   </label>
                   <button className="primary" disabled={busy}>
-                    Open sandbox wallet
+                    Open wallet
                   </button>
                 </form>
               </section>
@@ -477,33 +433,20 @@ function App() {
                 )}
                 {tab === "wallet" && (
                   <>
-                    <section className="balance-hero">
-                      <div>
-                        <p className="eyebrow">
-                          HEY, {me.handle.toUpperCase()}
-                        </p>
-                        <h1>Your growing space.</h1>
-                        <p className="muted">A wallet for the long game.</p>
-                      </div>
-                      <div className="leaf-art" aria-hidden="true">
-                        <i />
-                        <i />
-                        <i />
-                        <i />
-                        <i />
-                        <span>blunt$</span>
-                      </div>
-                    </section>
+                    <h1>Wallet</h1>
                     <div className="balance-grid">
                       <section className="card investment">
-                        <span>Simulated investment value</span>
+                        <span>Invested</span>
                         <strong className="big-number">
                           {dollars(me.balances.investmentValue)}
                         </strong>
-                        <p>{quantity(me.balances.units)} DEMO_QQQ units</p>
-                        <small>
-                          Fixture price: $500.00 · no live market feed
-                        </small>
+                        <details>
+                          <summary>Investment details</summary>
+                          <p>
+                            {quantity(me.balances.units)} demo QQQ units · fixed
+                            $500 test price.
+                          </p>
+                        </details>
                         <div className="button-row">
                           <button
                             className="primary"
@@ -523,22 +466,22 @@ function App() {
                             Spark
                           </button>
                         </div>
-                        <small>
-                          1% on each completed conversion. No dollar cap.
-                        </small>
+                        <small>1% to buy or sell.</small>
                       </section>
                       <section className="card">
-                        <span>Available simulated USDC</span>
+                        <span>Available</span>
                         <strong className="big-number">
                           {dollars(me.balances.availableCash)}
                         </strong>
-                        <p>Reserved: {dollars(me.balances.reservedCash)}</p>
+                        {BigInt(me.balances.reservedCash) > 0n && (
+                          <p>Pending: {dollars(me.balances.reservedCash)}</p>
+                        )}
                         <div className="button-row">
                           <button
                             disabled={me.status !== "active"}
                             onClick={() => open("fund")}
                           >
-                            Add USDC
+                            Add money
                           </button>
                           <button
                             className="quiet outline"
@@ -551,9 +494,6 @@ function App() {
                             Withdraw
                           </button>
                         </div>
-                        <small>
-                          Adding USDC does not automatically buy an investment.
-                        </small>
                       </section>
                     </div>
                     <section className="section-heading">
@@ -570,29 +510,17 @@ function App() {
                         me.intents.slice(0, 5).map(operation)
                       ) : (
                         <div className="empty">
-                          <h3>Room to grow.</h3>
-                          <p>
-                            Add simulated USDC, then Fill when you’re ready.
-                          </p>
+                          <p>No activity yet.</p>
                         </div>
                       )}
                     </section>
-                    <div className="footnote">
-                      Free holding. No subscription. External ramp, network and
-                      execution costs will be separately quoted in a live
-                      product.
-                    </div>
                   </>
                 )}
                 {tab === "activity" && (
                   <>
                     <div className="section-heading">
                       <div>
-                        <h1>Every move, accounted for.</h1>
-                        <p>
-                          Pending actions survive reloads. A browser callback
-                          never changes your balance.
-                        </p>
+                        <h1>Activity</h1>
                       </div>
                     </div>
                     <a
@@ -600,7 +528,7 @@ function App() {
                       href="/api/documents/statement"
                       download
                     >
-                      Download simulated statement ↗
+                      Download statement ↗
                     </a>
                     <section className="card activity-list">
                       {me.intents.length ? (
@@ -651,7 +579,7 @@ function App() {
                 )}
                 {tab === "settings" && (
                   <>
-                    <h1>Make it yours.</h1>
+                    <h1>Settings</h1>
                     <div className="settings-grid">
                       <section className="card">
                         <h2>Payout destinations</h2>
@@ -851,10 +779,6 @@ function App() {
           </div>
         )}
       </main>
-      <footer>
-        blunt$ · Browser sandbox{" "}
-        <span>Clear fees. Your confirmation. Every time.</span>
-      </footer>
       <dialog
         ref={dialog}
         onCancel={(e) => {
@@ -864,7 +788,7 @@ function App() {
         aria-labelledby="dialog-title"
       >
         <div className="dialog-head">
-          <span className="eyebrow">SIMULATED TRANSACTION</span>
+          <span>Demo</span>
           <button
             className="quiet"
             aria-label="Close transaction"
@@ -881,16 +805,15 @@ function App() {
               <strong>{currentIntent.state.replaceAll("_", " ")}</strong>
               <p>
                 {currentIntent.state === "awaiting_authorization"
-                  ? "Approve this simulated deposit. No Cash App or MoonPay account is connected."
+                  ? "Confirm this demo deposit."
                   : currentIntent.state === "completed"
-                    ? "Your simulated balance has been updated."
+                    ? "Balance updated."
                     : currentIntent.state === "failed"
-                      ? "The provider rejected this action. Reserved funds were released."
+                      ? "Not completed. Your funds are available again."
                       : terminal.has(currentIntent.state)
                         ? "This action has ended. See activity for details."
-                        : "Your instruction is saved. You can close this window; processing continues safely."}
+                        : "Processing. You can close this window."}
               </p>
-              <code>{currentIntent.id}</code>
             </div>
             {currentIntent.state === "awaiting_authorization" && (
               <button
@@ -905,7 +828,7 @@ function App() {
                   })
                 }
               >
-                Authorize simulated deposit
+                Add demo funds
               </button>
             )}
             <button className="quiet outline" onClick={close} disabled={busy}>
@@ -916,12 +839,12 @@ function App() {
           <>
             <p>
               {action === "buy"
-                ? "Buy DEMO_QQQ at the fixed test price."
+                ? "Buy demo QQQ."
                 : action === "sell"
-                  ? "Sell DEMO_QQQ; proceeds become available after simulated settlement."
+                  ? "Sell demo QQQ. Funds arrive after settlement."
                   : action === "fund"
-                    ? "Credit simulated USDC. Funding does not buy an investment."
-                    : "Send simulated USDC to your test destination."}
+                    ? "Add demo funds to your wallet."
+                    : "Withdraw to your test destination."}
             </p>
             <dl className="quote">
               <div>
@@ -946,10 +869,7 @@ function App() {
                 </div>
               )}
             </dl>
-            <p className="muted">
-              External fees are $0 in this simulation. Live providers will quote
-              their actual costs.
-            </p>
+            <p className="muted">No other fees in this demo.</p>
             <p role="status">
               {clock >= quote.expiresAt
                 ? "Quote expired. Go back for a fresh quote."
@@ -960,7 +880,7 @@ function App() {
               disabled={busy || clock >= quote.expiresAt}
               onClick={confirm}
             >
-              {busy ? "Saving instruction…" : "Confirm simulated transaction"}
+              {busy ? "Saving instruction…" : "Confirm"}
             </button>
             <button
               className="quiet"
@@ -974,12 +894,12 @@ function App() {
           <form onSubmit={preview}>
             <p>
               {action === "fund"
-                ? "Practice adding USDC. No real payment will be requested."
+                ? "Add demo funds."
                 : action === "buy"
-                  ? "Convert available simulated USDC into investment units."
+                  ? "Buy demo QQQ. 1% fee."
                   : action === "sell"
-                    ? "Convert investment units back into simulated USDC."
-                    : "Choose a test destination. Add one in Settings first."}
+                    ? "Sell demo QQQ. 1% fee."
+                    : "Choose a destination from Settings."}
             </p>
             <label>
               Amount in dollars

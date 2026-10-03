@@ -17,7 +17,7 @@ npm start
 ```
 
 Open [Blunts](http://localhost:8740). Create a test account, save its recovery
-code, then Add USDC → Fill → Spark → Withdraw. Add a simulated destination in
+code, then Add money → Fill → Spark → Withdraw. Add a simulated destination in
 Settings before withdrawing. Records survive refresh and server restart.
 
 The default file-backed PostgreSQL store lives in ignored `data/blunts/`.

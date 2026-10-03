@@ -26,7 +26,7 @@ npm start
 
 Open `http://localhost:8740`. Create a made-up handle and password, save the recovery code, accept the simulation terms, then:
 
-1. Add USDC → review quote → confirm → authorize simulated deposit.
+1. Add money → review quote → confirm → authorize simulated deposit.
 2. Fill → review the investment and uncapped fee → confirm.
 3. Spark → sell all units → wait for simulated settlement.
 4. Settings → add a test destination, confirming the password.
@@ -93,3 +93,7 @@ On a failed/unknown action, inspect its durable intent and provider reference; d
 The current simulator's $1,000,000 per-action limit is a test exposure bound, **not a $10 fee cap**. A live program must set its own documented limits. The old creative prototypes remain historical artifacts and still have their old financial model; the new app is the implementation target.
 
 This change implements the browser foundation and simulated vertical slice (F02 and substantial shared portions of F04–F06). It does not mark F01, real F03/F04 integrations, E10 funded release or native publishing complete. Provider credentials alone will not eliminate the remaining adapter and acceptance work.
+
+## Minimal interface pass — October 3
+
+Removed the landing pitch, fee chips, chain label, decorative wallet hero, repeated simulation paragraphs and status pills. The login opens directly on the account form. One persistent “Demo · no real money” line identifies the entire environment; transaction details and exact fees remain at confirmation. Sandbox consent is one explicit checkbox. Investment details are expandable, zero pending balances are hidden, and activity uses plain text. Live account verification and provider-mandated disclosures remain a distinct integration requirement; this copy change does not bypass them.
