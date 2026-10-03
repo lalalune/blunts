@@ -18,3 +18,9 @@ ad/**/*.pcm
 ad/**/*.png
 ad/**/*.jpg
 ad/**/*.ttf
+# Browser app build, local PostgreSQL store and test evidence.
+dist/
+data/
+playwright-report/
+test-results/
+*.tsbuildinfo

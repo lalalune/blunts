@@ -1,0 +1,11 @@
+.git
+.env
+.env.*
+node_modules
+data
+dist
+ad
+prototype
+research
+playwright-report
+test-results

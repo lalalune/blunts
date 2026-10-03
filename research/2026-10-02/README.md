@@ -4,6 +4,10 @@
 
 **Current product decision: a wallet funded by load/unload conversion fees. Subscriptions are excluded.** The project is a working visual simulation with substantial research, not a funded investing service. It is worth a bounded validation phase; there is not yet evidence to justify a broad financial-app build or profitable-growth forecast. The highest-risk decisions are lawful company revenue, approved securities/funding structure, repeat customer demand, financial clarity, and native publisher/brand acceptance.
 
+## October 3 implementation update
+
+A durable browser simulation now exists in `app/`. It implements the complete simulated funding/buy/sell/payout cycle with persistent accounts, reservations, uncapped fees, failure recovery, record export and closure. Read the [implementation and acceptance record](../../docs/browser-implementation.md) for exact capabilities and remaining integration/native gates. Research statements below about the original prototype describe the audited baseline, not completion of the new funded service.
+
 ## Read in this order
 
 **Latest decision:** [Permissionless alternatives and lowest-friction build](permissionless-options-and-build-decision.md) compares QQQx, QQQon, ST0x QQQM, perps and US infrastructure; separates the thin wallet interface from brokerage execution; and specifies the MoonPay Cash App integration spike.

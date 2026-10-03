@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: blunts
+      POSTGRES_USER: blunts
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the shell}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blunts"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  app:
+    build: .
+    ports: ["127.0.0.1:8740:8740"]
+    environment:
+      MONEY_MODE: simulation
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:8740}
+      DATABASE_URL: postgresql://blunts:${POSTGRES_PASSWORD}@postgres:5432/blunts
+    depends_on:
+      postgres:
+        condition: service_healthy
+volumes:
+  postgres-data:

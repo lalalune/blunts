@@ -1,25 +1,50 @@
 # Blunts
 
-Interactive investing concept, founder brief, research, and creative tooling.
-The prototypes simulate balances, funding, bank linking, and withdrawals in memory;
-refreshing resets them. No payment or brokerage integration is connected.
+A browser wallet sandbox with durable accounts, a complete simulated investment
+cycle, a PostgreSQL-compatible backend, research and creative prototypes.
 
-## Run locally
+**No live money:** MoonPay/Cash App, Dinari and real wallets are not connected.
+See the [implementation and remaining launch gates](docs/browser-implementation.md).
 
-From this directory:
+## Run the browser app
+
+Requires Node 24.
 
 ```sh
-python3 -m http.server 8731 --bind 127.0.0.1
+npm ci
+npm run build
+npm start
 ```
 
-- [Current 3D prototype](http://localhost:8731/prototype/)
-- [Earlier flat prototype](http://localhost:8731/prototype/v1-flat.html)
-- [Founder brief](http://localhost:8731/brief/)
+Open [Blunts](http://localhost:8740). Create a test account, save its recovery
+code, then Add USDC → Fill → Spark → Withdraw. Add a simulated destination in
+Settings before withdrawing. Records survive refresh and server restart.
 
-The current prototype needs WebGL and loads Three.js r128 and fonts from CDNs.
-Press **D** for demo controls (market changes, empty/sample balances, funding
-methods, profit cut). Escape or clicking outside a sheet dismisses it and cancels
-its pending simulated payment. Use Fill to add and Spark to withdraw.
+The default file-backed PostgreSQL store lives in ignored `data/blunts/`.
+Set `DATABASE_URL` for server PostgreSQL. The existing creative-tools `.env` is
+not loaded. [Configuration](infra/sandbox.env.example) and
+[backup/recovery instructions](docs/browser-implementation.md) are provided.
+
+```sh
+npm run build
+npm test
+npx playwright install chromium webkit
+npm run test:e2e
+npm run format:check
+```
+
+## Historical visual prototypes
+
+The original prototypes use in-memory balances and a different financial model.
+They are creative references, not the application implementation. To view one,
+serve only its directory rather than the repository root:
+
+```sh
+python3 -m http.server 8731 --bind 127.0.0.1 --directory prototype
+```
+
+- [3D prototype](http://localhost:8731/)
+- [Earlier flat prototype](http://localhost:8731/v1-flat.html)
 
 ## Current launch research
 

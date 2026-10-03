@@ -1,0 +1,46 @@
+{
+  "name": "blunts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "tsx watch app/server/main.ts",
+    "build": "tsc --noEmit && vite build",
+    "start": "tsx app/server/main.ts",
+    "test": "tsx --test --test-concurrency=1 app/tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "check": "npm run build && npm test",
+    "db:backup": "tsx app/server/backup.ts",
+    "format": "prettier --write app vite.config.ts playwright.config.ts tsconfig.json package.json .github/workflows/checks.yml",
+    "format:check": "prettier --check app vite.config.ts playwright.config.ts tsconfig.json package.json .github/workflows/checks.yml",
+    "ops": "tsx app/server/ops.ts"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@fastify/cookie": "^11.1.2",
+    "@fastify/helmet": "^13.1.1",
+    "@fastify/rate-limit": "^11.2.0",
+    "@fastify/static": "^10.1.5",
+    "fastify": "^5.12.5",
+    "pg": "^8.23.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.4",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.2"
+  }
+}

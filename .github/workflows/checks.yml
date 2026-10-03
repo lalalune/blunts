@@ -7,12 +7,61 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "24"
       - run: python -m compileall -q ad research/model research/2026-10-02
       - run: python -m unittest discover -s tests
       - run: node --test tests/prototype.test.cjs
       - run: python research/model/market_model.py > /tmp/model_output.md
       - run: diff -u research/model/model_output.md /tmp/model_output.md
+
+  browser-app:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: blunts
+          POSTGRES_PASSWORD: ci-test-only
+          POSTGRES_DB: blunts_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run build
+      - run: npm test
+        env:
+          TEST_DATABASE_URL: postgresql://blunts:ci-test-only@localhost:5432/blunts_test
+      - run: docker build --tag blunts-sandbox:${{ github.sha }} .
+      - name: Container startup and health
+        shell: bash
+        run: |
+          docker run --detach --name blunts-smoke --network host \
+            -e PORT=8742 -e APP_ORIGIN=http://localhost:8742 \
+            -e DATABASE_URL=postgresql://blunts:ci-test-only@localhost:5432/blunts_test \
+            blunts-sandbox:${{ github.sha }}
+          trap 'docker logs blunts-smoke; docker rm --force blunts-smoke' EXIT
+          curl --fail --retry 15 --retry-delay 2 --retry-connrefused http://localhost:8742/api/health
+          curl --fail http://localhost:8742/ | grep -q '<div id="root">'
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-evidence
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
