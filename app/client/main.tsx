@@ -195,7 +195,7 @@ function App() {
       setPendingCommand(null);
       await refresh();
     } catch (e) {
-      if (e instanceof ApiError && e.status >= 400 && e.status < 500) {
+      if (e instanceof ApiError && [400, 409, 422].includes(e.status)) {
         localStorage.removeItem(`blunts-flow:${handle}`);
         setPendingCommand(null);
       }
