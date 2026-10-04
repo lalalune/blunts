@@ -1,6 +1,6 @@
 // Geometry ported from prototype/index.html. No prototype payment logic is included.
 import * as THREE from "three";
-export function createTrayScene(canvas, host) {
+export function createTrayScene(canvas, host, moneyCanvas) {
   const vis = { stash: 0, fill: 0 };
   const rand = (a, b) => a + Math.random() * (b - a);
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -12,7 +12,7 @@ export function createTrayScene(canvas, host) {
   const easeIO = (t) =>
     t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const easeOut = (t) => 1 - Math.pow(1 - t, 3);
-  const lin = (hex) => new THREE.Color(hex).convertSRGBToLinear();
+  const lin = (hex) => new THREE.Color(hex);
 
   const renderer = new THREE.WebGLRenderer({
     canvas,
@@ -20,7 +20,17 @@ export function createTrayScene(canvas, host) {
     alpha: true,
     powerPreference: "low-power",
   });
-  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  const gl = renderer.getContext();
+  const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+  const softwareGPU =
+    debugInfo &&
+    /swiftshader|llvmpipe|software/i.test(
+      gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL),
+    );
+  const pixelRatio = softwareGPU
+    ? 0.65
+    : Math.min(2, window.devicePixelRatio || 1);
+  renderer.setPixelRatio(pixelRatio);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
@@ -616,6 +626,9 @@ export function createTrayScene(canvas, host) {
   function rebuildStash(n, animateLastBand = false) {
     if (!bandGeos)
       bandGeos = BAND_DZ.map((dz) => bandGeometry(BUNDLE_C, bluntRadiusAt(dz)));
+    stashGroup.traverse((o) => {
+      if (o.isMesh && o.material !== leafMat) o.material.dispose();
+    });
     stashGroup.clear();
     stashBlunts = [];
     stashBands = [];
@@ -1004,64 +1017,1009 @@ float vn(vec3 x){ vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3. - 2. * f
     flagPile();
   }
 
-  build();
-  let frame = 0,
-    lastFrame = 0;
-  const motion = matchMedia("(prefers-reduced-motion: reduce)");
-  function render(time = 0) {
-    if (!document.hidden) {
-      camera.position.copy(camTarget).addScaledVector(camDir, camDist);
-      if (!motion.matches) camera.position.x += Math.sin(time / 6000) * 0.12;
-      camera.lookAt(camTarget);
-      renderer.render(scene, camera);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let busy = false,
+    disposed = false,
+    frame = 0,
+    initialized = false,
+    desired = 0,
+    rendered = 0,
+    draining = false;
+  const setBusy = (value) => {
+    busy = value;
+    host.dataset.animating = String(value);
+  };
+  const setCounts = () => {};
+  const setPips = () => {};
+  const bumpChip = () => {};
+  const haptic = () => {};
+  const showStamp = (text) => {
+    const el = host.querySelector(".scene-stamp");
+    if (el) el.textContent = text;
+  };
+  /* ================= TWEENS ================= */
+  const tweens = [];
+  function tween(dur, fn, ease = easeIO) {
+    return new Promise((res, reject) => {
+      if (disposed) return reject(new Error("disposed"));
+      tweens.push({ t: 0, dur, fn, ease, res, reject });
+    });
+  }
+  const waits = new Map();
+  const wait = (ms) =>
+    new Promise((resolve, reject) => {
+      if (disposed) return reject(new Error("disposed"));
+      const id = setTimeout(() => {
+        waits.delete(id);
+        resolve();
+      }, ms);
+      waits.set(id, reject);
+    });
+
+  /* ================= FILL ================= */
+  let pourQueue = null,
+    dollarsLeft = 0;
+  function pour(fromAmt, toAmt, speed = 1) {
+    const s0 = Math.round((fromAmt / 100) * NS),
+      s1 = Math.round((toAmt / 100) * NS);
+    const dur = clamp((toAmt - fromAmt) * 0.17, 3.0, 8.0) / speed;
+    dollarsLeft += Math.max(
+      1,
+      Math.round((toAmt - fromAmt) / 2.6 / Math.max(1, speed * 0.8)),
+    );
+    const order = [];
+    for (let i = s0; i < s1; i++) order.push(i);
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = (Math.random() * (i + 1)) | 0;
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    return new Promise((res, reject) => {
+      if (disposed) return reject(new Error("disposed"));
+      pourQueue = {
+        reject,
+        s0,
+        s1,
+        order,
+        oi: 0,
+        next: s0,
+        rate: (s1 - s0) / dur,
+        acc: 0,
+        dlrRate: dollarsLeft / dur,
+        dAcc: 0,
+        res,
+        quarterFrom: Math.floor(fromAmt / 25 + 1e-6),
+      };
+    });
+  }
+  function spawnFlake(i) {
+    slot.state[i] = 1;
+    slot.px[i] = slot.x[i] + rand(-0.2, 0.2);
+    slot.py[i] = rand(2.4, 3.6);
+    slot.pz[i] = slot.z[i] + rand(-0.5, 0.3);
+    slot.vy[i] = -rand(0.25, 0.5);
+    slot.ang[i] = rand(0, 6);
+    slot.t0[i] = slot.py[i];
+  }
+  const qtmp = new THREE.Quaternion();
+  function stepFlakes(dt) {
+    if (pourQueue) {
+      const P = pourQueue;
+      P.acc += P.rate * dt;
+      while (P.acc >= 1 && P.oi < P.order.length) {
+        spawnFlake(P.order[P.oi++]);
+        P.acc -= 1;
+        spawned++;
+      }
+      P.dAcc += P.dlrRate * dt;
+      while (P.dAcc >= 1 && dollarsLeft > 0) {
+        spawnDollar();
+        P.dAcc -= 1;
+        dollarsLeft--;
+      }
+    }
+    let changed = false;
+    for (let i = 0; i < NS; i++) {
+      if (slot.state[i] !== 1) continue;
+      changed = true;
+      slot.vy[i] = Math.max(slot.vy[i] - 1.1 * dt, -1.05);
+      slot.py[i] += slot.vy[i] * dt;
+      const prog = clamp(
+        1 - (slot.py[i] - slot.y[i]) / (slot.t0[i] - slot.y[i]),
+        0,
+        1,
+      );
+      const k = 1 - Math.pow(1 - prog, 2);
+      const x = lerp(slot.px[i], slot.x[i], k),
+        z = lerp(slot.pz[i], slot.z[i], k);
+      slot.ang[i] += dt * 4;
+      if (slot.py[i] <= slot.y[i]) {
+        slot.state[i] = 2;
+        landed++;
+        setSlotMatrix(i, slot.x[i], slot.y[i], slot.z[i], slot.q[i]);
+        const amtNow = (landed / NS) * 100;
+        const q = Math.floor(amtNow / 25 + 1e-6);
+        if (pourQueue && q > pourQueue.quarterFrom && q < 4) {
+          pourQueue.quarterFrom = q;
+          quarterPulse(q);
+        }
+      } else {
+        qtmp.setFromAxisAngle(slot.spin[i], slot.ang[i]);
+        qtmp.multiply(slot.q[i]);
+        setSlotMatrix(i, x, slot.py[i], z, qtmp, 1.15);
+      }
+    }
+    if (changed) {
+      flagPile();
+      setPips((landed / NS) * 100);
+    }
+    if (pourQueue && pourQueue.oi >= pourQueue.order.length) {
+      let allDown = true;
+      for (let i = pourQueue.s0; i < pourQueue.s1; i++)
+        if (slot.state[i] === 1) {
+          allDown = false;
+          break;
+        }
+      if (allDown && dollarsLeft <= 0) {
+        const r = pourQueue.res;
+        pourQueue = null;
+        r();
+      }
     }
   }
-  function loop(time) {
-    const rect = host.getBoundingClientRect();
-    if (time - lastFrame > 66 && rect.bottom > 0 && rect.top < innerHeight) {
-      render(time);
-      lastFrame = time;
-    }
-    frame = requestAnimationFrame(loop);
+  function spawnDollar() {
+    const i = pourQueue
+      ? pourQueue.order[(Math.random() * pourQueue.order.length) | 0]
+      : Math.max(0, landed - 1);
+    const target = new THREE.Vector3(slot.x[i], slot.y[i] + 0.03, slot.z[i]);
+    const start = new THREE.Vector3(
+      target.x + rand(-0.3, 0.3),
+      rand(2.2, 3.4),
+      target.z + rand(-0.4, 0.3),
+    );
+    const d = addSprite(dollarTex, {
+      pos: start,
+      size: rand(0.24, 0.32),
+      life: 99,
+      parent: inner,
+      kind: "dollar",
+      target,
+      vy: -rand(0.2, 0.35),
+      color: 0xffe08a,
+    });
+    d.sparks = [0, 1, 2, 3].map((k) =>
+      addSprite(sparkTex, {
+        pos: start.clone(),
+        size: 0.06,
+        life: 99,
+        parent: inner,
+        kind: "orbit",
+        host: d,
+        ph: k * 1.6 + rand(0, 1),
+        rad: rand(0.13, 0.19),
+        color: 0xfff1c0,
+      }),
+    );
   }
+  function quarterPulse(q) {
+    const dots = qDots[q - 1];
+    if (dots) {
+      dots.material.opacity = 1;
+      dots.material.size = 0.14;
+    }
+    const wp = inner.localToWorld(
+      new THREE.Vector3(-0.97 + (1.94 * q) / 4, 0.15, 0),
+    );
+    burst(
+      inner.localToWorld(new THREE.Vector3(-0.97 + (1.94 * q) / 4, 0.15, 0)),
+      28,
+      { power: 1.1 },
+    );
+    const ring = addSprite(glowTex, {
+      pos: wp.clone(),
+      size: 0.2,
+      life: 0.7,
+      kind: "ring",
+      op: 0.9,
+    });
+    ring.grow = 2.4;
+    haptic(12);
+  }
+
+  async function rollUp(fast = false) {
+    const sp = fast ? 1.8 : 1;
+    qDots.forEach((d) => (d.visible = false));
+    await wait(200 / sp);
+    await tween(1.25 / sp, (t) => {
+      curl = t;
+      shapeSheet(t);
+      setTilt(1 - t);
+    });
+    // seal shimmer
+    const wp = pivot.position.clone();
+    for (let k = 0; k < 5; k++)
+      burst(wp.clone().add(new THREE.Vector3(-0.9 + k * 0.45, 0.05, 0)), 8, {
+        power: 0.6,
+      });
+    showStamp(
+      vis.stash + 1 === 10 * Math.ceil((vis.stash + 1) / 10) ? "" : "",
+      "",
+    );
+    haptic(30);
+    await tween(
+      0.55 / sp,
+      (t) => {
+        pivot.rotation.x = t * Math.PI * 2;
+        pivot.position.y = HOME.y + Math.sin(t * Math.PI) * 0.35;
+      },
+      easeIO,
+    );
+    pivot.rotation.x = 0;
+    const n = vis.stash + 1;
+    const { list } = stashSlots(n);
+    const dst =
+      n % 10 === 0
+        ? { x: 0.09 + 9 * 0.12, y: FLOOR + 0.062 }
+        : list[list.length - 1];
+    const from = pivot.position.clone();
+    const to = new THREE.Vector3(dst.x, dst.y, STASH_Z);
+    await tween(
+      0.75 / sp,
+      (t) => {
+        pivot.position.lerpVectors(from, to, t);
+        pivot.position.y += Math.sin(t * Math.PI) * 0.6;
+        pivot.scale.setScalar(lerp(1, STASH_S, t));
+        pivot.rotation.y = (-Math.PI / 2) * t;
+      },
+      easeIO,
+    );
+    vis.stash = n;
+    rebuildStash(n, n % 10 === 0);
+    bumpChip("#chipBlunts");
+    setCounts();
+    burst(to, 20, { power: 0.8 });
+    // reset the wrap: fresh one unrolls in from the side
+    presetFill(0);
+    for (const s of sprites)
+      if (s.kind === "dollar" || s.kind === "orbit") s.dead = true;
+    pivot.scale.setScalar(1);
+    pivot.rotation.set(0, 0, 0);
+    pivot.position.set(3.2, HOME.y, HOME.z);
+    if (n % 10 === 0) await bandUp(n);
+    await tween(
+      0.8 / sp,
+      (t) => {
+        pivot.position.x = lerp(3.2, 0, t);
+        curl = 1 - t;
+        shapeSheet(curl);
+        setTilt(t);
+      },
+      easeOut,
+    );
+    qDots.forEach((d) => {
+      d.visible = true;
+      d.material.opacity = 0.55;
+      d.material.size = 0.06;
+    });
+    setPips(0);
+  }
+  const elasticOut = (t) =>
+    t === 0 || t === 1
+      ? t
+      : Math.pow(2, -9 * t) * Math.sin(((t * 9 - 0.75) * (2 * Math.PI)) / 3) +
+        1;
+  async function bandUp(n) {
+    const b = Math.floor(n / 10) - 1;
+    showStamp("BAND UP");
+    haptic([20, 40, 20]);
+    billRain(110);
+    const rainStart = performance.now();
+    if (b > 5 || !stashBands[b]) {
+      bumpChip("#chipBands");
+      setCounts();
+      await wait(5000);
+      return;
+    }
+    const ms = stashBlunts.slice(b * 10, b * 10 + 10),
+      froms = ms.map((m) => m.position.clone());
+    await tween(
+      0.7,
+      (t) =>
+        ms.forEach((m, j) => {
+          const k = clamp(t * 1.4 - j * 0.04, 0, 1),
+            e = easeIO(k);
+          m.position.lerpVectors(froms[j], m.userData.to, e);
+          m.position.y += Math.sin(e * Math.PI) * 0.12;
+        }),
+      (t) => t,
+    );
+    const bands = stashBands[b];
+    bands.forEach((t) => {
+      t.visible = true;
+    });
+    await tween(
+      0.6,
+      (t) =>
+        bands.forEach((m) => {
+          const k = lerp(1.6, 1, elasticOut(t));
+          m.scale.set(k, k, 1);
+        }),
+      (t) => t,
+    );
+    const p = ms[0].userData.to;
+    burst(new THREE.Vector3(p.x + 0.24, p.y + 0.15, STASH_Z), 40, {
+      power: 1.2,
+    });
+    bumpChip("#chipBands");
+    setCounts();
+    await wait(Math.max(700, 4000 - (performance.now() - rainStart)));
+  }
+  // Public-domain scans of the Series 2009 $100 Federal Reserve Note (Wikimedia Commons; US Government work).
+  const BILL_FRONT_SRC = new URL("./assets/bill-front.jpg", import.meta.url)
+    .href;
+  const BILL_BACK_SRC = new URL("./assets/bill-back.jpg", import.meta.url).href;
+
+  /* $100 bill rain for BAND UP.
+   Own layer above all UI, straight-on orthographic camera, constant fall speed until fully off screen.
+   Bills bend and flutter in the vertex shader; front/back scans chosen by face direction. */
+  const VH = 10; // view height in world units
+  let billMesh = null,
+    billRenderer = null,
+    billScene = null,
+    billCam = null,
+    billsDrawn = false;
+  const BILLS_MAX = 150,
+    billState = [];
+  const billUniforms = { uTime: { value: 0 } };
+  const billTextures = [];
+  function initBillLayer() {
+    billRenderer = new THREE.WebGLRenderer({
+      canvas: moneyCanvas,
+      antialias: true,
+      alpha: true,
+    });
+    billRenderer.setPixelRatio(pixelRatio);
+    billRenderer.outputColorSpace = THREE.SRGBColorSpace;
+    billRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+    billRenderer.toneMappingExposure = 0.95;
+    billRenderer.setClearColor(0x000000, 0);
+    billScene = new THREE.Scene();
+    billCam = new THREE.OrthographicCamera(-1, 1, VH / 2, -VH / 2, 0.1, 100);
+    billCam.position.set(0, 0, 30);
+    billCam.lookAt(0, 0, 0);
+    billScene.add(new THREE.HemisphereLight(0xfff3e0, 0x2b1d12, 0.55));
+    const key = new THREE.DirectionalLight(0xffe6c4, 0.95);
+    key.position.set(-4, 6, 10);
+    billScene.add(key);
+    sizeBillLayer();
+  }
+  function sizeBillLayer() {
+    if (!billRenderer) return;
+    const w = host.clientWidth,
+      h = host.clientHeight;
+    billRenderer.setSize(w, h, false);
+    const hw = (VH / 2) * (w / h);
+    billCam.left = -hw;
+    billCam.right = hw;
+    billCam.updateProjectionMatrix();
+  }
+  function buildBillMesh() {
+    initBillLayer();
+    const ld = new THREE.TextureLoader();
+    const front = ld.load(BILL_FRONT_SRC),
+      back = ld.load(BILL_BACK_SRC);
+    billTextures.push(front, back);
+    [front, back].forEach((t) => {
+      t.colorSpace = THREE.SRGBColorSpace;
+      t.anisotropy = billRenderer.capabilities.getMaxAnisotropy();
+    });
+    const geo = new THREE.PlaneGeometry(1, 0.421, 24, 8); // real 2.37:1 note proportions
+    const phase = new Float32Array(BILLS_MAX);
+    for (let i = 0; i < BILLS_MAX; i++) phase[i] = rand(0, 20);
+    geo.setAttribute("aPhase", new THREE.InstancedBufferAttribute(phase, 1));
+    const mat = new THREE.MeshStandardMaterial({
+      map: front,
+      color: 0xe2e2d6,
+      side: THREE.DoubleSide,
+      roughness: 0.85,
+      metalness: 0,
+    });
+    mat.onBeforeCompile = (sh) => {
+      sh.uniforms.uTime = billUniforms.uTime;
+      sh.uniforms.uBack = { value: back };
+      sh.vertexShader = sh.vertexShader
+        .replace(
+          "#include <common>",
+          "#include <common>\nuniform float uTime; attribute float aPhase;",
+        )
+        .replace(
+          "#include <begin_vertex>",
+          `#include <begin_vertex>
+        float bp = aPhase + uTime;
+        float A = 1.6 + 1.1 * sin(bp * 1.7), B = .7 * sin(bp * 2.3);
+        transformed.z += transformed.y * transformed.y * A + sin(transformed.x * 5.0 + bp * 4.0) * .03 + transformed.x * transformed.x * B;`,
+        )
+        .replace(
+          "#include <beginnormal_vertex>",
+          `#include <beginnormal_vertex>
+        { float bp2 = aPhase + uTime; float A2 = 1.6 + 1.1 * sin(bp2 * 1.7), B2 = .7 * sin(bp2 * 2.3);
+          objectNormal = normalize(vec3(-(cos(position.x * 5.0 + bp2 * 4.0) * .15 + 2.0 * position.x * B2), -2.0 * position.y * A2, 1.0)); }`,
+        );
+      sh.fragmentShader = sh.fragmentShader
+        .replace(
+          "#include <common>",
+          "#include <common>\nuniform sampler2D uBack;",
+        )
+        .replace(
+          "#include <map_fragment>",
+          `#ifdef USE_MAP
+        vec4 texelColor = gl_FrontFacing ? texture2D(map, vMapUv) : texture2D(uBack, vec2(1.0 - vMapUv.x, vMapUv.y));
+         diffuseColor *= texelColor;
+        #endif`,
+        );
+    };
+    billMesh = new THREE.InstancedMesh(geo, mat, BILLS_MAX);
+    billMesh.frustumCulled = false;
+    for (let i = 0; i < BILLS_MAX; i++) {
+      billMesh.setMatrixAt(i, ZERO);
+      billState.push(null);
+    }
+    billScene.add(billMesh);
+  }
+  function billRain(n) {
+    if (reduce) return;
+    if (!billMesh) buildBillMesh();
+    const hw = billCam.right,
+      spread = 7.5; // stream length above the screen, in world units
+    let k = 0;
+    for (let i = 0; i < BILLS_MAX && k < n; i++)
+      if (!billState[i]) {
+        const w = hw * 2 * rand(0.28, 0.46);
+        billState[i] = {
+          x: rand(-hw, hw),
+          y: VH / 2 + w * 0.5 + (k / n) * spread + rand(0, 0.6),
+          z: rand(-8, 8),
+          s: w,
+          v: rand(4.0, 5.2),
+          ph: rand(0, 6.28),
+          w1: rand(1.8, 3.2),
+          w2: rand(1.2, 2.2),
+          spin: rand(-2.2, 2.2),
+          rz: rand(-0.5, 0.5),
+          age: 0,
+        };
+        k++;
+      }
+  }
+  const _bq = new THREE.Quaternion(),
+    _be = new THREE.Euler(),
+    _bs = new THREE.Vector3(),
+    _bm = new THREE.Matrix4(),
+    _bp = new THREE.Vector3();
+  function stepBills(dt) {
+    if (!billMesh) return;
+    billUniforms.uTime.value += dt;
+    let any = false;
+    for (let i = 0; i < BILLS_MAX; i++) {
+      const b = billState[i];
+      if (!b) continue;
+      any = true;
+      b.age += dt;
+      b.y -= b.v * dt; // constant speed: no slowing, no fading
+      b.x += Math.sin(b.age * b.w1 + b.ph) * 0.7 * dt; // side-to-side glide
+      _be.set(
+        Math.sin(b.age * b.w1 + b.ph) * 0.55,
+        b.ph + b.age * b.spin,
+        b.rz + Math.sin(b.age * b.w2 + b.ph) * 0.35,
+        "XYZ",
+      );
+      _bq.setFromEuler(_be);
+      _bp.set(b.x, b.y, b.z);
+      _bs.set(b.s, b.s, b.s);
+      _bm.compose(_bp, _bq, _bs);
+      billMesh.setMatrixAt(i, _bm);
+      if (b.y < -VH / 2 - b.s) {
+        billState[i] = null;
+        billMesh.setMatrixAt(i, ZERO);
+      } // gone only once fully below the screen
+    }
+    if (any) billMesh.instanceMatrix.needsUpdate = true;
+    if (any || billsDrawn) {
+      billRenderer.render(billScene, billCam);
+      billsDrawn = any;
+    }
+  }
+
+  async function doFill(amount, method) {
+    if (busy || !Number.isFinite(amount) || amount <= 0) return;
+    setBusy(true);
+    let remaining = amount,
+      rolledThis = 0;
+    while (remaining > 1e-6) {
+      if (rolledThis >= 2 && remaining >= 100) {
+        const k = Math.floor(remaining / 100);
+        remaining -= k * 100;
+        const before = vis.stash;
+        vis.stash += k;
+        rebuildStash(vis.stash);
+        setCounts();
+        bumpChip("#chipBlunts");
+        burst(new THREE.Vector3(0.6, FLOOR + 0.2, STASH_Z), 50, { power: 1.3 });
+        if (Math.floor(vis.stash / 10) > Math.floor(before / 10)) {
+          showStamp("BAND UP");
+          bumpChip("#chipBands");
+          billRain(110);
+          await wait(5000);
+        }
+        await wait(600);
+        continue;
+      }
+      const room = 100 - vis.fill,
+        add = Math.min(room, remaining);
+      await pour(vis.fill, vis.fill + add, amount > 150 ? 1.7 : 1);
+      vis.fill += add;
+      remaining -= add;
+      if (vis.fill >= 99.999) {
+        await rollUp(amount > 150);
+        vis.fill = 0;
+        rolledThis++;
+      }
+    }
+    setCounts();
+    setBusy(false);
+  }
+
+  /* ================= SPARK ================= */
+  async function popBands(from, to) {
+    const popping = [];
+    for (let b = from; b < Math.min(to, stashBands.length); b++)
+      popping.push(...stashBands[b]);
+    showStamp(to - from > 1 ? "BANDS POPPED" : "BAND POPPED");
+    haptic([40, 30, 60]);
+    // stretch...
+    await tween(
+      0.22,
+      (t) =>
+        popping.forEach((m) => {
+          const k = 1 + t * 0.18;
+          m.scale.set(k, k * 0.92, 1);
+        }),
+      (t) => t * t,
+    );
+    // ...snap
+    const vel = popping.map(
+        () =>
+          new THREE.Vector3(rand(-1.4, 1.4), rand(1.6, 2.6), rand(-0.4, 1.2)),
+      ),
+      spin = popping.map(
+        () => new THREE.Vector3(rand(-9, 9), rand(-9, 9), rand(-9, 9)),
+      );
+    popping.forEach((m) =>
+      burst(m.position.clone().add(new THREE.Vector3(0, 0.1, 0)), 14, {
+        power: 1.3,
+        color: 0xff7a5a,
+      }),
+    );
+    const bundleBlunts = [];
+    for (let b = from; b < Math.min(to, stashBands.length); b++)
+      bundleBlunts.push(...stashBlunts.slice(b * 10, b * 10 + 10));
+    const starts = bundleBlunts.map((m) => m.position.clone());
+    await tween(
+      0.7,
+      (t) => {
+        popping.forEach((m, i) => {
+          m.position.addScaledVector(vel[i], 0.016);
+          vel[i].y -= 0.09;
+          m.rotation.x += spin[i].x * 0.016;
+          m.rotation.y += spin[i].y * 0.016;
+          m.rotation.z += spin[i].z * 0.016;
+          const k = lerp(1.18, 0.5, t);
+          m.scale.set(k, k, 1);
+          m.material.opacity = 1 - t;
+        });
+        bundleBlunts.forEach((m, i) => {
+          m.position.x = starts[i].x + Math.sin(t * 30 + i) * 0.012 * (1 - t);
+          m.position.y =
+            starts[i].y +
+            Math.abs(Math.sin(t * Math.PI * 2 + i)) * 0.03 * (1 - t);
+        });
+      },
+      (t) => t,
+    );
+    bumpChip("#chipBands");
+  }
+  async function doSpark(target) {
+    setBusy(true);
+    const oldFill = vis.fill,
+      newStash = Math.floor(target / 100),
+      newFill = target - newStash * 100;
+    const nBurn = Math.max(0, vis.stash - newStash);
+    const { list } = stashSlots(vis.stash);
+    const take = list.slice(Math.max(0, list.length - nBurn)).slice(-5);
+    const bandsBefore = Math.floor(vis.stash / 10),
+      bandsAfter = Math.floor(Math.max(0, vis.stash - nBurn) / 10);
+    if (bandsAfter < bandsBefore) await popBands(bandsAfter, bandsBefore);
+    vis.stash = Math.max(0, vis.stash - nBurn);
+    rebuildStash(vis.stash);
+    const burners = take.map((p, j) => {
+      const m = new THREE.Mesh(bluntLatheGeo, makeBurnMat());
+      m.scale.setScalar(STASH_S);
+      m.position.set(p.x, p.y, STASH_Z);
+      scene.add(m);
+      return { m, from: m.position.clone(), j };
+    });
+    // lift into a fan
+    const cnt = burners.length;
+    await tween(0.8, (t) =>
+      burners.forEach((b) => {
+        const ty = 1.45 + (b.j - (cnt - 1) / 2) * 0.28 + (cnt - 1) * 0.14,
+          tz = 1.25;
+        b.m.position.set(
+          lerp(b.from.x, 0, t),
+          lerp(b.from.y, ty, t) + Math.sin(t * Math.PI) * 0.2,
+          lerp(b.from.z, tz, t),
+        );
+        b.m.scale.setScalar(lerp(STASH_S, 0.68, t));
+        b.m.rotation.y = (Math.PI / 2) * t;
+      }),
+    );
+    // weed leaving the open wrap goes up in smoke
+    if (newFill < oldFill - 0.01) vaporizeRange(newFill, oldFill);
+    // burn
+    const embers = burners.map((b) =>
+      addSprite(glowTex, {
+        pos: b.m.position.clone(),
+        size: 0.32,
+        life: 99,
+        kind: "ember",
+      }),
+    );
+    emberLight.intensity = 3;
+    haptic(20);
+    const tipL = new THREE.Vector3();
+    await tween(
+      2.6,
+      (t) => {
+        burners.forEach((b, i) => {
+          b.m.material.userData.uBurn.value = t;
+          // ember rides the dissolve edge; geometry is untouched
+          tipL.set(0, 0, lerp(HL + 0.05, -HL - 0.05, t));
+          const tip = b.m.localToWorld(tipL.clone());
+          embers[i].s.position.copy(tip);
+          embers[i].s.scale.setScalar(
+            (0.26 + Math.sin(performance.now() / 70 + i) * 0.05) *
+              (t > 0.95 ? (1 - t) * 20 : 1),
+          );
+          if (Math.random() < 0.4)
+            addSprite(smokeTex, {
+              pos: tip.clone().add(new THREE.Vector3(0, 0.05, 0)),
+              size: rand(0.12, 0.24),
+              life: rand(2.2, 3.2),
+              vel: new THREE.Vector3(
+                rand(-0.1, 0.1),
+                rand(0.4, 0.7),
+                rand(-0.08, 0.08),
+              ),
+              kind: "smoke",
+              blend: THREE.NormalBlending,
+              op: 0.32,
+              grow: 2.2,
+              color: 0xb9b2aa,
+            });
+          if (Math.random() < 0.45)
+            addSprite(ashTex, {
+              pos: tip.clone(),
+              size: rand(0.025, 0.05),
+              life: 1.4,
+              vel: new THREE.Vector3(
+                rand(-0.2, 0.2),
+                rand(-0.1, 0.2),
+                rand(-0.1, 0.1),
+              ),
+              grav: -2.5,
+              kind: "ash",
+              blend: THREE.NormalBlending,
+            });
+          if (Math.random() < 0.22)
+            addSprite(sparkTex, {
+              pos: tip.clone(),
+              size: rand(0.04, 0.09),
+              life: rand(0.4, 0.8),
+              vel: new THREE.Vector3(
+                rand(-0.4, 0.4),
+                rand(0.2, 0.9),
+                rand(-0.3, 0.3),
+              ),
+              grav: -1.5,
+              kind: "spark",
+              color: 0xffa050,
+            });
+          if (Math.random() < 0.16)
+            addSprite(dollarTex, {
+              pos: tip.clone(),
+              size: rand(0.2, 0.28),
+              life: 1.9,
+              vel: new THREE.Vector3(
+                rand(-0.25, 0.25),
+                rand(0.9, 1.4),
+                rand(-0.1, 0.1),
+              ),
+              kind: "rise",
+              color: 0xffe08a,
+            });
+        });
+        if (burners.length) emberLight.position.copy(embers[0].s.position);
+      },
+      (t) => t,
+    );
+    burners.forEach((b) => {
+      scene.remove(b.m);
+      b.m.material.dispose();
+    });
+    embers.forEach((e) => (e.dead = true));
+    emberLight.intensity = 0;
+    // cash taken from inside a blunt: the rest of that blunt goes back into the wrap
+    setCounts();
+    if (newFill > oldFill + 0.01) {
+      await pour(oldFill, newFill, 2.6);
+    }
+    vis.fill = newFill;
+    presetFill(newFill);
+    setPips(newFill);
+    await wait(1200);
+    setBusy(false);
+  }
+  function vaporizeRange(a, b) {
+    const i0 = Math.round((a / 100) * NS),
+      i1 = Math.round((b / 100) * NS);
+    for (let i = i0; i < i1; i += 3) {
+      const wp = inner.localToWorld(
+        new THREE.Vector3(slot.x[i], slot.y[i], slot.z[i]),
+      );
+      if (Math.random() < 0.5)
+        addSprite(smokeTex, {
+          pos: wp,
+          size: rand(0.12, 0.25),
+          life: rand(1.4, 2.4),
+          vel: new THREE.Vector3(rand(-0.1, 0.1), rand(0.4, 0.8), 0),
+          kind: "smoke",
+          blend: THREE.NormalBlending,
+          op: 0.5,
+          grow: 1.6,
+        });
+    }
+    presetFill(a);
+  }
+  function vaporize() {
+    for (let i = 0; i < landed; i += 3) {
+      const wp = inner.localToWorld(
+        new THREE.Vector3(slot.x[i], slot.y[i], slot.z[i]),
+      );
+      if (Math.random() < 0.5)
+        addSprite(smokeTex, {
+          pos: wp,
+          size: rand(0.12, 0.25),
+          life: rand(1.4, 2.4),
+          vel: new THREE.Vector3(rand(-0.1, 0.1), rand(0.4, 0.8), 0),
+          kind: "smoke",
+          blend: THREE.NormalBlending,
+          op: 0.5,
+          grow: 1.6,
+        });
+    }
+    presetFill(0);
+  }
+
+  /* ================= LOOP ================= */
+  let last = performance.now(),
+    camSway = 0,
+    pointerX = 0,
+    pointerY = 0;
+  const pointerMove = (e) => {
+    const r = host.getBoundingClientRect();
+    pointerX = (e.clientX - r.left) / r.width - 0.5;
+    pointerY = (e.clientY - r.top) / r.height - 0.5;
+  };
+  host.addEventListener("pointermove", pointerMove);
+  const tmpV = new THREE.Vector3();
+  function tick(now) {
+    const dt = Math.min(0.15, (now - last) / 1000);
+    last = now;
+    for (let i = tweens.length - 1; i >= 0; i--) {
+      const tw = tweens[i];
+      tw.t += dt;
+      const k = clamp(tw.t / tw.dur, 0, 1);
+      tw.fn(tw.ease(k));
+      if (k >= 1) {
+        tweens.splice(i, 1);
+        tw.res();
+      }
+    }
+    stepFlakes(dt);
+    stepBills(dt);
+    for (let i = sprites.length - 1; i >= 0; i--) {
+      const p = sprites[i];
+      p.age += dt;
+      if (p.kind === "dollar") {
+        if (!p.landed) {
+          p.vy = Math.max(p.vy - 0.8 * dt, -0.8);
+          p.s.position.y += p.vy * dt;
+          const k = clamp(1 - (p.s.position.y - p.target.y) / 2.8, 0, 1);
+          p.s.position.x = lerp(p.s.position.x, p.target.x, k * 0.08);
+          p.s.position.z = lerp(p.s.position.z, p.target.z, k * 0.08);
+          if (p.s.position.y <= p.target.y) {
+            p.landed = true;
+            p.age = 0;
+            p.s.position.copy(p.target);
+            burst(inner.localToWorld(p.target.clone()), 5, { power: 0.4 });
+          }
+        } else {
+          const tw = 1 + Math.sin(p.age * 12) * 0.12;
+          const fade = clamp(1 - (p.age - 1.4) / 0.8, 0, 1);
+          p.s.scale.setScalar(p.size0 * tw * (0.6 + 0.4 * fade));
+          p.s.material.opacity = fade;
+          if (fade <= 0) p.dead = true;
+        }
+      } else if (p.kind === "orbit") {
+        const h = p.host;
+        if (!h || h.dead) p.dead = true;
+        else {
+          const a = p.age * 3.2 + p.ph;
+          p.s.position.set(
+            h.s.position.x + Math.cos(a) * p.rad,
+            h.s.position.y + Math.sin(a * 1.3) * p.rad * 0.8,
+            h.s.position.z + Math.sin(a) * p.rad * 0.5,
+          );
+          const tw = (Math.sin(p.age * 14 + p.ph * 3) + 1) / 2;
+          p.s.scale.setScalar(0.03 + tw * 0.1);
+          p.s.material.opacity = h.s.material.opacity;
+        }
+      } else if (p.kind === "ember") {
+        // positioned by spark tween
+      } else {
+        p.vel.y += (p.grav || 0) * dt;
+        p.s.position.addScaledVector(p.vel, dt);
+        const k = p.age / p.life;
+        if (p.kind === "smoke") {
+          p.s.scale.setScalar(p.size0 * (1 + k * (p.grow || 1) * 2));
+          p.s.material.opacity = p.op0 * (1 - k) * Math.min(1, p.age * 4);
+          p.s.material.rotation += dt * 0.4;
+          p.vel.x += Math.sin(p.age * 2 + i) * 0.02;
+        } else if (p.kind === "ring") {
+          p.s.scale.setScalar(p.size0 * (1 + k * (p.grow || 2)));
+          p.s.material.opacity = p.op0 * (1 - k);
+        } else if (p.kind === "rise") {
+          p.s.material.opacity = 1 - k;
+          p.s.scale.setScalar(p.size0 * (1 + Math.sin(p.age * 14) * 0.1));
+        } else p.s.material.opacity = p.op0 * (1 - k);
+        if (k >= 1) p.dead = true;
+      }
+      if (p.dead) {
+        p.s.parent && p.s.parent.remove(p.s);
+        p.s.material.dispose();
+        sprites.splice(i, 1);
+      }
+    }
+    qDots.forEach((d) => {
+      if (d.material.opacity > 0.56) {
+        d.material.opacity = Math.max(0.55, d.material.opacity - dt * 0.8);
+        d.material.size = Math.max(0.06, d.material.size - dt * 0.15);
+      }
+    });
+    // dust drift
+    if (dust) {
+      const a = dust.geometry.attributes.position.array;
+      for (let i = 0; i < a.length; i += 3) {
+        a[i + 1] += dt * 0.05;
+        a[i] += Math.sin(now / 3000 + i) * dt * 0.02;
+        if (a[i + 1] > 3.2) a[i + 1] = 0;
+      }
+      dust.geometry.attributes.position.needsUpdate = true;
+    }
+    // idle life
+    if (!busy && curl === 0) inner.rotation.z = Math.sin(now / 1800) * 0.006;
+    fillL.intensity = 1.1 + Math.sin(now / 900) * 0.1;
+    camSway = now / 1000;
+    tmpV
+      .copy(camDir)
+      .applyAxisAngle(
+        new THREE.Vector3(0, 1, 0),
+        Math.sin(camSway * 0.25) * 0.03 + pointerX * 0.08,
+      );
+    camera.position.copy(camTarget).addScaledVector(tmpV, camDist);
+    camera.position.y += -pointerY * 0.3;
+    camera.lookAt(camTarget);
+    renderer.render(scene, camera);
+  }
+
   function resize() {
     const w = host.clientWidth,
       h = host.clientHeight;
     if (!w || !h) return;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
+    const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     camDist = Math.max(
-      6,
-      1.8 / (Math.tan(THREE.MathUtils.degToRad(15)) * camera.aspect),
+      1.54 / (tanH * camera.aspect),
+      1.5 / (tanH * Math.max(0.45, 1 - 270 / h)),
     );
     camera.updateProjectionMatrix();
-    render();
+    sizeBillLayer();
+    camera.position.copy(camTarget).addScaledVector(camDir, camDist);
+    camera.lookAt(camTarget);
+    renderer.render(scene, camera);
   }
+  function snap(value) {
+    vis.stash = Math.floor(value / 100);
+    vis.fill = value % 100;
+    stashGroup.traverse((o) => {
+      if (o.isMesh && o.material !== leafMat) o.material.dispose();
+    });
+    rebuildStash(vis.stash);
+    presetFill(vis.fill);
+    rendered = value;
+    resize();
+  }
+  async function drain() {
+    if (draining || disposed) return;
+    draining = true;
+    try {
+      while (!disposed && Math.abs(desired - rendered) > 0.00001) {
+        const target = desired;
+        host.dataset.animation = target > rendered ? "fill" : "spark";
+        if (reduce) snap(target);
+        else {
+          if (target > rendered) await doFill(target - rendered);
+          else await doSpark(target);
+          rendered = target;
+        }
+      }
+    } catch (error) {
+      if (!disposed) {
+        snap(desired);
+        host.dataset.animation = "fallback";
+      }
+    } finally {
+      draining = false;
+      setBusy(false);
+      showStamp("");
+    }
+  }
+  let lastRender = 0;
+  function loop(now) {
+    if (disposed) return;
+    if (!document.hidden && now - lastRender > (busy ? 32 : 66)) {
+      tick(now);
+      lastRender = now;
+    } else if (document.hidden) last = now;
+    frame = requestAnimationFrame(loop);
+  }
+  build();
   const observer = new ResizeObserver(resize);
   observer.observe(host);
-  function motionChange() {
-    cancelAnimationFrame(frame);
-    if (motion.matches) render();
-    else frame = requestAnimationFrame(loop);
-  }
-  motion.addEventListener("change", motionChange);
   resize();
-  motionChange();
+  if (!reduce) frame = requestAnimationFrame(loop);
   return {
     update(cents) {
-      const value = Math.max(0, Number(cents) / 100);
-      // A bounded visual representation, never a substitute for the numeric balance.
-      stashGroup.traverse((o) => {
-        if (o.isMesh && o.material !== leafMat) o.material.dispose();
-      });
-      rebuildStash(Math.min(69, Math.floor(value / 100)));
-      presetFill(value % 100);
-      render();
+      desired = Math.min(6999, Math.max(0, Number(cents) / 100));
+      if (!initialized) {
+        initialized = true;
+        snap(desired);
+      } else void drain();
     },
     dispose() {
+      disposed = true;
+      pourQueue?.reject(new Error("disposed"));
+      pourQueue = null;
       cancelAnimationFrame(frame);
       observer.disconnect();
-      motion.removeEventListener("change", motionChange);
+      host.removeEventListener("pointermove", pointerMove);
+      for (const tw of tweens) tw.reject(new Error("disposed"));
+      tweens.length = 0;
+      for (const [id, reject] of waits) {
+        clearTimeout(id);
+        reject(new Error("disposed"));
+      }
+      waits.clear();
       const geometries = new Set(),
         materials = new Set(),
         textures = new Set([
@@ -1072,20 +2030,22 @@ float vn(vec3 x){ vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3. - 2. * f
           smokeTex,
           dotTex,
           ashTex,
+          ...billTextures,
         ]);
-      scene.traverse((o) => {
-        if (o.geometry) geometries.add(o.geometry);
-        if (o.material) for (const m of [o.material].flat()) materials.add(m);
-      });
+      for (const root of [scene, billScene].filter(Boolean))
+        root.traverse((o) => {
+          if (o.geometry) geometries.add(o.geometry);
+          if (o.material) for (const m of [o.material].flat()) materials.add(m);
+        });
       for (const m of materials) {
-        for (const value of Object.values(m))
-          if (value?.isTexture) textures.add(value);
+        for (const v of Object.values(m)) if (v?.isTexture) textures.add(v);
         m.dispose();
       }
-      geometries.forEach((g) => g.dispose());
-      textures.forEach((t) => t?.dispose());
+      for (const g of geometries) g.dispose();
+      for (const t of textures) t?.dispose();
       bandGeos?.forEach((g) => g.dispose());
       renderer.dispose();
+      billRenderer?.dispose();
     },
   };
 }

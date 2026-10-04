@@ -109,3 +109,8 @@ Current local validation: 13 API/domain tests passed, with the optional external
 
 
 Native verification: the Android debug APK compiled locally with cached Gradle 8.13 and in hosted CI with the pinned Gradle 8.14.3 wrapper. iOS simulator compilation and hosted compilation passed. On the owned iOS 26.4 simulator, a synthetic account signed in through native HTTP, opened the demo wallet, showed backup in `?`, and retained its session after process termination/relaunch. Safe-area rendering was visually inspected. Android and iOS release builds both rejected loopback development metadata as intended. Statement sharing and the complete physical-device/provider acceptance checklist remain required; this smoke test does not certify them.
+
+
+## Original scene restored — October 4
+
+The dashboard rewrite was a visual regression. The main screen again uses the original full-height brown/gold 3D composition, locally bundled Bungee/Figtree fonts, circular Fill/Spark controls, pour/roll/bundle/bill-rain/burn animations and live server-backed balances. Activity/settings are utility panels reached through `?`; setup overlays the scene and recovery stays in help. The top demo banner and persistent recovery reminder are removed. Simulation disclosure remains in setup, transaction confirmation and help while live adapters are unfinished. Animation runs after confirmed investment balance changes; it never authorizes or settles transactions. Visual stash counts are bounded independently of account balances. Software rendering uses reduced resolution, and reduced-motion mode applies changes without animation.

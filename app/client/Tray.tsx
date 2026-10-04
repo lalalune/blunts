@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-export function Tray({ value }: { value: string }) {
+export function Tray({ value, paused }: { value: string; paused: boolean }) {
   const host = useRef<HTMLDivElement>(null),
     canvas = useRef<HTMLCanvasElement>(null);
+  const moneyCanvas = useRef<HTMLCanvasElement>(null);
   const scene = useRef<{
     update: (value: string) => void;
     dispose: () => void;
@@ -15,7 +16,11 @@ export function Tray({ value }: { value: string }) {
       .then(({ createTrayScene }) => {
         if (cancelled || !host.current || !canvas.current) return;
         try {
-          scene.current = createTrayScene(canvas.current, host.current);
+          scene.current = createTrayScene(
+            canvas.current,
+            host.current,
+            moneyCanvas.current,
+          );
           scene.current.update(latest.current);
         } catch {
           setUnavailable(true);
@@ -36,10 +41,14 @@ export function Tray({ value }: { value: string }) {
       element?.removeEventListener("webglcontextlost", lost);
     };
   }, []);
-  useEffect(() => scene.current?.update(value), [value]);
+  useEffect(() => {
+    if (!paused) scene.current?.update(value);
+  }, [value, paused]);
   return (
     <div className="tray-scene" ref={host} aria-hidden="true">
       <canvas ref={canvas} />
+      <canvas className="money-canvas" ref={moneyCanvas} />
+      <span className="scene-stamp" />
       {unavailable && (
         <div className="tray-fallback">
           <span>blunt$</span>

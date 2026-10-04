@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { dollars, quantity, type Kind } from "../shared/money";
+import "@fontsource/bungee/latin-400.css";
+import "@fontsource/figtree/latin-500.css";
+import "@fontsource/figtree/latin-800.css";
 import "./style.css";
+import "./scene-layout.css";
 import { Tray } from "./Tray";
 import { request, native, shareStatement, onResume, onBack } from "./platform";
 type Intent = {
@@ -218,7 +222,7 @@ function App() {
       csrf = data.csrf;
       setRecovery(data.recoveryCode ?? "");
       await refresh();
-      setNotice(data.recoveryCode ? "Save your recovery code in ?." : "");
+      setNotice("");
     });
   }
   async function preview(event: React.FormEvent) {
@@ -299,8 +303,7 @@ function App() {
   }
   return (
     <>
-      <div className="sandbox">Demo · no real money</div>
-      <header>
+      <header className="scene-header">
         <a className="brand" href="/" aria-label="Blunts home">
           blunt<span>$</span>
         </a>
@@ -312,8 +315,14 @@ function App() {
           ?
         </button>
       </header>
-      <main className={!me || me.status === "new" ? "setup-main" : undefined}>
-        <Tray value={me?.balances.investmentValue ?? "0"} />
+      <main
+        className={`scene-main ${!me || me.status === "new" ? "setup-main" : ""}`}
+      >
+        <Tray
+          key={me?.handle ?? "guest"}
+          value={me?.balances.investmentValue ?? "0"}
+          paused={!!action || help || tab !== "wallet"}
+        />
 
         {!loaded ? (
           <p role="status">Opening your wallet…</p>
@@ -427,17 +436,21 @@ function App() {
               </section>
             ) : (
               <>
-                <nav aria-label="Wallet navigation">
-                  {["wallet", "activity", "settings"].map((t) => (
-                    <button
-                      key={t}
-                      aria-current={tab === t ? "page" : undefined}
-                      onClick={() => setTab(t)}
-                    >
-                      {t[0].toUpperCase() + t.slice(1)}
-                    </button>
-                  ))}
-                </nav>
+                {tab !== "wallet" && (
+                  <div className="utility-panel">
+                    <nav aria-label="Wallet navigation">
+                      {["wallet", "activity", "settings"].map((t) => (
+                        <button
+                          key={t}
+                          aria-current={tab === t ? "page" : undefined}
+                          onClick={() => setTab(t)}
+                        >
+                          {t[0].toUpperCase() + t.slice(1)}
+                        </button>
+                      ))}
+                    </nav>
+                  </div>
+                )}
                 {me.status === "restricted" && (
                   <div className="callout warning" role="alert">
                     This account needs reconciliation. New actions are paused.
@@ -446,91 +459,109 @@ function App() {
                 )}
                 {tab === "wallet" && (
                   <>
-                    <h1>Wallet</h1>
-                    <div className="balance-grid">
-                      <section className="card investment">
-                        <span>Invested</span>
-                        <strong className="big-number">
-                          {dollars(me.balances.investmentValue)}
-                        </strong>
-                        <details>
-                          <summary>Investment details</summary>
-                          <p>
-                            {quantity(me.balances.units)} demo QQQ units · fixed
-                            $500 test price.
-                          </p>
-                        </details>
-                        <div className="button-row">
-                          <button
-                            className="primary"
-                            disabled={me.status !== "active"}
-                            onClick={() => open("buy")}
-                          >
-                            Fill
-                          </button>
-                          <button
-                            className="ember"
-                            disabled={
-                              me.status !== "active" ||
-                              BigInt(me.balances.availableUnits) <= 0n
-                            }
-                            onClick={() => open("sell")}
-                          >
-                            Spark
-                          </button>
-                        </div>
-                        <small>1% to buy or sell.</small>
-                      </section>
-                      <section className="card">
-                        <span>Available</span>
-                        <strong className="big-number">
-                          {dollars(me.balances.availableCash)}
-                        </strong>
-                        {BigInt(me.balances.reservedCash) > 0n && (
-                          <p>Pending: {dollars(me.balances.reservedCash)}</p>
-                        )}
-                        <div className="button-row">
-                          <button
-                            disabled={me.status !== "active"}
-                            onClick={() => open("fund")}
-                          >
-                            Add money
-                          </button>
-                          <button
-                            className="quiet outline"
-                            disabled={
-                              me.status !== "active" ||
-                              BigInt(me.balances.availableCash) <= 0n
-                            }
-                            onClick={() => open("payout")}
-                          >
-                            Withdraw
-                          </button>
-                        </div>
-                      </section>
+                    <div className="scene-hud">
+                      <span className="sr-only">Invested</span>
+                      <strong className="scene-value">
+                        {dollars(me.balances.investmentValue)}
+                      </strong>
+                      <div className="scene-cash">
+                        <span>Available </span>
+                        <strong>{dollars(me.balances.availableCash)}</strong>
+                      </div>
                     </div>
-                    <section className="section-heading">
-                      <h2>Recent activity</h2>
+                    <div className="scene-dock">
                       <button
-                        className="quiet"
+                        className="scene-act fill"
+                        aria-label="Fill"
+                        disabled={me.status !== "active"}
+                        onClick={() => open("buy")}
+                      >
+                        <span className="orb">
+                          <svg
+                            width="42"
+                            height="42"
+                            viewBox="0 0 42 42"
+                            fill="none"
+                          >
+                            <path
+                              d="M5 26c6 7 26 7 32 0"
+                              stroke="#15210a"
+                              strokeWidth="3.2"
+                              strokeLinecap="round"
+                            />
+                            <circle cx="14" cy="9" r="2.6" fill="#15210a" />
+                            <circle cx="22" cy="15" r="2.2" fill="#15210a" />
+                            <circle cx="28" cy="7" r="2" fill="#15210a" />
+                            <circle cx="19" cy="4" r="1.6" fill="#15210a" />
+                            <path
+                              d="M21 19v6M18 22.5l3 3 3-3"
+                              stroke="#15210a"
+                              strokeWidth="2.4"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </span>
+                        <span className="lbl">FILL</span>
+                      </button>
+                      <div className="cash-actions">
+                        <button
+                          onClick={() => open("fund")}
+                          disabled={me.status !== "active"}
+                        >
+                          Add money
+                        </button>
+                        <button
+                          onClick={() => open("payout")}
+                          disabled={
+                            me.status !== "active" ||
+                            BigInt(me.balances.availableCash) <= 0n
+                          }
+                        >
+                          Withdraw
+                        </button>
+                      </div>
+                      <button
+                        className="scene-act spark"
+                        aria-label="Spark"
+                        disabled={
+                          me.status !== "active" ||
+                          BigInt(me.balances.availableUnits) <= 0n
+                        }
+                        onClick={() => open("sell")}
+                      >
+                        <span className="orb">
+                          <svg
+                            width="40"
+                            height="44"
+                            viewBox="0 0 40 44"
+                            fill="none"
+                          >
+                            <path
+                              d="M20 3c2 7 11 11 11 22a11 11 0 0 1-22 0c0-6 3-9 5-12 0 4 2 6 4 6-1-6 0-11 2-16z"
+                              fill="#2a0e03"
+                            />
+                            <path
+                              d="M20 24c1 3 5 4 5 9a5 5 0 0 1-10 0c0-3 2-4 3-6 0 2 1 3 2 3z"
+                              fill="#ffc07a"
+                            />
+                          </svg>
+                        </span>
+                        <span className="lbl">SPARK</span>
+                      </button>
+                    </div>
+                    {me.intents.some((i) => !terminal.has(i.state)) && (
+                      <button
+                        className="pending-link"
                         onClick={() => setTab("activity")}
                       >
-                        View all
+                        View pending activity
                       </button>
-                    </section>
-                    <section className="card activity-list">
-                      {me.intents.length ? (
-                        me.intents.slice(0, 5).map(operation)
-                      ) : (
-                        <div className="empty">
-                          <p>No activity yet.</p>
-                        </div>
-                      )}
-                    </section>
+                    )}
                   </>
                 )}
                 {tab === "activity" && (
-                  <>
+                  <section className="utility-content">
                     <div className="section-heading">
                       <div>
                         <h1>Activity</h1>
@@ -598,10 +629,10 @@ function App() {
                           </div>
                         ))}
                     </details>
-                  </>
+                  </section>
                 )}
                 {tab === "settings" && (
-                  <>
+                  <section className="utility-content">
                     <h1>Settings</h1>
                     <div className="settings-grid">
                       <section className="card">
@@ -788,7 +819,7 @@ function App() {
                         </button>
                       </form>
                     </details>
-                  </>
+                  </section>
                 )}
               </>
             )}
@@ -832,6 +863,24 @@ function App() {
         </div>
         {me ? (
           <>
+            <div className="help-links">
+              <button
+                onClick={() => {
+                  setTab("activity");
+                  setHelp(false);
+                }}
+              >
+                Activity
+              </button>
+              <button
+                onClick={() => {
+                  setTab("settings");
+                  setHelp(false);
+                }}
+              >
+                Settings
+              </button>
+            </div>
             <h3>Back up wallet</h3>
             <p>
               Save a recovery code for this demo account. This is not a seed

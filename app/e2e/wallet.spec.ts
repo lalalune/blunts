@@ -81,6 +81,7 @@ test("complete browser cycle survives reload and has no serious accessibility vi
     page.getByRole("dialog").getByText("completed", { exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Back to wallet" }).click();
+  await page.getByRole("button", { name: "Wallet help" }).click();
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByLabel("Destination label").fill("Test Cash App");
   await page
@@ -106,6 +107,7 @@ test("complete browser cycle survives reload and has no serious accessibility vi
     page.getByRole("dialog").getByText("completed", { exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Back to wallet" }).click();
+  await page.getByRole("button", { name: "Wallet help" }).click();
   await page.getByRole("button", { name: "Activity", exact: true }).click();
   const download = page.waitForEvent("download");
   await page.getByRole("link", { name: "Download statement" }).click();
@@ -134,12 +136,7 @@ test("reject and ambiguous submission are visible and recover without duplicate 
     .getByRole("button", { name: "Add demo funds" })
     .click();
   await page.reload();
-  await expect(
-    page
-      .locator("section.card")
-      .filter({ hasText: "Available" })
-      .locator(".big-number"),
-  ).toHaveText("$100.00");
+  await expect(page.locator(".scene-cash strong")).toHaveText("$100.00");
   await page.getByRole("button", { name: "Fill", exact: true }).click();
   await page.getByText("Test a failure or recovery path").click();
   await page.getByLabel("Simulation scenario").selectOption("reject");
@@ -150,19 +147,14 @@ test("reject and ambiguous submission are visible and recover without duplicate 
   ).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
-  await expect(
-    page
-      .locator("section.card")
-      .filter({ hasText: "Available" })
-      .locator(".big-number"),
-  ).toHaveText("$100.00");
+  await expect(page.locator(".scene-cash strong")).toHaveText("$100.00");
 });
 test("setup overlays the tray and backup lives in help", async ({ page }) => {
   await page.goto("/");
   await expect(
     page.getByRole("dialog", { name: "Wallet setup" }),
   ).toBeVisible();
-  await expect(page.locator(".tray-scene canvas")).toBeVisible();
+  await expect(page.locator(".tray-scene canvas").first()).toBeVisible();
   await page.getByRole("button", { name: "Wallet help" }).click();
   await page
     .getByRole("button", { name: "Recover wallet", exact: true })
@@ -182,4 +174,55 @@ test("setup overlays the tray and backup lives in help", async ({ page }) => {
   await expect(help.locator("code.recovery")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(help).not.toBeVisible();
+});
+
+test("original scene fills, rolls and burns after confirmed transactions", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== "chromium",
+    "Animation smoke on Chromium; account flow runs on all engines.",
+  );
+  test.setTimeout(240000);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => {
+    if (
+      message.type() === "error" &&
+      /THREE|shader|WebGLProgram/.test(message.text())
+    )
+      errors.push(message.text());
+  });
+  await signup(page);
+  await expect(
+    page.getByText("Demo · no real money", { exact: true }),
+  ).toHaveCount(0);
+  await expect(page.locator(".balance-grid")).toHaveCount(0);
+  await transaction(page, "Add money", "1110");
+  await transaction(page, "Fill", "1100");
+  const scene = page.locator(".tray-scene");
+  await expect(scene).toHaveAttribute("data-animation", "fill");
+  await expect(scene).toHaveAttribute("data-animating", "true");
+  await page.screenshot({ path: testInfo.outputPath("restored-fill.png") });
+  await expect(scene).toHaveAttribute("data-animating", "false", {
+    timeout: 120000,
+  });
+  await expect(scene).toHaveAttribute("data-animation", "fill");
+  await page.screenshot({ path: testInfo.outputPath("restored-scene.png") });
+  await page.getByRole("button", { name: "Spark", exact: true }).click();
+  await page.getByLabel("Sell all available units").check();
+  await page.getByRole("button", { name: "Review quote" }).click();
+  await page.getByRole("button", { name: "Confirm", exact: true }).click();
+  await expect(
+    page.getByRole("dialog").getByText("completed", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Back to wallet" }).click();
+  await expect(scene).toHaveAttribute("data-animation", "spark");
+  await expect(scene).toHaveAttribute("data-animating", "true");
+  await page.screenshot({ path: testInfo.outputPath("restored-spark.png") });
+  await expect(scene).toHaveAttribute("data-animating", "false", {
+    timeout: 20000,
+  });
+  expect(errors).toEqual([]);
 });

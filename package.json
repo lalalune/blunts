@@ -35,6 +35,8 @@
     "@fastify/helmet": "^13.1.1",
     "@fastify/rate-limit": "^11.2.0",
     "@fastify/static": "^10.1.5",
+    "@fontsource/bungee": "^5.3.0",
+    "@fontsource/figtree": "^5.3.0",
     "fastify": "^5.12.5",
     "pg": "^8.23.1",
     "react": "^19.3.0",
