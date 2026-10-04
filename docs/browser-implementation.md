@@ -118,3 +118,7 @@ The dashboard rewrite was a visual regression. The main screen again uses the or
 ## Original menu and counters — October 3
 
 Restored the prototype's three-line menu and History / How It Works entries, with Wallet added for backup, recovery and account settings. The blunt and band counters replace the added app-name header and use confirmed investment value ($100 per blunt, ten per band). Removed the separate Add money / Withdraw controls from the scene. Fill contains funding and investing; Spark contains selling and cashing out, with explicit continuation after confirmed funding or sale. Empty wallets open funding, and cash-only wallets open cash-out. Provider authorization, settlement and simulation disclosures remain intact.
+
+## Fill and Spark sheets restored — October 3
+
+Replaced the generic amount form and primary transaction-type tabs with the prototype's bottom sheets: blunt/dollar toggle, quarter-blunt Fill increments, blunt Spark increments, large amount display, plus/minus controls, MAX and green/orange action buttons. Payment-source and simulator controls are tucked under Options. Quotes and confirmed server intents still govern execution; no fake Cash App links or client-side settlement were restored. Continuations retain the funded amount or settled available cash. Browser coverage exercises the stepper, dollar entry, MAX, reloads, failures and full transaction cycle.

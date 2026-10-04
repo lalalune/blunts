@@ -24,8 +24,8 @@ async function transaction(page: Page, button: string, amount: string) {
       exact: true,
     })
     .click();
-  if (button === "Add money")
-    await page.getByRole("button", { name: "Add funds", exact: true }).click();
+
+  await page.getByRole("button", { name: "Dollars", exact: true }).click();
   await page.getByLabel("Amount in dollars").fill(amount);
   await page.getByRole("button", { name: "Review quote" }).click();
   await expect(page.getByRole("dialog")).toContainText("Blunts fee");
@@ -52,10 +52,21 @@ test("complete browser cycle survives reload and has no serious accessibility vi
       ["serious", "critical"].includes(v.impact ?? ""),
     ),
   ).toEqual([]);
+  await page.getByRole("button", { name: "Fill", exact: true }).click();
+  await expect(page.locator(".picker-value")).toHaveText("$25");
+  await page.getByRole("button", { name: "More", exact: true }).click();
+  await expect(page.locator(".picker-value")).toHaveText("$50");
+  await page.getByRole("button", { name: "Less", exact: true }).click();
+  await expect(page.locator(".blunt-selection strong")).toHaveText("¼");
+  await page.screenshot({ path: testInfo.outputPath("fill-sheet.png") });
+  await page
+    .getByRole("button", { name: "Close transaction", exact: true })
+    .click();
   await transaction(page, "Add money", "2000");
   await page.reload();
   await expect(page.getByText("$2,000.00").first()).toBeVisible();
   await page.getByRole("button", { name: "Fill", exact: true }).click();
+  await page.getByRole("button", { name: "Dollars", exact: true }).click();
   await page.getByLabel("Amount in dollars").fill("2000");
   await page.getByRole("button", { name: "Review quote" }).click();
   await expect(page.getByRole("dialog")).toContainText("$20.00");
@@ -88,6 +99,7 @@ test("complete browser cycle survives reload and has no serious accessibility vi
   });
   await page.getByRole("button", { name: "Spark", exact: true }).click();
   await page.getByLabel("Sell all available units").check();
+  await page.screenshot({ path: testInfo.outputPath("spark-sheet.png") });
   await page.getByRole("button", { name: "Review quote" }).click();
   await page.getByRole("button", { name: "Confirm" }).click();
   await expect(
@@ -110,6 +122,7 @@ test("complete browser cycle survives reload and has no serious accessibility vi
   ).toBeVisible();
   await page.getByRole("button", { name: "Wallet", exact: true }).click();
   await page.getByRole("button", { name: "Spark", exact: true }).click();
+  await page.getByRole("button", { name: "Dollars", exact: true }).click();
   await page.getByLabel("Amount in dollars").fill("1960.20");
   await page
     .getByRole("dialog")
@@ -140,7 +153,9 @@ test("reject and ambiguous submission are visible and recover without duplicate 
 }) => {
   await signup(page);
   await page.getByRole("button", { name: "Fill", exact: true }).click();
+  await page.getByRole("button", { name: "Dollars", exact: true }).click();
   await page.getByLabel("Amount in dollars").fill("100");
+  await page.getByText("Options", { exact: true }).click();
   await page.getByText("Test a failure or recovery path").click();
   await page.getByLabel("Simulation scenario").selectOption("timeout");
   await page.getByRole("button", { name: "Review quote" }).click();
@@ -152,6 +167,7 @@ test("reject and ambiguous submission are visible and recover without duplicate 
   await page.reload();
   await expect(page.locator(".scene-cash strong")).toHaveText("$100.00");
   await page.getByRole("button", { name: "Fill", exact: true }).click();
+  await page.getByText("Options", { exact: true }).click();
   await page.getByText("Test a failure or recovery path").click();
   await page.getByLabel("Simulation scenario").selectOption("reject");
   await page.getByRole("button", { name: "Review quote" }).click();

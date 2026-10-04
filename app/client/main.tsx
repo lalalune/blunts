@@ -7,6 +7,7 @@ import "@fontsource/figtree/latin-800.css";
 import "./style.css";
 import "./scene-layout.css";
 import { Tray } from "./Tray";
+import { AmountPicker } from "./AmountPicker";
 import { request, native, shareStatement, onResume, onBack } from "./platform";
 type Intent = {
   id: string;
@@ -197,7 +198,20 @@ function App() {
     setAction(kind);
     setQuote(null);
     setIntent(null);
-    setAmount("100");
+    setAmount(
+      kind === "fund" || kind === "buy"
+        ? "25"
+        : String(
+            Math.min(
+              100,
+              Number(
+                kind === "sell"
+                  ? (me?.balances.investmentValue ?? "0")
+                  : (me?.balances.availableCash ?? "0"),
+              ) / 100,
+            ),
+          ),
+    );
     setPassword("");
     setAll(false);
     setScenario("success");
@@ -1099,6 +1113,7 @@ function App() {
       </dialog>
       <dialog
         ref={dialog}
+        className={`transaction-sheet ${action === "fund" || action === "buy" ? "fill" : "spark"}`}
         onCancel={(e) => {
           e.preventDefault();
           close();
@@ -1106,7 +1121,7 @@ function App() {
         aria-labelledby="dialog-title"
       >
         <div className="dialog-head">
-          <span>Demo</span>
+          <span />
           <button
             className="quiet"
             aria-label="Close transaction"
@@ -1116,30 +1131,9 @@ function App() {
             ×
           </button>
         </div>
-        <h2 id="dialog-title">{action ? labels[action] : ""}</h2>
-        {!quote && !currentIntent && (
-          <div className="flow-options" aria-label="Transaction type">
-            {(action === "fund" || action === "buy"
-              ? [
-                  ["fund", "Add funds"],
-                  ["buy", "Invest"],
-                ]
-              : [
-                  ["sell", "Sell"],
-                  ["payout", "Cash out"],
-                ]
-            ).map(([kind, label]) => (
-              <button
-                key={kind}
-                aria-pressed={action === kind}
-                disabled={busy}
-                onClick={() => open(kind as Kind)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        )}
+        <h2 id="dialog-title" className="sr-only">
+          {action ? labels[action] : ""}
+        </h2>
         {currentIntent ? (
           <>
             <div className="callout">
@@ -1176,7 +1170,16 @@ function App() {
               (action === "fund" || action === "sell") && (
                 <button
                   className="primary"
-                  onClick={() => open(action === "fund" ? "buy" : "payout")}
+                  onClick={() => {
+                    const nextAmount =
+                      action === "fund"
+                        ? amount
+                        : (
+                            Number(me?.balances.availableCash ?? "0") / 100
+                          ).toFixed(2);
+                    open(action === "fund" ? "buy" : "payout");
+                    setAmount(nextAmount);
+                  }}
                   disabled={busy}
                 >
                   {action === "fund"
@@ -1245,36 +1248,22 @@ function App() {
           </>
         ) : (
           <form onSubmit={preview}>
-            <p>
-              {action === "fund"
-                ? "Add demo funds."
-                : action === "buy"
-                  ? "Buy demo QQQ. 1% fee."
-                  : action === "sell"
-                    ? "Sell demo QQQ. 1% fee."
-                    : "Choose a destination from Settings."}
-            </p>
-            <label>
-              Amount in dollars
-              <input
-                autoFocus
-                inputMode="decimal"
-                value={amount}
-                disabled={all}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-                pattern="[0-9]+(\.[0-9]{1,2})?"
+            {action && (
+              <AmountPicker
+                key={action}
+                kind={action}
+                amount={amount}
+                setAmount={setAmount}
+                all={all}
+                setAll={setAll}
+                available={
+                  action === "fund"
+                    ? "100000000"
+                    : action === "buy" || action === "payout"
+                      ? (me?.balances.availableCash ?? "0")
+                      : (me?.balances.investmentValue ?? "0")
+                }
               />
-            </label>
-            {action === "sell" && (
-              <label className="check">
-                <input
-                  type="checkbox"
-                  checked={all}
-                  onChange={(e) => setAll(e.target.checked)}
-                />{" "}
-                Sell all available units
-              </label>
             )}
             {action === "payout" && (
               <>
@@ -1305,28 +1294,89 @@ function App() {
                 </label>
               </>
             )}
-            <details>
-              <summary>Test a failure or recovery path</summary>
-              <label>
-                Simulation scenario
-                <select
-                  value={scenario}
-                  onChange={(e) => setScenario(e.target.value)}
-                >
-                  <option value="success">Successful execution</option>
-                  <option value="reject">Provider rejection</option>
-                  <option value="timeout">
-                    Timeout after acceptance → recover by lookup
-                  </option>
-                  {["buy", "sell"].includes(action ?? "") && (
-                    <option value="partial">Partial fill → completion</option>
-                  )}
-                </select>
-              </label>
-            </details>
-            <button className="primary" disabled={busy}>
-              {busy ? "Preparing…" : "Review quote"}
+            <button
+              className="picker-go"
+              aria-label={`${action === "fund" || action === "buy" ? "Fill" : "Spark"} · Review quote`}
+              disabled={busy}
+            >
+              <svg
+                width="22"
+                height="24"
+                viewBox="0 0 42 44"
+                fill="none"
+                aria-hidden="true"
+              >
+                {action === "fund" || action === "buy" ? (
+                  <>
+                    <path
+                      d="M5 26c6 7 26 7 32 0"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                    />
+                    <circle cx="14" cy="10" r="3" fill="currentColor" />
+                    <circle cx="23" cy="15" r="3" fill="currentColor" />
+                    <circle cx="29" cy="7" r="2.6" fill="currentColor" />
+                  </>
+                ) : (
+                  <path
+                    d="M20 3c2 7 11 11 11 22a11 11 0 0 1-22 0c0-6 3-9 5-12 0 4 2 6 4 6-1-6 0-11 2-16z"
+                    fill="currentColor"
+                  />
+                )}
+              </svg>
+              {busy
+                ? "Preparing…"
+                : action === "fund" || action === "buy"
+                  ? "FILL"
+                  : "SPARK"}
             </button>
+            <details className="transaction-options">
+              <summary>Options</summary>
+              {!quote && !currentIntent && (
+                <div className="flow-options" aria-label="Transaction type">
+                  {(action === "fund" || action === "buy"
+                    ? [
+                        ["fund", "Add funds"],
+                        ["buy", "Invest"],
+                      ]
+                    : [
+                        ["sell", "Sell"],
+                        ["payout", "Cash out"],
+                      ]
+                  ).map(([kind, label]) => (
+                    <button
+                      key={kind}
+                      type="button"
+                      aria-pressed={action === kind}
+                      disabled={busy}
+                      onClick={() => open(kind as Kind)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <details>
+                <summary>Test a failure or recovery path</summary>
+                <label>
+                  Simulation scenario
+                  <select
+                    value={scenario}
+                    onChange={(e) => setScenario(e.target.value)}
+                  >
+                    <option value="success">Successful execution</option>
+                    <option value="reject">Provider rejection</option>
+                    <option value="timeout">
+                      Timeout after acceptance → recover by lookup
+                    </option>
+                    {["buy", "sell"].includes(action ?? "") && (
+                      <option value="partial">Partial fill → completion</option>
+                    )}
+                  </select>
+                </label>
+              </details>
+            </details>
           </form>
         )}
         {error && (
