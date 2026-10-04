@@ -82,9 +82,11 @@ export function AmountPicker({
   const quarter = Number((selected % 10000n) / 2500n);
   const label = all
     ? "ALL"
-    : fill
-      ? `${whole || ""}${["", "¼", "½", "¾"][quarter]}` || "0"
-      : `×${whole || 1n}`;
+    : selected % (fill ? 2500n : 10000n) !== 0n
+      ? `×${Number(selected) / 10000}`
+      : fill
+        ? `${whole || ""}${["", "¼", "½", "¾"][quarter]}` || "0"
+        : `×${whole || 1n}`;
   const choose = (v: bigint) => {
     setAmount(`${v / 100n}.${String(v % 100n).padStart(2, "0")}`);
     setAll(!fill && kind === "sell" && v >= limit);

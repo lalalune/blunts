@@ -199,18 +199,22 @@ function App() {
     setQuote(null);
     setIntent(null);
     setAmount(
-      kind === "fund" || kind === "buy"
+      kind === "fund"
         ? "25"
-        : String(
-            Math.min(
-              100,
-              Number(
-                kind === "sell"
-                  ? (me?.balances.investmentValue ?? "0")
-                  : (me?.balances.availableCash ?? "0"),
-              ) / 100,
+        : kind === "buy"
+          ? String(
+              Math.min(25, Number(me?.balances.availableCash ?? "0") / 100),
+            )
+          : String(
+              Math.min(
+                100,
+                Number(
+                  kind === "sell"
+                    ? (me?.balances.investmentValue ?? "0")
+                    : (me?.balances.availableCash ?? "0"),
+                ) / 100,
+              ),
             ),
-          ),
     );
     setPassword("");
     setAll(false);
