@@ -189,18 +189,18 @@ export function AmountPicker({
         </button>
       )}
       {kind === "sell" && (
-        <label className="picker-max">
-          <input
-            type="checkbox"
-            aria-label="Sell all available units"
-            checked={all}
-            onChange={(e) => {
-              setAll(e.target.checked);
-              if (e.target.checked) choose(limit);
-            }}
-          />{" "}
+        <button
+          className="picker-max"
+          type="button"
+          aria-label="Sell all available units"
+          aria-pressed={all}
+          onClick={() => {
+            if (all) setAll(false);
+            else choose(limit);
+          }}
+        >
           MAX {dollars(limit)}
-        </label>
+        </button>
       )}
     </div>
   );

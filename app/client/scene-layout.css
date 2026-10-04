@@ -537,9 +537,17 @@ dialog.transaction-sheet {
     sans-serif;
   color: var(--dim);
 }
-.picker-max input {
-  width: 16px;
-  accent-color: var(--ember);
+.picker-max {
+  flex-direction: row;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: none;
+  border: 1px solid var(--line);
+}
+.picker-max[aria-pressed="true"] {
+  border-color: var(--ember);
+  color: #ffab6b;
+  background: #ff6a2b12;
 }
 .picker-go {
   display: flex;

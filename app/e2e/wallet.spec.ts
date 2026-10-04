@@ -98,7 +98,7 @@ test("complete browser cycle survives reload and has no serious accessibility vi
     fullPage: true,
   });
   await page.getByRole("button", { name: "Spark", exact: true }).click();
-  await page.getByLabel("Sell all available units").check();
+  await page.getByRole("button", { name: "Sell all available units" }).click();
   await page.screenshot({ path: testInfo.outputPath("spark-sheet.png") });
   await page.getByRole("button", { name: "Review quote" }).click();
   await page.getByRole("button", { name: "Confirm" }).click();
@@ -243,7 +243,7 @@ test("original scene fills, rolls and burns after confirmed transactions", async
   await expect(scene).toHaveAttribute("data-animation", "fill");
   await page.screenshot({ path: testInfo.outputPath("restored-scene.png") });
   await page.getByRole("button", { name: "Spark", exact: true }).click();
-  await page.getByLabel("Sell all available units").check();
+  await page.getByRole("button", { name: "Sell all available units" }).click();
   await page.getByRole("button", { name: "Review quote" }).click();
   await page.getByRole("button", { name: "Confirm", exact: true }).click();
   await expect(
