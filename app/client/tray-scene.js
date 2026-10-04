@@ -1028,6 +1028,7 @@ float vn(vec3 x){ vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3. - 2. * f
   const setBusy = (value) => {
     busy = value;
     host.dataset.animating = String(value);
+    if (!value) host.dataset.phase = "idle";
   };
   const setCounts = () => {};
   const setPips = () => {};
@@ -1035,7 +1036,14 @@ float vn(vec3 x){ vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3. - 2. * f
   const haptic = () => {};
   const showStamp = (text) => {
     const el = host.querySelector(".scene-stamp");
-    if (el) el.textContent = text;
+    if (el) {
+      el.classList.remove("show");
+      el.textContent = text;
+      if (text) {
+        void el.offsetWidth;
+        el.classList.add("show");
+      }
+    }
   };
   /* ================= TWEENS ================= */
   const tweens = [];
@@ -1679,6 +1687,7 @@ float vn(vec3 x){ vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3. - 2. * f
     await tween(
       2.6,
       (t) => {
+        if (t > 0.2) host.dataset.phase = "burning";
         burners.forEach((b, i) => {
           b.m.material.userData.uBurn.value = t;
           // ember rides the dissolve edge; geometry is untouched

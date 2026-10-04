@@ -160,6 +160,13 @@ test("original scene fills, bundles and burns with one press", async ({
   await page.emulateMedia({ reducedMotion: "no-preference" });
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
+  page.on("console", (message) => {
+    if (
+      message.type() === "error" &&
+      /THREE|shader|WebGLProgram/.test(message.text())
+    )
+      errors.push(message.text());
+  });
   await signup(page);
   await act(page, "Fill", "1100");
   const scene = page.locator(".tray-scene");
@@ -173,6 +180,7 @@ test("original scene fills, bundles and burns with one press", async ({
   await act(page, "Spark", "1089", true);
   await expect(scene).toHaveAttribute("data-animation", "spark");
   await expect(scene).toHaveAttribute("data-animating", "true");
+  await expect(scene).toHaveAttribute("data-phase", "burning");
   await page.screenshot({ path: testInfo.outputPath("restored-spark.png") });
   await expect(scene).toHaveAttribute("data-animating", "false", {
     timeout: 30000,

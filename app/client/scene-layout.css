@@ -567,3 +567,44 @@ dialog.transaction-sheet {
   font-size: 12px;
   margin-top: 8px;
 }
+
+.scene-stamp {
+  position: absolute;
+  left: 50%;
+  top: 33%;
+  z-index: 3;
+  pointer-events: none;
+  font-family: "Bungee", Impact, sans-serif;
+  font-size: 44px;
+  line-height: 0.9;
+  text-align: center;
+  color: var(--gold);
+  text-shadow:
+    0 4px 0 #5b340d,
+    0 0 40px #f5c45180;
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(-7deg);
+}
+.scene-stamp.show {
+  animation: scene-stamp 1.4s cubic-bezier(0.2, 1.5, 0.4, 1) forwards;
+}
+@keyframes scene-stamp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-7deg) scale(0.3);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-7deg) scale(1.1);
+  }
+  28% {
+    transform: translate(-50%, -50%) rotate(-7deg) scale(1);
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -65%) rotate(-7deg);
+  }
+}
