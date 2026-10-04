@@ -1,7 +1,7 @@
 # Blunts
 
 One React app for the web, iOS and Android. Wallet setup appears over the 3D tray;
-backup, recovery and sign-out live under **?**. No subscription. The simulated
+backup, recovery and sign-out live under **Menu → Wallet**. No subscription. The simulated
 investment flow charges an uncapped 1% on each completed Fill/Spark conversion.
 
 **Current release: simulated money only.** The browser and Capacitor apps use a
@@ -24,10 +24,11 @@ npm start
 ```
 
 Create a test handle and password in the overlay, accept the demo terms, then
-Add money → Fill → Spark → Withdraw. Add a test destination in Settings first.
-Use **? → Back up wallet** to view the initially issued recovery code or replace
+use **Fill → Add funds → Continue to invest**, then **Spark → Sell → Continue to cash out**.
+Add a test destination under **Menu → Wallet → Settings** before cashing out.
+Use **Menu → Wallet → Back up wallet** to view the initially issued recovery code or replace
 it after confirming your password. Replacing a code invalidates the old one.
-Signed-out users can choose **? → Recover wallet**. This code recovers a demo
+Signed-out users can choose **Menu → Wallet → Recover wallet**. This code recovers a demo
 account; it is NOT a blockchain seed phrase or wallet key backup.
 
 Records survive restart in ignored `data/blunts/`. Only one process may open
@@ -225,8 +226,8 @@ The proposed provider credentials are not consumed by this code yet. Adding
 ### Product and provider gates
 
 Keep one chain and one investment first. Prove deposits and withdrawals before
-introducing trading. The normal surface stays Available / Invested, Add money /
-Withdraw, Fill / Spark. Show total fees and settlement expectations before the
+introducing trading. The main scene keeps the blunt/band counters, balance, and Fill / Spark.
+Funding and withdrawals belong inside those two flows. Show total fees and settlement expectations before the
 user confirms; do not hide provider-required disclosures to achieve minimal copy.
 
 [Dinari US requirements](https://docs.dinari.com/docs/us) describe dedicated
