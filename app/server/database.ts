@@ -126,5 +126,17 @@ export async function migrate(db: Database) {
       );
       await tx.query("INSERT INTO schema_version VALUES (3,$1)", [Date.now()]);
     }
+    if (
+      !(await tx.query("SELECT version FROM schema_version WHERE version=4"))
+        .length
+    ) {
+      await tx.query(
+        `CREATE TABLE flows (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), kind TEXT NOT NULL, amount TEXT NOT NULL, fingerprint TEXT NOT NULL, state TEXT NOT NULL, intent_id TEXT NOT NULL REFERENCES intents(id), error TEXT, created_at BIGINT NOT NULL, updated_at BIGINT NOT NULL, UNIQUE(user_id,id))`,
+      );
+      await tx.query(
+        `CREATE UNIQUE INDEX one_active_flow ON flows(user_id) WHERE state IN ('funding','investing','selling')`,
+      );
+      await tx.query("INSERT INTO schema_version VALUES (4,$1)", [Date.now()]);
+    }
   });
 }

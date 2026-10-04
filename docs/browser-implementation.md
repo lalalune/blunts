@@ -122,3 +122,10 @@ Restored the prototype's three-line menu and History / How It Works entries, wit
 ## Fill and Spark sheets restored — October 3
 
 Replaced the generic amount form and primary transaction-type tabs with the prototype's bottom sheets: blunt/dollar toggle, quarter-blunt Fill increments, blunt Spark increments, large amount display, plus/minus controls, MAX and green/orange action buttons. Fill and Spark omit transaction-type and simulator controls. Background taps dismiss the sheets; the close icon is removed. Failure scenarios remain covered by automated API/browser tests. Quotes and confirmed server intents still govern execution; no fake Cash App links or client-side settlement were restored. Continuations retain the funded amount or settled available cash. Browser coverage exercises the stepper, dollar entry, MAX, reloads, failures and full transaction cycle.
+
+
+## One-action Fill and Spark — October 4
+
+Compared the complete flow with the original import (`9e91c76`). Fill now closes its sheet on the first press and submits one durable instruction. The backend authorizes simulated funding, waits for settlement and submits the investment automatically. Spark closes on the first press and submits the sale; its confirmed balance reduction drives the existing burn animation. Quotes, confirmation screens and separate deposit/investment steps are removed from these UI flows. A small 1% fee label remains before submission. Spark currently settles to wallet USDC; actual external payment rails remain unconnected.
+
+Flow IDs persist before the request, retries reuse the ID, and one active flow per account prevents overlapping commands. A lost response can be retried after reload without duplicate funding. Worker transitions and the next-stage instruction commit in one database transaction. Failed funding never starts an investment; failed investment leaves funds available in the wallet. Snapshot schema 2 includes flows and restores schema 1 snapshots with no flows. Tests cover restart/replay, mismatched keys, CSRF, failure stages, reconciliation and direct Fill/Spark browser interaction.

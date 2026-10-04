@@ -379,3 +379,136 @@ test("a return stops still-unsubmitted investment commands before provider accep
     await db.close();
   }
 });
+
+test("one Fill survives restart, deduplicates, invests once, and Spark settles once", async () => {
+  const { createFlow } = await import("../server/domain.js");
+  const dir = await mkdtemp(join(tmpdir(), "blunts-flow-"));
+  let db = await setup(join(dir, "db"));
+  const key = randomUUID();
+  try {
+    await db.transaction((tx) =>
+      createFlow(tx, user, key, { kind: "fill", amount: "1000" }),
+    );
+    await advance(db, 1);
+    await db.close();
+    db = await openDatabase(join(dir, "db"));
+    await migrate(db);
+    await db.transaction((tx) =>
+      createFlow(tx, user, key, { kind: "fill", amount: "1000" }),
+    );
+    await assert.rejects(
+      db.transaction((tx) =>
+        createFlow(tx, user, key, { kind: "fill", amount: "2000" }),
+      ),
+      /already used/,
+    );
+    await assert.rejects(
+      db.transaction((tx) =>
+        createFlow(tx, user, randomUUID(), { kind: "fill", amount: "100" }),
+      ),
+      /still processing/,
+    );
+    await advance(db, 8);
+    assert.equal((await balances(db, user)).investmentValue, "99000");
+    assert.equal((await balances(db, user)).availableCash, "0");
+    assert.equal((await db.query("SELECT * FROM intents")).length, 2);
+    await db.transaction((tx) =>
+      createFlow(tx, user, key, { kind: "fill", amount: "1000" }),
+    );
+    await advance(db);
+    assert.equal((await db.query("SELECT * FROM intents")).length, 2);
+    const spark = randomUUID();
+    await db.transaction((tx) =>
+      createFlow(tx, user, spark, { kind: "spark", amount: "990", all: true }),
+    );
+    await advance(db);
+    await db.transaction((tx) =>
+      createFlow(tx, user, spark, { kind: "spark", amount: "990", all: true }),
+    );
+    assert.equal((await balances(db, user)).units, "0");
+    assert.equal((await balances(db, user)).availableCash, "98010");
+    assert.equal(
+      (await db.query("SELECT * FROM flows WHERE state='completed'")).length,
+      2,
+    );
+    assert.equal((await reconcile(db)).ok, true);
+  } finally {
+    await db.close();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("failed composite stages preserve cash and never start an unauthorized next leg", async () => {
+  const { createFlow } = await import("../server/domain.js");
+  const db = await setup();
+  try {
+    const f = await db.transaction((tx) =>
+      createFlow(tx, user, randomUUID(), { kind: "fill", amount: "100" }),
+    );
+    await db.query("UPDATE intents SET scenario='reject' WHERE id=$1", [
+      f.intent_id,
+    ]);
+    await advance(db);
+    assert.equal(
+      (await db.query("SELECT state FROM flows WHERE id=$1", [f.id]))[0].state,
+      "failed",
+    );
+    assert.equal(
+      (await db.query("SELECT * FROM intents WHERE kind='buy'")).length,
+      0,
+    );
+    const next = await db.transaction((tx) =>
+      createFlow(tx, user, randomUUID(), { kind: "fill", amount: "100" }),
+    );
+    await advance(db, 2);
+    const [flow] = await db.query("SELECT * FROM flows WHERE id=$1", [next.id]);
+    assert.equal(flow.state, "investing");
+    await db.query("UPDATE intents SET scenario='reject' WHERE id=$1", [
+      flow.intent_id,
+    ]);
+    await advance(db);
+    assert.equal((await balances(db, user)).availableCash, "10000");
+    assert.equal((await balances(db, user)).investmentValue, "0");
+    assert.equal((await reconcile(db)).ok, true);
+  } finally {
+    await db.close();
+  }
+});
+
+test("snapshot restore includes an unfinished Fill and resumes it once", async () => {
+  const { execFile } = await import("node:child_process");
+  const { promisify } = await import("node:util");
+  const exec = promisify(execFile);
+  const { createFlow } = await import("../server/domain.js");
+  const dir = await mkdtemp(join(tmpdir(), "blunts-snapshot-flow-"));
+  let db = await setup(join(dir, "source"));
+  try {
+    await db.transaction((tx) =>
+      createFlow(tx, user, randomUUID(), { kind: "fill", amount: "100" }),
+    );
+    await advance(db, 1);
+    await db.close();
+    const snapshot = join(dir, "snapshot.json");
+    await exec(
+      process.execPath,
+      ["--import", "tsx", "app/server/backup.ts", "backup", snapshot],
+      { env: { ...process.env, DATABASE_URL: join(dir, "source") } },
+    );
+    await exec(
+      process.execPath,
+      ["--import", "tsx", "app/server/backup.ts", "restore", snapshot],
+      { env: { ...process.env, DATABASE_URL: join(dir, "restored") } },
+    );
+    db = await openDatabase(join(dir, "restored"));
+    await advance(db, 8);
+    assert.equal((await balances(db, user)).investmentValue, "9900");
+    assert.equal(
+      (await db.query("SELECT state FROM flows"))[0].state,
+      "completed",
+    );
+    assert.equal((await db.query("SELECT * FROM intents")).length, 2);
+  } finally {
+    await db.close();
+    await rm(dir, { recursive: true, force: true });
+  }
+});

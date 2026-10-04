@@ -22,23 +22,18 @@ type Me = {
   csrf: string;
   balances: Record<string, string>;
   intents: Intent[];
+  flows: { id: string; kind: string; state: string; error: string | null }[];
   destinations: { id: string; label: string; rail: string; address: string }[];
   support: { id: string; message: string }[];
 };
-type Quote = {
-  id: string;
-  kind: Kind;
-  gross: string;
-  net: string;
-  fee: string;
-  debit: string;
-  units: string;
-  expiresAt: number;
+type PendingFlow = {
+  key: string;
+  body: { kind: "fill" | "spark"; amount: string; all: boolean };
 };
 const labels: Record<Kind, string> = {
-  fund: "Add money",
+  fund: "Fill",
   buy: "Fill · Buy investment",
-  sell: "Spark · Sell investment",
+  sell: "Spark",
   payout: "Withdraw USDC",
 };
 const terminal = new Set([
@@ -89,14 +84,12 @@ function App() {
   const [authMode, setAuthMode] = useState("register"),
     [busy, setBusy] = useState(false),
     [recovery, setRecovery] = useState("");
-  const [action, setAction] = useState<Kind | null>(null),
-    [quote, setQuote] = useState<Quote | null>(null),
-    [intent, setIntent] = useState<Intent | null>(null);
-  const [amount, setAmount] = useState("100"),
-    [destination, setDestination] = useState(""),
-    [password, setPassword] = useState("");
-  const [all, setAll] = useState(false),
-    [clock, setClock] = useState(Date.now());
+  const [action, setAction] = useState<Kind | null>(null);
+  const [pendingCommand, setPendingCommand] = useState<PendingFlow | null>(
+    null,
+  );
+  const [amount, setAmount] = useState("25");
+  const [all, setAll] = useState(false);
   const [help, setHelp] = useState(false);
   const [menuPage, setMenuPage] = useState("menu");
   const rolled = BigInt(me?.balances.investmentValue ?? "0") / 10000n;
@@ -127,7 +120,6 @@ function App() {
   );
   const authEpoch = useRef(0);
   const dialog = useRef<HTMLDialogElement>(null),
-    submitKey = useRef(crypto.randomUUID()),
     inFlight = useRef(false);
   async function refresh() {
     const epoch = authEpoch.current;
@@ -175,11 +167,59 @@ function App() {
       dialog.current?.showModal();
     } else dialog.current?.close();
   }, [action]);
+  const activeFlow = me?.flows?.find(
+    (f) => !["completed", "failed"].includes(f.state),
+  );
+  const working = busy || !!activeFlow || !!pendingCommand;
   useEffect(() => {
-    if (!quote) return;
-    const t = setInterval(() => setClock(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, [quote]);
+    setPendingCommand(null);
+    if (!me?.handle) return;
+    try {
+      const stored = localStorage.getItem(`blunts-flow:${me.handle}`);
+      if (stored) {
+        const command = JSON.parse(stored) as PendingFlow;
+        setPendingCommand(command);
+        void run(() => sendFlow(command));
+      }
+    } catch {
+      setError(
+        "Browser storage is unavailable. Enable it before using Fill or Spark.",
+      );
+    }
+  }, [me?.handle]);
+  async function sendFlow(command: PendingFlow) {
+    const handle = me!.handle;
+    try {
+      await api("/flows", command.body, command.key);
+      localStorage.removeItem(`blunts-flow:${handle}`);
+      setPendingCommand(null);
+      await refresh();
+    } catch (e) {
+      if (e instanceof ApiError && e.status >= 400 && e.status < 500) {
+        localStorage.removeItem(`blunts-flow:${handle}`);
+        setPendingCommand(null);
+      }
+      throw e;
+    }
+  }
+  function submitFlow(event: React.FormEvent) {
+    event.preventDefault();
+    if (inFlight.current || working || !action || !me) return;
+    const command: PendingFlow = {
+      key: crypto.randomUUID(),
+      body: { kind: action === "sell" ? "spark" : "fill", amount, all },
+    };
+    // Persist the authorized instruction before I/O; retries reuse this key.
+    try {
+      localStorage.setItem(`blunts-flow:${me.handle}`, JSON.stringify(command));
+    } catch {
+      setError("Allow browser storage before continuing.");
+      return;
+    }
+    setPendingCommand(command);
+    setAction(null);
+    void run(() => sendFlow(command));
+  }
   async function run(fn: () => Promise<void>) {
     if (inFlight.current) return;
     inFlight.current = true;
@@ -196,8 +236,6 @@ function App() {
   }
   function open(kind: Kind) {
     setAction(kind);
-    setQuote(null);
-    setIntent(null);
     setAmount(
       kind === "fund"
         ? "25"
@@ -216,16 +254,13 @@ function App() {
               ),
             ),
     );
-    setPassword("");
     setAll(false);
-    setDestination(me?.destinations[0]?.id ?? "");
     setError("");
   }
   function close() {
     if (busy) return;
     setAction(null);
     setError("");
-    setPassword("");
   }
   async function authenticate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -244,39 +279,6 @@ function App() {
       setNotice("");
     });
   }
-  async function preview(event: React.FormEvent) {
-    event.preventDefault();
-    await run(async () => {
-      const q = await api<Quote>("/quotes", {
-        kind: action,
-        amount,
-        all,
-        destinationId: action === "payout" ? destination : undefined,
-      });
-      submitKey.current = crypto.randomUUID();
-      setClock(Date.now());
-      setQuote(q);
-    });
-  }
-  async function confirm() {
-    if (!quote) return;
-    await run(async () => {
-      const i = await api<Intent>(
-        "/intents",
-        {
-          quoteId: quote.id,
-          scenario: "success",
-          ...(action === "payout" ? { password } : {}),
-        },
-        submitKey.current,
-      );
-      setIntent(i);
-      await refresh();
-    });
-  }
-  const currentIntent = intent
-    ? (me?.intents.find((i) => i.id === intent.id) ?? intent)
-    : null;
   function operation(i: Intent) {
     return (
       <div className="activity-row" key={i.id}>
@@ -540,14 +542,8 @@ function App() {
                       <button
                         className="scene-act fill"
                         aria-label="Fill"
-                        disabled={me.status !== "active"}
-                        onClick={() =>
-                          open(
-                            BigInt(me.balances.availableCash) > 0n
-                              ? "buy"
-                              : "fund",
-                          )
-                        }
+                        disabled={me.status !== "active" || working}
+                        onClick={() => open("fund")}
                       >
                         <span className="orb">
                           <svg
@@ -582,16 +578,10 @@ function App() {
                         aria-label="Spark"
                         disabled={
                           me.status !== "active" ||
-                          (BigInt(me.balances.availableUnits) <= 0n &&
-                            BigInt(me.balances.availableCash) <= 0n)
+                          working ||
+                          BigInt(me.balances.availableUnits) <= 0n
                         }
-                        onClick={() =>
-                          open(
-                            BigInt(me.balances.availableUnits) > 0n
-                              ? "sell"
-                              : "payout",
-                          )
-                        }
+                        onClick={() => open("sell")}
                       >
                         <span className="orb">
                           <svg
@@ -894,6 +884,19 @@ function App() {
             {error}
           </div>
         )}
+        {!action && pendingCommand && !busy && (
+          <button
+            className="pending-link"
+            onClick={() => void run(() => sendFlow(pendingCommand))}
+          >
+            Retry pending action
+          </button>
+        )}
+        {!action && !error && me?.flows?.[0]?.state === "failed" && (
+          <p className="error" role="alert">
+            {me.flows[0].error}
+          </p>
+        )}
         {notice && (
           <div className="notice" role="status">
             {notice}
@@ -1149,205 +1152,56 @@ function App() {
         <h2 id="dialog-title" className="sr-only">
           {action ? labels[action] : ""}
         </h2>
-        {currentIntent ? (
-          <>
-            <div className="callout">
-              <strong>{currentIntent.state.replaceAll("_", " ")}</strong>
-              <p>
-                {currentIntent.state === "awaiting_authorization"
-                  ? "Confirm this demo deposit."
-                  : currentIntent.state === "completed"
-                    ? "Balance updated."
-                    : currentIntent.state === "failed"
-                      ? "Not completed. Your funds are available again."
-                      : terminal.has(currentIntent.state)
-                        ? "This action has ended. See activity for details."
-                        : "Processing. You can close this window."}
-              </p>
-            </div>
-            {currentIntent.state === "awaiting_authorization" && (
-              <button
-                className="primary"
-                disabled={busy}
-                onClick={() =>
-                  run(async () => {
-                    await api(`/intents/${currentIntent.id}/authorize`, {
-                      confirm: true,
-                    });
-                    await refresh();
-                  })
-                }
-              >
-                Add demo funds
-              </button>
-            )}
-            {currentIntent.state === "completed" &&
-              (action === "fund" || action === "sell") && (
-                <button
-                  className="primary"
-                  onClick={() => {
-                    const nextAmount =
-                      action === "fund"
-                        ? amount
-                        : (
-                            Number(me?.balances.availableCash ?? "0") / 100
-                          ).toFixed(2);
-                    open(action === "fund" ? "buy" : "payout");
-                    setAmount(nextAmount);
-                  }}
-                  disabled={busy}
-                >
-                  {action === "fund"
-                    ? "Continue to invest"
-                    : "Continue to cash out"}
-                </button>
-              )}
-            <button className="quiet outline" onClick={close} disabled={busy}>
-              Back to wallet
-            </button>
-          </>
-        ) : quote ? (
-          <>
-            <p>
-              {action === "buy"
-                ? "Buy demo QQQ."
-                : action === "sell"
-                  ? "Sell demo QQQ. Funds arrive after settlement."
-                  : action === "fund"
-                    ? "Add demo funds to your wallet."
-                    : "Withdraw to your test destination."}
-            </p>
-            <dl className="quote">
-              <div>
-                <dt>Gross amount</dt>
-                <dd>{dollars(quote.gross)}</dd>
-              </div>
-              <div>
-                <dt>
-                  Blunts fee
-                  {["buy", "sell"].includes(action ?? "") ? " · 1%" : ""}
-                </dt>
-                <dd>{dollars(quote.fee)}</dd>
-              </div>
-              <div>
-                <dt>{action === "buy" ? "Invested value" : "Net proceeds"}</dt>
-                <dd>{dollars(quote.net)}</dd>
-              </div>
-              {["buy", "sell"].includes(action ?? "") && (
-                <div>
-                  <dt>Investment units</dt>
-                  <dd>{quantity(quote.units)}</dd>
-                </div>
-              )}
-            </dl>
-            <p className="muted">No other fees in this demo.</p>
-            <p role="status">
-              {clock >= quote.expiresAt
-                ? "Quote expired. Go back for a fresh quote."
-                : `Quote expires in ${Math.ceil((quote.expiresAt - clock) / 1000)} seconds.`}
-            </p>
-            <button
-              className="primary"
-              disabled={busy || clock >= quote.expiresAt}
-              onClick={confirm}
+        <form onSubmit={submitFlow}>
+          {action && (
+            <AmountPicker
+              key={action}
+              kind={action}
+              amount={amount}
+              setAmount={setAmount}
+              all={all}
+              setAll={setAll}
+              available={
+                action === "fund"
+                  ? "100000000"
+                  : (
+                      (BigInt(me?.balances.availableUnits ?? "0") * 50000n) /
+                      1000000n
+                    ).toString()
+              }
+            />
+          )}
+          <button className="picker-go" disabled={working}>
+            <svg
+              width="22"
+              height="24"
+              viewBox="0 0 42 44"
+              fill="none"
+              aria-hidden="true"
             >
-              {busy ? "Saving instruction…" : "Confirm"}
-            </button>
-            <button
-              className="quiet"
-              disabled={busy}
-              onClick={() => setQuote(null)}
-            >
-              Back to amount
-            </button>
-          </>
-        ) : (
-          <form onSubmit={preview}>
-            {action && (
-              <AmountPicker
-                key={action}
-                kind={action}
-                amount={amount}
-                setAmount={setAmount}
-                all={all}
-                setAll={setAll}
-                available={
-                  action === "fund"
-                    ? "100000000"
-                    : action === "buy" || action === "payout"
-                      ? (me?.balances.availableCash ?? "0")
-                      : (me?.balances.investmentValue ?? "0")
-                }
-              />
-            )}
-            {action === "payout" && (
-              <>
-                <label>
-                  Destination
-                  <select
-                    required
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                  >
-                    <option value="">Select a test destination</option>
-                    {me?.destinations.map((d) => (
-                      <option value={d.id} key={d.id}>
-                        {d.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Confirm password
-                  <input
-                    type="password"
-                    required
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </label>
-              </>
-            )}
-            <button
-              className="picker-go"
-              aria-label={`${action === "fund" || action === "buy" ? "Fill" : "Spark"} · Review quote`}
-              disabled={busy}
-            >
-              <svg
-                width="22"
-                height="24"
-                viewBox="0 0 42 44"
-                fill="none"
-                aria-hidden="true"
-              >
-                {action === "fund" || action === "buy" ? (
-                  <>
-                    <path
-                      d="M5 26c6 7 26 7 32 0"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                    />
-                    <circle cx="14" cy="10" r="3" fill="currentColor" />
-                    <circle cx="23" cy="15" r="3" fill="currentColor" />
-                    <circle cx="29" cy="7" r="2.6" fill="currentColor" />
-                  </>
-                ) : (
+              {action === "fund" ? (
+                <>
                   <path
-                    d="M20 3c2 7 11 11 11 22a11 11 0 0 1-22 0c0-6 3-9 5-12 0 4 2 6 4 6-1-6 0-11 2-16z"
-                    fill="currentColor"
+                    d="M5 26c6 7 26 7 32 0"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    strokeLinecap="round"
                   />
-                )}
-              </svg>
-              {busy
-                ? "Preparing…"
-                : action === "fund" || action === "buy"
-                  ? "FILL"
-                  : "SPARK"}
-            </button>
-          </form>
-        )}
+                  <circle cx="14" cy="10" r="3" fill="currentColor" />
+                  <circle cx="23" cy="15" r="3" fill="currentColor" />
+                  <circle cx="29" cy="7" r="2.6" fill="currentColor" />
+                </>
+              ) : (
+                <path
+                  d="M20 3c2 7 11 11 11 22a11 11 0 0 1-22 0c0-6 3-9 5-12 0 4 2 6 4 6-1-6 0-11 2-16z"
+                  fill="currentColor"
+                />
+              )}
+            </svg>
+            {action === "fund" ? "FILL" : "SPARK"}
+          </button>
+          <small className="action-fee">1% fee</small>
+        </form>
         {error && (
           <div className="error" role="alert">
             {error}

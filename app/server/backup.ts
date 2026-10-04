@@ -14,6 +14,7 @@ const tables = [
   "destinations",
   "quotes",
   "intents",
+  "flows",
   "reservations",
   "journals",
   "postings",
@@ -30,7 +31,7 @@ try {
       for (const table of tables)
         data[table] = await tx.query(`SELECT * FROM ${table}`);
       return {
-        schema: 1,
+        schema: 2,
         mode: "simulation",
         createdAt: new Date().toISOString(),
         data,
@@ -45,8 +46,9 @@ try {
     );
   } else {
     const snapshot = JSON.parse(await readFile(path, "utf8"));
-    if (snapshot.schema !== 1 || snapshot.mode !== "simulation")
+    if (![1, 2].includes(snapshot.schema) || snapshot.mode !== "simulation")
       throw new Error("Unsupported snapshot.");
+    if (snapshot.schema === 1 && !snapshot.data.flows) snapshot.data.flows = [];
     await db.transaction(async (tx) => {
       for (const table of tables)
         if ((await tx.query(`SELECT 1 FROM ${table} LIMIT 1`)).length)

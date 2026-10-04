@@ -24,8 +24,11 @@ npm start
 ```
 
 Create a test handle and password in the overlay, accept the demo terms, then
-use **Fill → Add funds → Continue to invest**, then **Spark → Sell → Continue to cash out**.
-Add a test destination under **Menu → Wallet → Settings** before cashing out.
+press **Fill** once to fund and invest. Press **Spark** once to sell back into the
+wallet. Each sheet closes immediately; there is no second confirmation screen.
+The backend persists both Fill stages and resumes them after a reload or restart.
+The existing payout adapter API remains available for provider integration; no real
+external payment rail is connected in this release.
 Use **Menu → Wallet → Back up wallet** to view the initially issued recovery code or replace
 it after confirming your password. Replacing a code invalidates the old one.
 Signed-out users can choose **Menu → Wallet → Recover wallet**. This code recovers a demo

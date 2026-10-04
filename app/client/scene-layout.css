@@ -560,3 +560,10 @@ dialog.transaction-sheet {
   color: #2a0e03;
   box-shadow: 0 8px 24px -8px #ff6a2bb3;
 }
+.action-fee {
+  display: block;
+  text-align: center;
+  color: var(--dim);
+  font-size: 12px;
+  margin-top: 8px;
+}

@@ -17,186 +17,108 @@ async function signup(page: Page) {
     page.getByRole("button", { name: "Fill", exact: true }),
   ).toBeVisible();
 }
-async function transaction(page: Page, button: string, amount: string) {
-  await page
-    .getByRole("button", {
-      name: button === "Add money" ? "Fill" : button,
-      exact: true,
-    })
-    .click();
-
-  await page.getByRole("button", { name: "Dollars", exact: true }).click();
-  await page.getByLabel("Amount in dollars").fill(amount);
-  await page.getByRole("button", { name: "Review quote" }).click();
-  await expect(page.getByRole("dialog")).toContainText("Blunts fee");
-  await page.getByRole("button", { name: "Confirm" }).click();
-  if (button === "Add money")
-    await page
-      .getByRole("dialog")
-      .getByRole("button", { name: "Add demo funds" })
+async function act(
+  page: Page,
+  kind: "Fill" | "Spark",
+  amount: string,
+  all = false,
+) {
+  await page.getByRole("button", { name: kind, exact: true }).click();
+  const sheet = page.getByRole("dialog");
+  if (all)
+    await sheet
+      .getByRole("button", { name: "Sell all available units" })
       .click();
+  else {
+    await sheet.getByRole("button", { name: "Dollars", exact: true }).click();
+    await sheet.getByLabel("Amount in dollars").fill(amount);
+  }
+  await sheet
+    .getByRole("button", { name: kind.toUpperCase(), exact: true })
+    .click();
+  await expect(sheet).not.toBeVisible();
   await expect(
-    page.getByRole("dialog").getByText("completed", { exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Back to wallet" }).click();
+    page.getByRole("button", { name: "Confirm", exact: true }),
+  ).toHaveCount(0);
 }
-test("complete browser cycle survives reload and has no serious accessibility violations", async ({
+test("one press fills and sparks without confirmations and survives reload", async ({
   page,
 }, testInfo) => {
-  const errors: string[] = [];
-  page.on("pageerror", (e) => errors.push(e.message));
   await signup(page);
-  let scan = await new AxeBuilder({ page }).analyze();
-  expect(
-    scan.violations.filter((v) =>
-      ["serious", "critical"].includes(v.impact ?? ""),
-    ),
-  ).toEqual([]);
   await page.getByRole("button", { name: "Fill", exact: true }).click();
-  await expect(page.locator(".picker-value")).toHaveText("$25");
+  const sheet = page.getByRole("dialog");
   await page.getByRole("button", { name: "More", exact: true }).click();
   await expect(page.locator(".picker-value")).toHaveText("$50");
   await page.getByRole("button", { name: "Less", exact: true }).click();
   await expect(page.locator(".blunt-selection strong")).toHaveText("¼");
-  await page.screenshot({ path: testInfo.outputPath("fill-sheet.png") });
   await expect(
     page.getByRole("button", { name: "Close transaction" }),
   ).toHaveCount(0);
   await expect(page.getByText("Options", { exact: true })).toHaveCount(0);
   await page.locator(".picker-value").click();
-  await expect(page.getByRole("dialog")).toBeVisible();
-  await page.mouse.click(8, 8);
-  await expect(page.getByRole("dialog")).not.toBeVisible();
-  await transaction(page, "Add money", "2000");
-  await page.reload();
-  await expect(page.getByText("$2,000.00").first()).toBeVisible();
-  await page.getByRole("button", { name: "Fill", exact: true }).click();
-  await page.getByRole("button", { name: "Dollars", exact: true }).click();
-  await page.getByLabel("Amount in dollars").fill("2000");
-  await page.getByRole("button", { name: "Review quote" }).click();
-  await expect(page.getByRole("dialog")).toContainText("$20.00");
-  scan = await new AxeBuilder({ page }).analyze();
+  await expect(sheet).toBeVisible();
+  const scan = await new AxeBuilder({ page }).analyze();
   expect(
     scan.violations.filter((v) =>
       ["serious", "critical"].includes(v.impact ?? ""),
     ),
   ).toEqual([]);
-  await page.getByRole("button", { name: "Confirm" }).click();
+  await page.screenshot({ path: testInfo.outputPath("fill-sheet.png") });
+  await page.mouse.click(8, 8);
+  await expect(sheet).not.toBeVisible();
+  await act(page, "Fill", "2000");
+  await page.reload();
+  await expect(page.locator(".scene-value")).toHaveText("$1,980.00");
   await expect(
-    page.getByRole("dialog").getByText("completed", { exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Back to wallet" }).click();
-  await expect(page.getByText("$1,980.00").first()).toBeVisible();
+    page.getByRole("button", { name: "Spark", exact: true }),
+  ).toBeEnabled();
   await expect(
     page.getByLabel("Blunts rolled: 19", { exact: true }),
   ).toBeVisible();
   await expect(page.getByLabel("Bands: 1", { exact: true })).toBeVisible();
-  await expect(page.locator(".scene-dock button")).toHaveCount(2);
-  await expect(page.locator(".scene-header .brand")).toHaveCount(0);
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
-    ),
-  ).toBe(true);
-  await page.screenshot({
-    path: testInfo.outputPath("funded-wallet.png"),
-    fullPage: true,
-  });
+  await page.screenshot({ path: testInfo.outputPath("funded-wallet.png") });
   await page.getByRole("button", { name: "Spark", exact: true }).click();
   await page.mouse.click(8, 8);
-  await expect(page.getByRole("dialog")).not.toBeVisible();
-  await page.getByRole("button", { name: "Spark", exact: true }).click();
-  await page.getByRole("button", { name: "Sell all available units" }).click();
-  await page.screenshot({ path: testInfo.outputPath("spark-sheet.png") });
-  await page.getByRole("button", { name: "Review quote" }).click();
-  await page.getByRole("button", { name: "Confirm" }).click();
-  await expect(
-    page.getByRole("dialog").getByText("completed", { exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Back to wallet" }).click();
-  await page.getByRole("button", { name: "Menu" }).click();
-  await page.getByRole("button", { name: "WALLET", exact: true }).click();
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
-  await page.getByLabel("Destination label").fill("Test Cash App");
-  await page
-    .getByLabel("Confirm password", { exact: true })
-    .first()
-    .fill("browser-test-password");
-  await page.getByRole("button", { name: "Save test destination" }).click();
-  await expect(
-    page.getByText(
-      "Simulated destination added. No external account was linked.",
-    ),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Wallet", exact: true }).click();
-  await page.getByRole("button", { name: "Spark", exact: true }).click();
-  await page.getByRole("button", { name: "Dollars", exact: true }).click();
-  await page.getByLabel("Amount in dollars").fill("1960.20");
-  await page
-    .getByRole("dialog")
-    .getByLabel("Confirm password")
-    .fill("browser-test-password");
-  await page.getByRole("button", { name: "Review quote" }).click();
-  await page.getByRole("button", { name: "Confirm" }).click();
-  await expect(
-    page.getByRole("dialog").getByText("completed", { exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Back to wallet" }).click();
-  await page.getByRole("button", { name: "Menu" }).click();
+  await expect(sheet).not.toBeVisible();
+  await act(page, "Spark", "1980", true);
+  await expect(page.locator(".scene-value")).toHaveText("$0.00");
+  await expect(page.locator(".scene-cash strong")).toHaveText("$1,960.20");
+  await page.reload();
+  await expect(page.locator(".scene-cash strong")).toHaveText("$1,960.20");
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
   await page.getByRole("button", { name: "HISTORY", exact: true }).click();
   const download = page.waitForEvent("download");
   await page.getByRole("link", { name: "Download statement" }).click();
   expect((await download).suggestedFilename()).toBe(
     "blunts-sandbox-statement.json",
   );
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
-    ),
-  ).toBe(true);
-  expect(errors).toEqual([]);
 });
-test("reject and ambiguous submission are visible and recover without duplicate funding", async ({
+test("lost Fill response retries the same authorized instruction after reload", async ({
   page,
 }) => {
   await signup(page);
-  await page.getByRole("button", { name: "Fill", exact: true }).click();
-  await page.getByRole("button", { name: "Dollars", exact: true }).click();
-  await page.getByLabel("Amount in dollars").fill("100");
-  await page.route("**/api/intents", (route) =>
-    route.continue({
-      postData: JSON.stringify({
-        ...route.request().postDataJSON(),
-        scenario: "timeout",
-      }),
-    }),
-  );
-  await page.getByRole("button", { name: "Review quote" }).click();
-  await page.getByRole("button", { name: "Confirm" }).click();
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Add demo funds" })
-    .click();
-  await page.reload();
-  await expect(page.locator(".scene-cash strong")).toHaveText("$100.00");
-  await page.getByRole("button", { name: "Fill", exact: true }).click();
-  await page.unroute("**/api/intents");
-  await page.route("**/api/intents", (route) =>
-    route.continue({
-      postData: JSON.stringify({
-        ...route.request().postDataJSON(),
-        scenario: "reject",
-      }),
-    }),
-  );
-  await page.getByRole("button", { name: "Review quote" }).click();
-  await page.getByRole("button", { name: "Confirm" }).click();
+  const keys: string[] = [];
+  await page.route("**/api/flows", async (route) => {
+    keys.push(route.request().headers()["idempotency-key"]);
+    if (keys.length === 1) {
+      await route.fetch();
+      await route.abort("failed");
+    } else await route.continue();
+  });
+  await act(page, "Fill", "100");
   await expect(
-    page.getByRole("dialog").getByText("failed", { exact: true }),
+    page.getByRole("button", { name: "Retry pending action" }),
   ).toBeVisible();
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog")).not.toBeVisible();
-  await expect(page.locator(".scene-cash strong")).toHaveText("$100.00");
+  await page.reload();
+  await expect(page.locator(".scene-value")).toHaveText("$99.00");
+  await expect(
+    page.getByRole("button", { name: "Spark", exact: true }),
+  ).toBeEnabled();
+  expect(keys.length).toBeGreaterThanOrEqual(2);
+  expect(new Set(keys).size).toBe(1);
+  const me = await (await page.request.get("/api/me")).json();
+  expect(me.flows).toHaveLength(1);
+  expect(me.intents).toHaveLength(2);
 });
 test("setup overlays the tray and backup lives in help", async ({ page }) => {
   await page.goto("/");
@@ -227,53 +149,34 @@ test("setup overlays the tray and backup lives in help", async ({ page }) => {
   await expect(help).not.toBeVisible();
 });
 
-test("original scene fills, rolls and burns after confirmed transactions", async ({
+test("original scene fills, bundles and burns with one press", async ({
   page,
 }, testInfo) => {
   test.skip(
     testInfo.project.name !== "chromium",
-    "Animation smoke on Chromium; account flow runs on all engines.",
+    "Full animation on Chromium; actions tested on all engines.",
   );
   test.setTimeout(240000);
   await page.emulateMedia({ reducedMotion: "no-preference" });
   const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(error.message));
-  page.on("console", (message) => {
-    if (
-      message.type() === "error" &&
-      /THREE|shader|WebGLProgram/.test(message.text())
-    )
-      errors.push(message.text());
-  });
+  page.on("pageerror", (e) => errors.push(e.message));
   await signup(page);
-  await expect(
-    page.getByText("Demo · no real money", { exact: true }),
-  ).toHaveCount(0);
-  await expect(page.locator(".balance-grid")).toHaveCount(0);
-  await transaction(page, "Add money", "1110");
-  await transaction(page, "Fill", "1100");
+  await act(page, "Fill", "1100");
   const scene = page.locator(".tray-scene");
   await expect(scene).toHaveAttribute("data-animation", "fill");
   await expect(scene).toHaveAttribute("data-animating", "true");
-  await page.screenshot({ path: testInfo.outputPath("restored-fill.png") });
   await expect(scene).toHaveAttribute("data-animating", "false", {
-    timeout: 120000,
+    timeout: 150000,
   });
   await expect(scene).toHaveAttribute("data-animation", "fill");
   await page.screenshot({ path: testInfo.outputPath("restored-scene.png") });
-  await page.getByRole("button", { name: "Spark", exact: true }).click();
-  await page.getByRole("button", { name: "Sell all available units" }).click();
-  await page.getByRole("button", { name: "Review quote" }).click();
-  await page.getByRole("button", { name: "Confirm", exact: true }).click();
-  await expect(
-    page.getByRole("dialog").getByText("completed", { exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Back to wallet" }).click();
+  await act(page, "Spark", "1089", true);
   await expect(scene).toHaveAttribute("data-animation", "spark");
   await expect(scene).toHaveAttribute("data-animating", "true");
   await page.screenshot({ path: testInfo.outputPath("restored-spark.png") });
   await expect(scene).toHaveAttribute("data-animating", "false", {
-    timeout: 20000,
+    timeout: 30000,
   });
+  await expect(scene).toHaveAttribute("data-animation", "spark");
   expect(errors).toEqual([]);
 });

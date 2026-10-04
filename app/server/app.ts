@@ -13,6 +13,7 @@ import {
   balances,
   createQuote,
   createIntent,
+  createFlow,
   requireThat,
   Problem,
   audit,
@@ -291,6 +292,10 @@ export async function createApp(options: AppOptions) {
         "SELECT id,kind,state,data,destination_id,created_at,updated_at FROM intents WHERE user_id=$1 ORDER BY created_at DESC,id DESC LIMIT 100",
         [s.user_id],
       ),
+      flows: await tx.query(
+        "SELECT id,kind,state,error,created_at FROM flows WHERE user_id=$1 ORDER BY created_at DESC LIMIT 20",
+        [s.user_id],
+      ),
       support: await tx.query(
         "SELECT id,message,created_at FROM support_cases WHERE user_id=$1 ORDER BY created_at DESC LIMIT 30",
         [s.user_id],
@@ -373,6 +378,23 @@ export async function createApp(options: AppOptions) {
     });
     return { id: destinationId };
   });
+  app.post(
+    "/api/flows",
+    { config: { rateLimit: { max: 30, timeWindow: "1 minute" } } },
+    async (req) => {
+      const s = await session(req);
+      const body = z
+        .object({
+          kind: z.enum(["fill", "spark"]),
+          amount: z.string().max(32),
+          all: z.boolean().optional(),
+        })
+        .strict()
+        .parse(req.body);
+      const key = id.parse(req.headers["idempotency-key"]);
+      return db.transaction((tx) => createFlow(tx, s.user_id, key, body));
+    },
+  );
   app.post("/api/quotes", async (req) => {
     const s = await session(req);
     const body = z

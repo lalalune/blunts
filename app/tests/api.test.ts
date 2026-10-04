@@ -220,3 +220,82 @@ test("closure denies pending actions, revokes sessions, and preserves audit reco
     await db.close();
   }
 });
+
+test("single-action endpoint requires session/CSRF, isolates keys and rejects simulation knobs", async () => {
+  const db = await openDatabase("memory://");
+  const app = await createApp({ db, origin });
+  try {
+    const register = await app.inject({
+      method: "POST",
+      url: "/api/auth/register",
+      headers: { origin, "x-blunts-request": "1" },
+      payload: { handle: "singleflow", password },
+    });
+    const cookie = `${register.cookies[0].name}=${register.cookies[0].value}`;
+    const headers = {
+      origin,
+      "x-blunts-request": "1",
+      cookie,
+      "x-csrf-token": register.json().csrf,
+      "idempotency-key": randomUUID(),
+    };
+    await app.inject({
+      method: "POST",
+      url: "/api/onboarding",
+      headers,
+      payload: { adult: true, simulation: true, agreement: "sandbox-v1" },
+    });
+    const payload = { kind: "fill", amount: "100" };
+    assert.equal(
+      (
+        await app.inject({
+          method: "POST",
+          url: "/api/flows",
+          headers: { ...headers, "x-csrf-token": "wrong" },
+          payload,
+        })
+      ).statusCode,
+      403,
+    );
+    assert.equal(
+      (
+        await app.inject({
+          method: "POST",
+          url: "/api/flows",
+          headers,
+          payload: { ...payload, scenario: "reject" },
+        })
+      ).statusCode,
+      400,
+    );
+    const first = await app.inject({
+      method: "POST",
+      url: "/api/flows",
+      headers,
+      payload,
+    });
+    assert.equal(first.statusCode, 200);
+    const repeat = await app.inject({
+      method: "POST",
+      url: "/api/flows",
+      headers,
+      payload,
+    });
+    assert.equal(repeat.json().id, first.json().id);
+    assert.equal(
+      (
+        await app.inject({
+          method: "POST",
+          url: "/api/flows",
+          headers,
+          payload: { ...payload, amount: "200" },
+        })
+      ).statusCode,
+      409,
+    );
+    assert.equal((await db.query("SELECT * FROM intents")).length, 1);
+  } finally {
+    await app.close();
+    await db.close();
+  }
+});

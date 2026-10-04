@@ -358,6 +358,7 @@ export async function tick(db: Database) {
       );
       await audit(tx, i.user_id, `${i.kind}: ${state}`, i.id);
     }
+    await advanceFlows(tx);
     // Authorizations never move money and can safely expire without provider contact.
     await tx.query(
       "UPDATE intents SET state='expired',updated_at=$1 WHERE state='awaiting_authorization' AND created_at<$2",
@@ -461,4 +462,128 @@ export async function reconcile(db: Database) {
     ]);
     return { ok, details };
   });
+}
+
+/** One user instruction; durable funding and investment stages survive client/worker restarts. */
+export async function createFlow(
+  tx: SQL,
+  user: string,
+  key: string,
+  input: { kind: "fill" | "spark"; amount: string; all?: boolean },
+) {
+  const fingerprint = JSON.stringify({
+    kind: input.kind,
+    amount: input.amount,
+    all: input.all ?? false,
+  });
+  const [existing] = await tx.query("SELECT * FROM flows WHERE id=$1", [key]);
+  if (existing) {
+    requireThat(
+      existing.user_id === user && existing.fingerprint === fingerprint,
+      "Instruction key already used.",
+      409,
+    );
+    return existing;
+  }
+  requireThat(
+    !(
+      await tx.query(
+        "SELECT id FROM flows WHERE user_id=$1 AND state IN ('funding','investing','selling')",
+        [user],
+      )
+    ).length,
+    "Your previous action is still processing.",
+    409,
+  );
+  // Validate the complete Fill before accepting its deposit.
+  if (input.kind === "fill") {
+    try {
+      quoteNumbers("buy", cents(input.amount));
+    } catch (e) {
+      throw new Problem(400, (e as Error).message);
+    }
+  }
+  const q = await createQuote(tx, user, {
+    kind: input.kind === "fill" ? "fund" : "sell",
+    amount: input.amount,
+    all: input.kind === "spark" && input.all,
+  });
+  const intent = await createIntent(tx, user, q.id, randomUUID(), "success");
+  if (input.kind === "fill")
+    await tx.query("UPDATE intents SET state='queued' WHERE id=$1", [
+      intent.id,
+    ]);
+  const [flow] = await tx.query(
+    "INSERT INTO flows VALUES ($1,$2,$3,$4,$5,$6,$7,NULL,$8,$8) RETURNING *",
+    [
+      key,
+      user,
+      input.kind,
+      input.amount,
+      fingerprint,
+      input.kind === "fill" ? "funding" : "selling",
+      intent.id,
+      now(),
+    ],
+  );
+  await audit(
+    tx,
+    user,
+    `${input.kind}: user authorized complete flow.`,
+    intent.id,
+  );
+  return flow;
+}
+async function advanceFlows(tx: SQL) {
+  const flows = await tx.query(
+    "SELECT f.*,i.state AS intent_state FROM flows f JOIN intents i ON i.id=f.intent_id WHERE f.state IN ('funding','investing','selling') ORDER BY f.created_at LIMIT 50",
+  );
+  for (const f of flows) {
+    if (
+      ["failed", "cancelled", "expired", "returned"].includes(f.intent_state)
+    ) {
+      await tx.query(
+        "UPDATE flows SET state='failed',error=$1,updated_at=$2 WHERE id=$3",
+        [
+          "Could not complete this action. Check your wallet balance and history.",
+          now(),
+          f.id,
+        ],
+      );
+    } else if (f.intent_state === "completed") {
+      if (f.state === "funding") {
+        try {
+          const q = await createQuote(tx, f.user_id, {
+            kind: "buy",
+            amount: f.amount,
+          });
+          const i = await createIntent(
+            tx,
+            f.user_id,
+            q.id,
+            randomUUID(),
+            "success",
+          );
+          await tx.query(
+            "UPDATE flows SET state='investing',intent_id=$1,updated_at=$2 WHERE id=$3",
+            [i.id, now(), f.id],
+          );
+        } catch (e) {
+          if (!(e instanceof Problem)) throw e;
+          await tx.query(
+            "UPDATE flows SET state='failed',error=$1,updated_at=$2 WHERE id=$3",
+            [
+              "Funds are in your wallet, but the investment could not complete.",
+              now(),
+              f.id,
+            ],
+          );
+        }
+      } else
+        await tx.query(
+          "UPDATE flows SET state='completed',updated_at=$1 WHERE id=$2",
+          [now(), f.id],
+        );
+    }
+  }
 }
