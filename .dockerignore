@@ -9,3 +9,6 @@ prototype
 research
 playwright-report
 test-results
+android
+ios
+dist-native

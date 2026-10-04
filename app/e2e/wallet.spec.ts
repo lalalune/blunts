@@ -11,10 +11,6 @@ async function signup(page: Page) {
   await page
     .getByRole("button", { name: "Create wallet", exact: true })
     .click();
-  await expect(
-    page.getByText("Save your recovery code", { exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "I saved my recovery code" }).click();
   await page.getByRole("checkbox").nth(0).check();
   await page.getByRole("button", { name: "Open wallet" }).click();
   await expect(
@@ -160,4 +156,30 @@ test("reject and ambiguous submission are visible and recover without duplicate 
       .filter({ hasText: "Available" })
       .locator(".big-number"),
   ).toHaveText("$100.00");
+});
+test("setup overlays the tray and backup lives in help", async ({ page }) => {
+  await page.goto("/");
+  await expect(
+    page.getByRole("dialog", { name: "Wallet setup" }),
+  ).toBeVisible();
+  await expect(page.locator(".tray-scene canvas")).toBeVisible();
+  await page.getByRole("button", { name: "Wallet help" }).click();
+  await page
+    .getByRole("button", { name: "Recover wallet", exact: true })
+    .click();
+  await expect(page.getByLabel("Recovery code", { exact: true })).toBeVisible();
+  await page.reload();
+  await signup(page);
+  await page.getByRole("button", { name: "Wallet help" }).click();
+  const help = page.getByRole("dialog", { name: "Your wallet", exact: true });
+  await expect(
+    help.getByRole("heading", { name: "Back up wallet" }),
+  ).toBeVisible();
+  await expect(help.locator("code.recovery")).toBeVisible();
+  await help.getByRole("button", { name: "I saved my recovery code" }).click();
+  await help.getByLabel("Confirm password").fill("browser-test-password");
+  await help.getByRole("button", { name: "Generate recovery code" }).click();
+  await expect(help.locator("code.recovery")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(help).not.toBeVisible();
 });

@@ -97,3 +97,12 @@ This change implements the browser foundation and simulated vertical slice (F02 
 ## Minimal interface pass — October 3
 
 Removed the landing pitch, fee chips, chain label, decorative wallet hero, repeated simulation paragraphs and status pills. The login opens directly on the account form. One persistent “Demo · no real money” line identifies the entire environment; transaction details and exact fees remain at confirmation. Sandbox consent is one explicit checkbox. Investment details are expandable, zero pending balances are hidden, and activity uses plain text. Live account verification and provider-mandated disclosures remain a distinct integration requirement; this copy change does not bypass them.
+
+
+## Native shells and tray/help update — October 3
+
+Wallet setup now overlays the 3D tray. Recovery, password-confirmed recovery-code replacement and sign-out live under the top-right `?`. Replacing a code invalidates its predecessor. The scene throttles animation, respects reduced motion and falls back when WebGL is unavailable.
+
+Capacitor 8 Android and iOS projects share the UI. Native HTTP transports use the configured API origin and platform cookie store; lifecycle handlers refresh account state, Android back dismisses panels, and statement exports use the native share sheet. Icons, splash assets, safe-area layout, the filesystem privacy manifest and release endpoint checks are included. These are sandbox shells, not real signer/KYC/provider integrations.
+
+Current local validation: 13 API/domain tests passed, with the optional external PostgreSQL test skipped; all nine browser scenarios passed across Chromium, mobile Chromium and WebKit. The iOS simulator build passed. Hosted checks include Android and iOS compilation alongside the browser/PostgreSQL/container checks. See README.md for the current production and store runbook; physical-device and funded acceptance remain open gates.

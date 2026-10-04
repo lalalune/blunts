@@ -111,10 +111,43 @@ test("API isolates accounts, rejects CSRF, supports recovery, and prevents live 
     assert.equal(statement.statusCode, 200);
     assert.equal(statement.json().handle, "bob");
     assert.equal(statement.headers["cache-control"], "no-store");
+    assert.equal(
+      (
+        await post(
+          "/auth/backup",
+          { password: "wrong" },
+          aliceCookie,
+          aliceCsrf,
+        )
+      ).statusCode,
+      401,
+    );
+    assert.equal(
+      (await post("/auth/backup", { password }, aliceCookie, "wrong"))
+        .statusCode,
+      403,
+    );
+    const backup = await post(
+      "/auth/backup",
+      { password },
+      aliceCookie,
+      aliceCsrf,
+    );
+    assert.equal(backup.statusCode, 200);
+    assert.equal(
+      (
+        await post("/auth/recover", {
+          handle: "alice",
+          password,
+          recoveryCode: first.json().recoveryCode,
+        })
+      ).statusCode,
+      401,
+    );
     const recovery = await post("/auth/recover", {
       handle: "alice",
       password: "new-test-password-123",
-      recoveryCode: first.json().recoveryCode,
+      recoveryCode: backup.json().recoveryCode,
     });
     assert.equal(recovery.statusCode, 200);
     assert.equal(

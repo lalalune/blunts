@@ -597,3 +597,86 @@ button:active:not(:disabled) {
 header > button {
   margin-left: auto;
 }
+/* The same tray stays behind setup and becomes the wallet's visual surface. */
+main {
+  position: relative;
+}
+.tray-scene {
+  height: 330px;
+  position: relative;
+  margin: -20px -32px 20px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #37271655, transparent 70%);
+}
+.tray-scene canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.setup-main {
+  min-height: calc(100dvh - 135px);
+  padding: 0;
+}
+.setup-main .tray-scene {
+  height: calc(100dvh - 135px);
+  min-height: 650px;
+  margin: 0;
+}
+.setup-overlay {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(390px, calc(100% - 40px));
+  padding: 0;
+  margin: 0;
+}
+.setup-overlay .auth,
+.onboarding.setup-overlay {
+  background: #1b2318ed;
+  box-shadow: 0 12px 50px #0008;
+}
+.onboarding.setup-overlay {
+  padding: 24px;
+}
+.help-button {
+  margin-left: auto;
+  border-radius: 50%;
+  width: 44px;
+  padding: 0;
+}
+.tray-fallback {
+  position: absolute;
+  inset: 10% 5%;
+  border: 8px ridge #69503b;
+  border-radius: 30px;
+  display: grid;
+  place-items: center;
+  background: #231710;
+  transform: perspective(600px) rotateX(28deg);
+}
+.tray-fallback span {
+  color: #bbaa84;
+  font-weight: 800;
+  font-size: 32px;
+}
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+dialog {
+  max-height: calc(
+    100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px
+  );
+}
+@media (max-width: 760px) {
+  .tray-scene {
+    margin-left: -20px;
+    margin-right: -20px;
+    height: 280px;
+  }
+  .setup-main .tray-scene {
+    margin: 0;
+  }
+}

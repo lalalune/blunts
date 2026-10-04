@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { dollars, quantity, type Kind } from "../shared/money";
 import "./style.css";
+import { Tray } from "./Tray";
+import { request, native, shareStatement, onResume, onBack } from "./platform";
 type Intent = {
   id: string;
   kind: Kind;
@@ -55,22 +57,17 @@ async function api<T = any>(
   body?: unknown,
   key?: string,
 ): Promise<T> {
-  const response = await fetch(`/api${path}`, {
-    method: body === undefined ? "GET" : "POST",
-    credentials: "same-origin",
-    headers: {
-      ...(body === undefined
-        ? {}
-        : {
-            "Content-Type": "application/json",
-            "X-Blunts-Request": "1",
-            "X-CSRF-Token": csrf,
-          }),
-      ...(key ? { "Idempotency-Key": key } : {}),
-    },
-    body: body === undefined ? undefined : JSON.stringify(body),
+  const response = await request(path, body, {
+    ...(body === undefined
+      ? {}
+      : {
+          "Content-Type": "application/json",
+          "X-Blunts-Request": "1",
+          "X-CSRF-Token": csrf,
+        }),
+    ...(key ? { "Idempotency-Key": key } : {}),
   });
-  const data = await response.json();
+  const data = response.data;
   if (!response.ok)
     throw new ApiError(
       data.error ?? "Could not complete request.",
@@ -96,6 +93,31 @@ function App() {
     [password, setPassword] = useState("");
   const [all, setAll] = useState(false),
     [clock, setClock] = useState(Date.now());
+  const [help, setHelp] = useState(false);
+  const helpDialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (help) helpDialog.current?.showModal();
+    else helpDialog.current?.close();
+  }, [help]);
+  useEffect(
+    () =>
+      onBack(() => {
+        if (help) {
+          setHelp(false);
+          return true;
+        }
+        if (action) {
+          close();
+          return true;
+        }
+        if (tab !== "wallet") {
+          setTab("wallet");
+          return true;
+        }
+        return false;
+      }),
+    [help, action, tab, busy],
+  );
   const authEpoch = useRef(0);
   const dialog = useRef<HTMLDialogElement>(null),
     submitKey = useRef(crypto.randomUUID()),
@@ -114,6 +136,13 @@ function App() {
       .catch(() => {})
       .finally(() => setLoaded(true));
   }, []);
+  useEffect(
+    () =>
+      onResume(() => {
+        void refresh().catch(() => {});
+      }),
+    [],
+  );
   useEffect(() => {
     if (!me) return;
     const t = setInterval(() => {
@@ -189,7 +218,7 @@ function App() {
       csrf = data.csrf;
       setRecovery(data.recoveryCode ?? "");
       await refresh();
-      setNotice("");
+      setNotice(data.recoveryCode ? "Save your recovery code in ?." : "");
     });
   }
   async function preview(event: React.FormEvent) {
@@ -275,29 +304,25 @@ function App() {
         <a className="brand" href="/" aria-label="Blunts home">
           blunt<span>$</span>
         </a>
-        {me && (
-          <button
-            className="quiet"
-            onClick={() =>
-              run(async () => {
-                await api("/auth/logout", {});
-                authEpoch.current++;
-                csrf = "";
-                setMe(null);
-                setRecovery("");
-                setTab("wallet");
-              })
-            }
-          >
-            Sign out
-          </button>
-        )}
+        <button
+          className="help-button"
+          aria-label="Wallet help"
+          onClick={() => setHelp(true)}
+        >
+          ?
+        </button>
       </header>
-      <main>
+      <main className={!me || me.status === "new" ? "setup-main" : undefined}>
+        <Tray value={me?.balances.investmentValue ?? "0"} />
+
         {!loaded ? (
           <p role="status">Opening your wallet…</p>
         ) : !me ? (
-          <section className="welcome">
+          <section
+            className="welcome setup-overlay"
+            role="dialog"
+            aria-label="Wallet setup"
+          >
             <section className="card auth">
               <h2>
                 {authMode === "register"
@@ -361,32 +386,17 @@ function App() {
                     ? "Create a wallet"
                     : "Already have a wallet?"}
                 </button>
-                <button
-                  className="quiet"
-                  onClick={() => {
-                    setAuthMode("recover");
-                    setError("");
-                  }}
-                >
-                  Use recovery code
-                </button>
               </div>
             </section>
           </section>
         ) : (
           <>
-            {recovery && (
-              <section className="callout">
-                <h2>Save your recovery code</h2>
-                <p>Keep this code to recover your account. It’s shown once.</p>
-                <code className="recovery">{recovery}</code>
-                <button onClick={() => setRecovery("")}>
-                  I saved my recovery code
-                </button>
-              </section>
-            )}
             {me.status === "new" ? (
-              <section className="card onboarding">
+              <section
+                className="card onboarding setup-overlay"
+                role="dialog"
+                aria-label="Wallet setup"
+              >
                 <h1>Try it out.</h1>
                 <p>All money and investments in this demo are simulated.</p>
                 <form
@@ -526,6 +536,16 @@ function App() {
                     <a
                       className="download"
                       href="/api/documents/statement"
+                      onClick={(e) => {
+                        if (native) {
+                          e.preventDefault();
+                          void run(async () => {
+                            await shareStatement(
+                              await api("/documents/statement"),
+                            );
+                          });
+                        }
+                      }}
                       download
                     >
                       Download statement ↗
@@ -694,6 +714,16 @@ function App() {
                         <a
                           className="download"
                           href="/api/documents/statement"
+                          onClick={(e) => {
+                            if (native) {
+                              e.preventDefault();
+                              void run(async () => {
+                                await shareStatement(
+                                  await api("/documents/statement"),
+                                );
+                              });
+                            }
+                          }}
                           download
                         >
                           Export my sandbox records ↗
@@ -761,7 +791,7 @@ function App() {
             )}
           </>
         )}
-        {!action && error && (
+        {!action && !help && error && (
           <div className="error" role="alert">
             {error}
           </div>
@@ -779,6 +809,110 @@ function App() {
           </div>
         )}
       </main>
+      <dialog
+        ref={helpDialog}
+        aria-labelledby="help-title"
+        onCancel={(e) => {
+          e.preventDefault();
+          setHelp(false);
+        }}
+      >
+        <div className="dialog-head">
+          <h2 id="help-title">Your wallet</h2>
+          <button
+            className="quiet"
+            aria-label="Close help"
+            onClick={() => setHelp(false)}
+          >
+            ×
+          </button>
+        </div>
+        {me ? (
+          <>
+            <h3>Back up wallet</h3>
+            <p>
+              Save a recovery code for this demo account. This is not a seed
+              phrase.
+            </p>
+            {recovery ? (
+              <>
+                <code className="recovery">{recovery}</code>
+                <button
+                  onClick={() => {
+                    setRecovery("");
+                    setNotice("");
+                  }}
+                >
+                  I saved my recovery code
+                </button>
+              </>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const values = new FormData(e.currentTarget);
+                  void run(async () => {
+                    const result = await api("/auth/backup", {
+                      password: values.get("password"),
+                    });
+                    setRecovery(result.recoveryCode);
+                  });
+                }}
+              >
+                <label>
+                  Confirm password
+                  <input
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                  />
+                </label>
+                <p>Generating a code replaces the previous one.</p>
+                <button disabled={busy}>Generate recovery code</button>
+              </form>
+            )}
+            <button
+              className="quiet"
+              disabled={busy}
+              onClick={() =>
+                void run(async () => {
+                  await api("/auth/logout", {});
+                  authEpoch.current++;
+                  csrf = "";
+                  setMe(null);
+                  setRecovery("");
+                  setTab("wallet");
+                  setHelp(false);
+                })
+              }
+            >
+              Sign out
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => {
+              setAuthMode("recover");
+              setError("");
+              setHelp(false);
+            }}
+          >
+            Recover wallet
+          </button>
+        )}
+        <details>
+          <summary>About this demo</summary>
+          <p>
+            No real money or investments. 1% per buy or sell, with no fee cap.
+          </p>
+        </details>
+        {error && (
+          <p className="error" role="alert">
+            {error}
+          </p>
+        )}
+      </dialog>
       <dialog
         ref={dialog}
         onCancel={(e) => {

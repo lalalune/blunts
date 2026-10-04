@@ -244,6 +244,31 @@ export async function createApp(options: AppOptions) {
     });
     return { ...(await startSession(user, reply)), recoveryCode: newCode };
   });
+  app.post("/api/auth/backup", authConfig, async (req) => {
+    const s = await session(req);
+    const { password } = z
+      .object({ password: z.string().max(128) })
+      .strict()
+      .parse(req.body);
+    const [user] = await db.query("SELECT password FROM users WHERE id=$1", [
+      s.user_id,
+    ]);
+    requireThat(
+      await verifyPassword(password, user.password),
+      "Password confirmation failed.",
+      401,
+    );
+    const recoveryCode = token();
+    await db.transaction(async (tx) => {
+      const updated = await tx.query(
+        "UPDATE users SET recovery=$1 WHERE id=$2 AND password=$3 AND status<>'closed' RETURNING id",
+        [digest(recoveryCode), s.user_id, user.password],
+      );
+      requireThat(updated.length, "Account changed. Sign in again.", 401);
+      await audit(tx, s.user_id, "Recovery code replaced.");
+    });
+    return { recoveryCode };
+  });
   app.post("/api/auth/logout", async (req, reply) => {
     const s = await session(req);
     await db.query("DELETE FROM sessions WHERE hash=$1", [s.hash]);

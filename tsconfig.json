@@ -9,7 +9,13 @@
     "noEmit": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["node", "vite/client"]
+    "types": ["node", "vite/client"],
+    "allowJs": true
   },
-  "include": ["app", "vite.config.ts", "playwright.config.ts"]
+  "include": [
+    "app",
+    "vite.config.ts",
+    "playwright.config.ts",
+    "capacitor.config.ts"
+  ]
 }

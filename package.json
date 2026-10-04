@@ -14,11 +14,22 @@
     "test:e2e": "playwright test",
     "check": "npm run build && npm test",
     "db:backup": "tsx app/server/backup.ts",
-    "format": "prettier --write app vite.config.ts playwright.config.ts tsconfig.json package.json .github/workflows/checks.yml",
-    "format:check": "prettier --check app vite.config.ts playwright.config.ts tsconfig.json package.json .github/workflows/checks.yml",
-    "ops": "tsx app/server/ops.ts"
+    "format": "prettier --write app vite.config.ts playwright.config.ts tsconfig.json package.json .github/workflows/checks.yml capacitor.config.ts scripts",
+    "format:check": "prettier --check app vite.config.ts playwright.config.ts tsconfig.json package.json .github/workflows/checks.yml capacitor.config.ts scripts",
+    "ops": "tsx app/server/ops.ts",
+    "mobile:sync": "node scripts/mobile.mjs",
+    "android:debug": "cd android && ./gradlew assembleDebug",
+    "android:bundle": "cd android && ./gradlew bundleRelease",
+    "ios:open": "cap open ios",
+    "mobile:release-check": "node scripts/check-mobile.mjs"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/filesystem": "^8.1.4",
+    "@capacitor/ios": "^8.5.2",
+    "@capacitor/share": "^8.0.3",
     "@electric-sql/pglite": "^0.5.8",
     "@fastify/cookie": "^11.1.2",
     "@fastify/helmet": "^13.1.1",
@@ -28,19 +39,27 @@
     "pg": "^8.23.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "three": "^0.186.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@capacitor/cli": "^8.5.2",
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.6.4",
     "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^6.1.1",
     "prettier": "^3.9.9",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.2"
+  },
+  "overrides": {
+    "xcode": {
+      "uuid": "11.1.1"
+    }
   }
 }

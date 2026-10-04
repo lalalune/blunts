@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Blunts</string>
+    <string name="title_activity_main">Blunts</string>
+    <string name="package_name">com.lalalune.blunts</string>
+    <string name="custom_url_scheme">com.lalalune.blunts</string>
+</resources>

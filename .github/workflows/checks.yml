@@ -65,3 +65,46 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: android-actions/setup-android@v3
+      - run: npm ci
+      - run: npm run mobile:sync
+        env:
+          MOBILE_API_ORIGIN: https://ci.invalid
+      - run: npm run android:debug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-build-only
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
+
+  ios:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run mobile:sync
+        env:
+          MOBILE_API_ORIGIN: https://ci.invalid
+      - run: xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -derivedDataPath data/ios-build CODE_SIGNING_ALLOWED=NO build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-build-only
+          path: data/ios-build/Build/Products/Debug-iphonesimulator/App.app
+          retention-days: 7
