@@ -281,7 +281,7 @@ RTO and operator. Rehearse this before launch and regularly afterward.
 ## 7. Produce and publish mobile releases
 
 Use an owned HTTPS staging endpoint first. Never ship the loopback development
-bundle. `mobile:release-check` and Android release validation reject it. These
+bundle. `mobile:release-check`, Android release validation and the iOS Release build phase reject it. These
 checks validate the endpoint, not regulatory clearance or live readiness.
 
 ```sh

@@ -87,6 +87,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 504EC3161FED79650016851F /* Build configuration list for PBXNativeTarget "App" */;
 			buildPhases = (
+                ABC123456789000000000003 /* Validate release endpoint */,
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
@@ -156,6 +157,20 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+        ABC123456789000000000003 /* Validate release endpoint */ = {
+            isa = PBXShellScriptBuildPhase;
+            buildActionMask = 2147483647;
+            files = ();
+            inputPaths = ("$(SRCROOT)/App/public/build-info.json");
+            name = "Validate release endpoint";
+            outputPaths = ();
+            runOnlyForDeploymentPostprocessing = 0;
+            shellPath = /bin/sh;
+            shellScript = "set -eu\nif [ \"$CONFIGURATION\" = \"Release\" ]; then\n  metadata=\"$SRCROOT/App/public/build-info.json\"\n  development=$(/usr/bin/plutil -extract development raw -o - \"$metadata\")\n  origin=$(/usr/bin/plutil -extract origin raw -o - \"$metadata\")\n  if [ \"$development\" != \"false\" ]; then\n    echo \"error: Run mobile:sync with an owned HTTPS API origin before archiving.\"\n    exit 1\n  fi\n  case \"$origin\" in\n    https://localhost*|https://127.*|https://*.invalid|https://*.invalid:*) echo \"error: Development endpoint cannot be archived.\"; exit 1 ;;\n    https://*) ;;\n    *) echo \"error: Release endpoint must use HTTPS.\"; exit 1 ;;\n  esac\nfi\n";
+        };
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		504EC3001FED79650016851F /* Sources */ = {
