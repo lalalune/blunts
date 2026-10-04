@@ -342,6 +342,9 @@ function App() {
                     maxLength={32}
                     pattern="[a-zA-Z0-9_-]+"
                     autoComplete="username"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
                   />
                 </label>
                 <label>
