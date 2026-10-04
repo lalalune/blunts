@@ -50,16 +50,57 @@ body::before {
   width: 100%;
   max-width: none;
 }
-.scene-header .brand {
+.scene-counts {
+  display: flex;
+  gap: 8px;
+  margin-right: auto;
+}
+.scene-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px 6px 8px;
+  border-radius: 999px;
+  background: rgba(20, 13, 9, 0.55);
+  border: 1px solid var(--line);
   font-family: "Bungee", Impact, sans-serif;
-  font-size: 20px;
-  letter-spacing: 0;
-  color: var(--paper);
+  font-size: 15px;
+  line-height: 1;
 }
-.scene-header .brand span {
-  color: var(--gold);
+.scene-count svg {
+  display: block;
 }
-.scene-header .help-button {
+.original-menu {
+  display: grid;
+  gap: 12px;
+}
+.original-menu button {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px;
+  font-family: "Bungee", Impact, sans-serif;
+  text-align: left;
+  background: transparent;
+  border: 0;
+}
+.original-menu button span {
+  width: 26px;
+  font-size: 26px;
+}
+.flow-options {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.flow-options button {
+  flex: 1;
+}
+.flow-options button[aria-pressed="true"] {
+  border-color: var(--leaf);
+  color: var(--leaf);
+}
+.scene-header .menu-button {
   width: 40px;
   height: 40px;
   min-height: 40px;
@@ -188,31 +229,6 @@ body::before {
 }
 .scene-act:disabled {
   opacity: 0.35;
-}
-.cash-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  margin-bottom: 4px;
-}
-.cash-actions button {
-  font-size: 12px;
-  min-height: 38px;
-  padding: 6px;
-  background: none;
-  border: 0;
-  color: var(--dim);
-}
-.scene-stamp {
-  position: absolute;
-  top: 30%;
-  width: 100%;
-  text-align: center;
-  font-family: "Bungee", Impact, sans-serif;
-  font-size: 28px;
-  color: var(--gold);
-  pointer-events: none;
 }
 .pending-link {
   position: absolute;
@@ -387,4 +403,12 @@ dialog::backdrop {
     max-height: calc(100dvh - 110px);
     top: calc(50% + 20px);
   }
+}
+
+dialog.menu-sheet {
+  margin: auto auto 0;
+  bottom: 0;
+  top: auto;
+  border-radius: 26px 26px 0 0;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
 }

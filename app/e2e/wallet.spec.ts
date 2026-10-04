@@ -18,7 +18,14 @@ async function signup(page: Page) {
   ).toBeVisible();
 }
 async function transaction(page: Page, button: string, amount: string) {
-  await page.getByRole("button", { name: button, exact: true }).click();
+  await page
+    .getByRole("button", {
+      name: button === "Add money" ? "Fill" : button,
+      exact: true,
+    })
+    .click();
+  if (button === "Add money")
+    await page.getByRole("button", { name: "Add funds", exact: true }).click();
   await page.getByLabel("Amount in dollars").fill(amount);
   await page.getByRole("button", { name: "Review quote" }).click();
   await expect(page.getByRole("dialog")).toContainText("Blunts fee");
@@ -64,6 +71,12 @@ test("complete browser cycle survives reload and has no serious accessibility vi
   ).toBeVisible();
   await page.getByRole("button", { name: "Back to wallet" }).click();
   await expect(page.getByText("$1,980.00").first()).toBeVisible();
+  await expect(
+    page.getByLabel("Blunts rolled: 19", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Bands: 1", { exact: true })).toBeVisible();
+  await expect(page.locator(".scene-dock button")).toHaveCount(2);
+  await expect(page.locator(".scene-header .brand")).toHaveCount(0);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -81,7 +94,8 @@ test("complete browser cycle survives reload and has no serious accessibility vi
     page.getByRole("dialog").getByText("completed", { exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Back to wallet" }).click();
-  await page.getByRole("button", { name: "Wallet help" }).click();
+  await page.getByRole("button", { name: "Menu" }).click();
+  await page.getByRole("button", { name: "WALLET", exact: true }).click();
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByLabel("Destination label").fill("Test Cash App");
   await page
@@ -95,7 +109,7 @@ test("complete browser cycle survives reload and has no serious accessibility vi
     ),
   ).toBeVisible();
   await page.getByRole("button", { name: "Wallet", exact: true }).click();
-  await page.getByRole("button", { name: "Withdraw", exact: true }).click();
+  await page.getByRole("button", { name: "Spark", exact: true }).click();
   await page.getByLabel("Amount in dollars").fill("1960.20");
   await page
     .getByRole("dialog")
@@ -107,8 +121,8 @@ test("complete browser cycle survives reload and has no serious accessibility vi
     page.getByRole("dialog").getByText("completed", { exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Back to wallet" }).click();
-  await page.getByRole("button", { name: "Wallet help" }).click();
-  await page.getByRole("button", { name: "Activity", exact: true }).click();
+  await page.getByRole("button", { name: "Menu" }).click();
+  await page.getByRole("button", { name: "HISTORY", exact: true }).click();
   const download = page.waitForEvent("download");
   await page.getByRole("link", { name: "Download statement" }).click();
   expect((await download).suggestedFilename()).toBe(
@@ -125,7 +139,7 @@ test("reject and ambiguous submission are visible and recover without duplicate 
   page,
 }) => {
   await signup(page);
-  await page.getByRole("button", { name: "Add money", exact: true }).click();
+  await page.getByRole("button", { name: "Fill", exact: true }).click();
   await page.getByLabel("Amount in dollars").fill("100");
   await page.getByText("Test a failure or recovery path").click();
   await page.getByLabel("Simulation scenario").selectOption("timeout");
@@ -155,14 +169,16 @@ test("setup overlays the tray and backup lives in help", async ({ page }) => {
     page.getByRole("dialog", { name: "Wallet setup" }),
   ).toBeVisible();
   await expect(page.locator(".tray-scene canvas").first()).toBeVisible();
-  await page.getByRole("button", { name: "Wallet help" }).click();
+  await page.getByRole("button", { name: "Menu" }).click();
+  await page.getByRole("button", { name: "WALLET", exact: true }).click();
   await page
     .getByRole("button", { name: "Recover wallet", exact: true })
     .click();
   await expect(page.getByLabel("Recovery code", { exact: true })).toBeVisible();
   await page.reload();
   await signup(page);
-  await page.getByRole("button", { name: "Wallet help" }).click();
+  await page.getByRole("button", { name: "Menu" }).click();
+  await page.getByRole("button", { name: "WALLET", exact: true }).click();
   const help = page.getByRole("dialog", { name: "Your wallet", exact: true });
   await expect(
     help.getByRole("heading", { name: "Back up wallet" }),

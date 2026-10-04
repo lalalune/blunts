@@ -98,6 +98,8 @@ function App() {
   const [all, setAll] = useState(false),
     [clock, setClock] = useState(Date.now());
   const [help, setHelp] = useState(false);
+  const [menuPage, setMenuPage] = useState("menu");
+  const rolled = BigInt(me?.balances.investmentValue ?? "0") / 10000n;
   const helpDialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     if (help) helpDialog.current?.showModal();
@@ -304,15 +306,63 @@ function App() {
   return (
     <>
       <header className="scene-header">
-        <a className="brand" href="/" aria-label="Blunts home">
-          blunt<span>$</span>
-        </a>
+        <div className="scene-counts">
+          <div className="scene-count" aria-label={`Blunts rolled: ${rolled}`}>
+            <svg width="30" height="12" viewBox="0 0 30 12">
+              <defs>
+                <linearGradient id="bl" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#9a6a3c" />
+                  <stop offset="1" stopColor="#5a3719" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M3 3.2 L26 2 Q29 2 29 6 Q29 10 26 10 L3 8.8 Q1 8.6 1 6 Q1 3.4 3 3.2Z"
+                fill="url(#bl)"
+              />
+              <path
+                d="M8 2.8l-2 6.6M14 2.5l-2 7.2M20 2.2l-2 7.6"
+                stroke="#3a220f"
+                strokeWidth=".8"
+                opacity=".6"
+              />
+            </svg>
+            <span>{rolled.toString()}</span>
+          </div>
+          <div className="scene-count" aria-label={`Bands: ${rolled / 10n}`}>
+            <svg width="26" height="18" viewBox="0 0 26 18">
+              <rect x="1" y="3" width="24" height="13" rx="3" fill="#3e5e1c" />
+              <rect x="1" y="1" width="24" height="13" rx="3" fill="#7fae45" />
+              <rect
+                x="10"
+                y="0"
+                width="6"
+                height="17"
+                rx="1.5"
+                fill="#c8412f"
+              />
+            </svg>
+            <span>{(rolled / 10n).toString()}</span>
+          </div>
+        </div>
         <button
-          className="help-button"
-          aria-label="Wallet help"
-          onClick={() => setHelp(true)}
+          className="menu-button"
+          aria-label="Menu"
+          onClick={() => {
+            setMenuPage("menu");
+            setHelp(true);
+          }}
         >
-          ?
+          <svg
+            width="18"
+            height="14"
+            viewBox="0 0 18 14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
+            <path d="M1 1h16M1 7h16M1 13h10" />
+          </svg>
         </button>
       </header>
       <main
@@ -474,7 +524,13 @@ function App() {
                         className="scene-act fill"
                         aria-label="Fill"
                         disabled={me.status !== "active"}
-                        onClick={() => open("buy")}
+                        onClick={() =>
+                          open(
+                            BigInt(me.balances.availableCash) > 0n
+                              ? "buy"
+                              : "fund",
+                          )
+                        }
                       >
                         <span className="orb">
                           <svg
@@ -504,31 +560,21 @@ function App() {
                         </span>
                         <span className="lbl">FILL</span>
                       </button>
-                      <div className="cash-actions">
-                        <button
-                          onClick={() => open("fund")}
-                          disabled={me.status !== "active"}
-                        >
-                          Add money
-                        </button>
-                        <button
-                          onClick={() => open("payout")}
-                          disabled={
-                            me.status !== "active" ||
-                            BigInt(me.balances.availableCash) <= 0n
-                          }
-                        >
-                          Withdraw
-                        </button>
-                      </div>
                       <button
                         className="scene-act spark"
                         aria-label="Spark"
                         disabled={
                           me.status !== "active" ||
-                          BigInt(me.balances.availableUnits) <= 0n
+                          (BigInt(me.balances.availableUnits) <= 0n &&
+                            BigInt(me.balances.availableCash) <= 0n)
                         }
-                        onClick={() => open("sell")}
+                        onClick={() =>
+                          open(
+                            BigInt(me.balances.availableUnits) > 0n
+                              ? "sell"
+                              : "payout",
+                          )
+                        }
                       >
                         <span className="orb">
                           <svg
@@ -845,6 +891,7 @@ function App() {
       </main>
       <dialog
         ref={helpDialog}
+        className="menu-sheet"
         aria-labelledby="help-title"
         onCancel={(e) => {
           e.preventDefault();
@@ -852,113 +899,198 @@ function App() {
         }}
       >
         <div className="dialog-head">
-          <h2 id="help-title">Your wallet</h2>
+          <h2 id="help-title">
+            {menuPage === "menu"
+              ? "Menu"
+              : menuPage === "how"
+                ? "How it works"
+                : "Your wallet"}
+          </h2>
           <button
             className="quiet"
-            aria-label="Close help"
+            aria-label="Close menu"
             onClick={() => setHelp(false)}
           >
             ×
           </button>
         </div>
-        {me ? (
-          <>
-            <div className="help-links">
-              <button
-                onClick={() => {
-                  setTab("activity");
-                  setHelp(false);
-                }}
-              >
-                Activity
-              </button>
-              <button
-                onClick={() => {
-                  setTab("settings");
-                  setHelp(false);
-                }}
-              >
-                Settings
-              </button>
-            </div>
-            <h3>Back up wallet</h3>
-            <p>
-              Save a recovery code for this demo account. This is not a seed
-              phrase.
-            </p>
-            {recovery ? (
-              <>
-                <code className="recovery">{recovery}</code>
-                <button
-                  onClick={() => {
-                    setRecovery("");
-                    setNotice("");
-                  }}
+        {menuPage === "menu" ? (
+          <div className="original-menu">
+            <button
+              disabled={!me || me.status === "new"}
+              onClick={() => {
+                setTab("activity");
+                setHelp(false);
+              }}
+            >
+              <span aria-hidden="true">
+                <svg
+                  width="26"
+                  height="26"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  I saved my recovery code
+                  <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+                  <path d="M3 3v5h5M12 7v5l3 2" />
+                </svg>
+              </span>{" "}
+              HISTORY
+            </button>
+            <button onClick={() => setMenuPage("how")}>
+              <span aria-hidden="true">
+                <svg
+                  width="26"
+                  height="26"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                >
+                  <circle cx="12" cy="12" r="9.5" />
+                  <path d="M9.5 9a2.6 2.6 0 1 1 3.6 2.4c-.7.3-1.1.9-1.1 1.6v.6" />
+                  <circle cx="12" cy="17" r=".6" fill="currentColor" />
+                </svg>
+              </span>{" "}
+              HOW IT WORKS
+            </button>
+            <button onClick={() => setMenuPage("wallet")}>
+              <span aria-hidden="true">
+                <svg
+                  width="26"
+                  height="26"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="5" width="18" height="15" rx="3" />
+                  <path d="M3 8V5l14-3v3M21 11h-6v5h6" />
+                </svg>
+              </span>{" "}
+              WALLET
+            </button>
+          </div>
+        ) : menuPage === "how" ? (
+          <div className="menu-how">
+            <p>
+              Fill adds funds and invests. Spark sells and sends funds back out.
+            </p>
+            <p>One blunt represents $100 invested. Ten blunts make a band.</p>
+            <p>This version uses simulated money and investments.</p>
+            <button onClick={() => setMenuPage("menu")}>Back to menu</button>
+          </div>
+        ) : (
+          <>
+            <button className="quiet" onClick={() => setMenuPage("menu")}>
+              Back to menu
+            </button>
+            {me ? (
+              <>
+                <div className="help-links">
+                  <button
+                    onClick={() => {
+                      setTab("activity");
+                      setHelp(false);
+                    }}
+                  >
+                    Activity
+                  </button>
+                  <button
+                    onClick={() => {
+                      setTab("settings");
+                      setHelp(false);
+                    }}
+                  >
+                    Settings
+                  </button>
+                </div>
+                <h3>Back up wallet</h3>
+                <p>
+                  Save a recovery code for this demo account. This is not a seed
+                  phrase.
+                </p>
+                {recovery ? (
+                  <>
+                    <code className="recovery">{recovery}</code>
+                    <button
+                      onClick={() => {
+                        setRecovery("");
+                        setNotice("");
+                      }}
+                    >
+                      I saved my recovery code
+                    </button>
+                  </>
+                ) : (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const values = new FormData(e.currentTarget);
+                      void run(async () => {
+                        const result = await api("/auth/backup", {
+                          password: values.get("password"),
+                        });
+                        setRecovery(result.recoveryCode);
+                      });
+                    }}
+                  >
+                    <label>
+                      Confirm password
+                      <input
+                        name="password"
+                        type="password"
+                        autoComplete="current-password"
+                        required
+                      />
+                    </label>
+                    <p>Generating a code replaces the previous one.</p>
+                    <button disabled={busy}>Generate recovery code</button>
+                  </form>
+                )}
+                <button
+                  className="quiet"
+                  disabled={busy}
+                  onClick={() =>
+                    void run(async () => {
+                      await api("/auth/logout", {});
+                      authEpoch.current++;
+                      csrf = "";
+                      setMe(null);
+                      setRecovery("");
+                      setTab("wallet");
+                      setHelp(false);
+                    })
+                  }
+                >
+                  Sign out
                 </button>
               </>
             ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const values = new FormData(e.currentTarget);
-                  void run(async () => {
-                    const result = await api("/auth/backup", {
-                      password: values.get("password"),
-                    });
-                    setRecovery(result.recoveryCode);
-                  });
+              <button
+                onClick={() => {
+                  setAuthMode("recover");
+                  setError("");
+                  setHelp(false);
                 }}
               >
-                <label>
-                  Confirm password
-                  <input
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                  />
-                </label>
-                <p>Generating a code replaces the previous one.</p>
-                <button disabled={busy}>Generate recovery code</button>
-              </form>
+                Recover wallet
+              </button>
             )}
-            <button
-              className="quiet"
-              disabled={busy}
-              onClick={() =>
-                void run(async () => {
-                  await api("/auth/logout", {});
-                  authEpoch.current++;
-                  csrf = "";
-                  setMe(null);
-                  setRecovery("");
-                  setTab("wallet");
-                  setHelp(false);
-                })
-              }
-            >
-              Sign out
-            </button>
+            <details>
+              <summary>About this demo</summary>
+              <p>
+                No real money or investments. 1% per buy or sell, with no fee
+                cap.
+              </p>
+            </details>
           </>
-        ) : (
-          <button
-            onClick={() => {
-              setAuthMode("recover");
-              setError("");
-              setHelp(false);
-            }}
-          >
-            Recover wallet
-          </button>
         )}
-        <details>
-          <summary>About this demo</summary>
-          <p>
-            No real money or investments. 1% per buy or sell, with no fee cap.
-          </p>
-        </details>
         {error && (
           <p className="error" role="alert">
             {error}
@@ -985,6 +1117,29 @@ function App() {
           </button>
         </div>
         <h2 id="dialog-title">{action ? labels[action] : ""}</h2>
+        {!quote && !currentIntent && (
+          <div className="flow-options" aria-label="Transaction type">
+            {(action === "fund" || action === "buy"
+              ? [
+                  ["fund", "Add funds"],
+                  ["buy", "Invest"],
+                ]
+              : [
+                  ["sell", "Sell"],
+                  ["payout", "Cash out"],
+                ]
+            ).map(([kind, label]) => (
+              <button
+                key={kind}
+                aria-pressed={action === kind}
+                disabled={busy}
+                onClick={() => open(kind as Kind)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
         {currentIntent ? (
           <>
             <div className="callout">
@@ -1017,6 +1172,18 @@ function App() {
                 Add demo funds
               </button>
             )}
+            {currentIntent.state === "completed" &&
+              (action === "fund" || action === "sell") && (
+                <button
+                  className="primary"
+                  onClick={() => open(action === "fund" ? "buy" : "payout")}
+                  disabled={busy}
+                >
+                  {action === "fund"
+                    ? "Continue to invest"
+                    : "Continue to cash out"}
+                </button>
+              )}
             <button className="quiet outline" onClick={close} disabled={busy}>
               Back to wallet
             </button>
