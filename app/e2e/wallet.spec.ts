@@ -59,9 +59,14 @@ test("complete browser cycle survives reload and has no serious accessibility vi
   await page.getByRole("button", { name: "Less", exact: true }).click();
   await expect(page.locator(".blunt-selection strong")).toHaveText("¼");
   await page.screenshot({ path: testInfo.outputPath("fill-sheet.png") });
-  await page
-    .getByRole("button", { name: "Close transaction", exact: true })
-    .click();
+  await expect(
+    page.getByRole("button", { name: "Close transaction" }),
+  ).toHaveCount(0);
+  await expect(page.getByText("Options", { exact: true })).toHaveCount(0);
+  await page.locator(".picker-value").click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.mouse.click(8, 8);
+  await expect(page.getByRole("dialog")).not.toBeVisible();
   await transaction(page, "Add money", "2000");
   await page.reload();
   await expect(page.getByText("$2,000.00").first()).toBeVisible();
@@ -97,6 +102,9 @@ test("complete browser cycle survives reload and has no serious accessibility vi
     path: testInfo.outputPath("funded-wallet.png"),
     fullPage: true,
   });
+  await page.getByRole("button", { name: "Spark", exact: true }).click();
+  await page.mouse.click(8, 8);
+  await expect(page.getByRole("dialog")).not.toBeVisible();
   await page.getByRole("button", { name: "Spark", exact: true }).click();
   await page.getByRole("button", { name: "Sell all available units" }).click();
   await page.screenshot({ path: testInfo.outputPath("spark-sheet.png") });
@@ -155,9 +163,14 @@ test("reject and ambiguous submission are visible and recover without duplicate 
   await page.getByRole("button", { name: "Fill", exact: true }).click();
   await page.getByRole("button", { name: "Dollars", exact: true }).click();
   await page.getByLabel("Amount in dollars").fill("100");
-  await page.getByText("Options", { exact: true }).click();
-  await page.getByText("Test a failure or recovery path").click();
-  await page.getByLabel("Simulation scenario").selectOption("timeout");
+  await page.route("**/api/intents", (route) =>
+    route.continue({
+      postData: JSON.stringify({
+        ...route.request().postDataJSON(),
+        scenario: "timeout",
+      }),
+    }),
+  );
   await page.getByRole("button", { name: "Review quote" }).click();
   await page.getByRole("button", { name: "Confirm" }).click();
   await page
@@ -167,9 +180,15 @@ test("reject and ambiguous submission are visible and recover without duplicate 
   await page.reload();
   await expect(page.locator(".scene-cash strong")).toHaveText("$100.00");
   await page.getByRole("button", { name: "Fill", exact: true }).click();
-  await page.getByText("Options", { exact: true }).click();
-  await page.getByText("Test a failure or recovery path").click();
-  await page.getByLabel("Simulation scenario").selectOption("reject");
+  await page.unroute("**/api/intents");
+  await page.route("**/api/intents", (route) =>
+    route.continue({
+      postData: JSON.stringify({
+        ...route.request().postDataJSON(),
+        scenario: "reject",
+      }),
+    }),
+  );
   await page.getByRole("button", { name: "Review quote" }).click();
   await page.getByRole("button", { name: "Confirm" }).click();
   await expect(

@@ -88,18 +88,6 @@ body::before {
   width: 26px;
   font-size: 26px;
 }
-.flow-options {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.flow-options button {
-  flex: 1;
-}
-.flow-options button[aria-pressed="true"] {
-  border-color: var(--leaf);
-  color: var(--leaf);
-}
 .scene-header .menu-button {
   width: 40px;
   height: 40px;
@@ -421,14 +409,6 @@ dialog.transaction-sheet {
   border-radius: 26px 26px 0 0;
   padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
 }
-.transaction-sheet .dialog-head {
-  margin: 0;
-  min-height: 32px;
-}
-.transaction-sheet .dialog-head button {
-  min-height: 32px;
-  padding: 0 8px;
-}
 .amount-picker {
   display: flex;
   flex-direction: column;
@@ -579,13 +559,4 @@ dialog.transaction-sheet {
   background: linear-gradient(#ffa25f, #ff6a2b);
   color: #2a0e03;
   box-shadow: 0 8px 24px -8px #ff6a2bb3;
-}
-.transaction-options {
-  text-align: center;
-  color: var(--dim);
-  font-size: 12px;
-  margin-top: 10px;
-}
-.transaction-options[open] {
-  text-align: left;
 }

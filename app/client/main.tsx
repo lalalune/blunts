@@ -93,7 +93,6 @@ function App() {
     [quote, setQuote] = useState<Quote | null>(null),
     [intent, setIntent] = useState<Intent | null>(null);
   const [amount, setAmount] = useState("100"),
-    [scenario, setScenario] = useState("success"),
     [destination, setDestination] = useState(""),
     [password, setPassword] = useState("");
   const [all, setAll] = useState(false),
@@ -102,6 +101,7 @@ function App() {
   const [menuPage, setMenuPage] = useState("menu");
   const rolled = BigInt(me?.balances.investmentValue ?? "0") / 10000n;
   const helpDialog = useRef<HTMLDialogElement>(null);
+  const backdropPress = useRef(false);
   useEffect(() => {
     if (help) helpDialog.current?.showModal();
     else helpDialog.current?.close();
@@ -218,7 +218,6 @@ function App() {
     );
     setPassword("");
     setAll(false);
-    setScenario("success");
     setDestination(me?.destinations[0]?.id ?? "");
     setError("");
   }
@@ -266,7 +265,7 @@ function App() {
         "/intents",
         {
           quoteId: quote.id,
-          scenario,
+          scenario: "success",
           ...(action === "payout" ? { password } : {}),
         },
         submitKey.current,
@@ -658,8 +657,9 @@ function App() {
                     <details className="card">
                       <summary>Sandbox failure testing</summary>
                       <p>
-                        Use the scenario selector before confirming a new action
-                        to test rejection, unknown submission or partial fills.
+                        Automated tests cover rejection, unknown submission and
+                        partial fills. Completed test transfers can be returned
+                        below.
                       </p>
                       {me.intents
                         .filter(
@@ -1117,6 +1117,28 @@ function App() {
       </dialog>
       <dialog
         ref={dialog}
+        onPointerDown={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          backdropPress.current =
+            e.target === e.currentTarget &&
+            (e.clientX < r.left ||
+              e.clientX > r.right ||
+              e.clientY < r.top ||
+              e.clientY > r.bottom);
+        }}
+        onClick={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          if (
+            backdropPress.current &&
+            e.target === e.currentTarget &&
+            (e.clientX < r.left ||
+              e.clientX > r.right ||
+              e.clientY < r.top ||
+              e.clientY > r.bottom)
+          )
+            close();
+          backdropPress.current = false;
+        }}
         className={`transaction-sheet ${action === "fund" || action === "buy" ? "fill" : "spark"}`}
         onCancel={(e) => {
           e.preventDefault();
@@ -1124,17 +1146,6 @@ function App() {
         }}
         aria-labelledby="dialog-title"
       >
-        <div className="dialog-head">
-          <span />
-          <button
-            className="quiet"
-            aria-label="Close transaction"
-            onClick={close}
-            disabled={busy}
-          >
-            ×
-          </button>
-        </div>
         <h2 id="dialog-title" className="sr-only">
           {action ? labels[action] : ""}
         </h2>
@@ -1335,52 +1346,6 @@ function App() {
                   ? "FILL"
                   : "SPARK"}
             </button>
-            <details className="transaction-options">
-              <summary>Options</summary>
-              {!quote && !currentIntent && (
-                <div className="flow-options" aria-label="Transaction type">
-                  {(action === "fund" || action === "buy"
-                    ? [
-                        ["fund", "Add funds"],
-                        ["buy", "Invest"],
-                      ]
-                    : [
-                        ["sell", "Sell"],
-                        ["payout", "Cash out"],
-                      ]
-                  ).map(([kind, label]) => (
-                    <button
-                      key={kind}
-                      type="button"
-                      aria-pressed={action === kind}
-                      disabled={busy}
-                      onClick={() => open(kind as Kind)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <details>
-                <summary>Test a failure or recovery path</summary>
-                <label>
-                  Simulation scenario
-                  <select
-                    value={scenario}
-                    onChange={(e) => setScenario(e.target.value)}
-                  >
-                    <option value="success">Successful execution</option>
-                    <option value="reject">Provider rejection</option>
-                    <option value="timeout">
-                      Timeout after acceptance → recover by lookup
-                    </option>
-                    {["buy", "sell"].includes(action ?? "") && (
-                      <option value="partial">Partial fill → completion</option>
-                    )}
-                  </select>
-                </label>
-              </details>
-            </details>
           </form>
         )}
         {error && (
