@@ -9,6 +9,7 @@ if (!["backup", "restore"].includes(command) || !path)
 const db = await openDatabase(process.env.DATABASE_URL ?? "data/blunts");
 const tables = [
   "users",
+  "steward_identities",
   "sessions",
   "consents",
   "destinations",
@@ -31,7 +32,7 @@ try {
       for (const table of tables)
         data[table] = await tx.query(`SELECT * FROM ${table}`);
       return {
-        schema: 2,
+        schema: 3,
         mode: "simulation",
         createdAt: new Date().toISOString(),
         data,
@@ -46,9 +47,10 @@ try {
     );
   } else {
     const snapshot = JSON.parse(await readFile(path, "utf8"));
-    if (![1, 2].includes(snapshot.schema) || snapshot.mode !== "simulation")
+    if (![1, 2, 3].includes(snapshot.schema) || snapshot.mode !== "simulation")
       throw new Error("Unsupported snapshot.");
     if (snapshot.schema === 1 && !snapshot.data.flows) snapshot.data.flows = [];
+    if (snapshot.schema < 3) snapshot.data.steward_identities = [];
     await db.transaction(async (tx) => {
       for (const table of tables)
         if ((await tx.query(`SELECT 1 FROM ${table} LIMIT 1`)).length)

@@ -1,0 +1,16 @@
+# Actual VPS layout: the existing ingress reaches a stateless read-only Docker
+# container. No new Kubernetes application pod is scheduled on the pressured node.
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: blunts-vps
+  namespace: blunts
+  labels:
+    kubernetes.io/service-name: blunts
+    endpointslice.kubernetes.io/managed-by: blunts-deployment
+addressType: IPv4
+ports:
+  - { name: http, protocol: TCP, port: 8746 }
+endpoints:
+  - addresses: ["172.30.46.1"]
+    conditions: { ready: true }

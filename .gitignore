@@ -42,3 +42,7 @@ ios/App/CapApp-SPM/.build/
 *.mobileprovision
 ios/App/App/config.xml
 ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+.wrangler/
+.dev.vars*
+edge/worker-env.d.ts

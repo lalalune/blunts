@@ -1,0 +1,8 @@
+# PREPARED ONLY. Do not start publicly until owner shipping approval.
+{
+	admin off
+}
+
+blunt.nubs.site {
+	reverse_proxy 127.0.0.1:8746
+}

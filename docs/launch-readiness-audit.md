@@ -1,5 +1,11 @@
 # Blunts launch-readiness audit
 
+This is a historical audit of the October 2 prototype. For the current
+implemented application and verification boundaries, read
+[the October 27 local review](local-review-2026-10-27.md) and
+[the first-party integration](first-party-integration.md). The financial-provider
+gaps below are not closed by the later login, wallet or simulator work.
+
 **Date:** October 2, 2026. **Audited commit:** `9e91c76d1d4f8905d83459e0afed551dce6e83c3`.
 
 **Verdict:** This repository is a concept prototype plus research and creative tooling. It is not a production web investing application, and it contains no native application implementation. A demo can be hosted after a small hardening pass; accepting real money requires building the product infrastructure and obtaining partner/compliance approvals.

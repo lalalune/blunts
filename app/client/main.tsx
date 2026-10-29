@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { dollars, quantity, type Kind } from "../shared/money";
+import { cents, dollars, quoteNumbers, type Kind } from "../shared/money";
 import "@fontsource/bungee/latin-400.css";
 import "@fontsource/figtree/latin-500.css";
 import "@fontsource/figtree/latin-800.css";
@@ -8,6 +8,15 @@ import "./style.css";
 import "./scene-layout.css";
 import { Tray } from "./Tray";
 import { AmountPicker } from "./AmountPicker";
+import { CashOut } from "./CashOut";
+import { BanknoteArrowDown } from "lucide-react";
+import { StewardLogin } from "./StewardLogin";
+import { EvmApp } from "./EvmApp";
+import { lazy, Suspense } from "react";
+const SolanaApp = lazy(() =>
+  import("./SolanaApp").then((m) => ({ default: m.SolanaApp })),
+);
+import { HowItWorks } from "./HowItWorks";
 import { request, native, shareStatement, onResume, onBack } from "./platform";
 type Intent = {
   id: string;
@@ -25,6 +34,10 @@ type Me = {
   flows: { id: string; kind: string; state: string; error: string | null }[];
   destinations: { id: string; label: string; rail: string; address: string }[];
   support: { id: string; message: string }[];
+  steward?: {
+    userId: string;
+    wallet: { address: string; agentId: string } | null;
+  } | null;
 };
 type PendingFlow = {
   key: string;
@@ -84,6 +97,11 @@ function App() {
   const [authMode, setAuthMode] = useState("register"),
     [busy, setBusy] = useState(false),
     [recovery, setRecovery] = useState("");
+  const [authProvider, setAuthProvider] = useState<
+    "demo" | "steward" | "eliza-cloud" | null
+  >(null);
+  const [connected, setConnected] = useState(false);
+  const [accountUrl, setAccountUrl] = useState<string | null>(null);
   const [action, setAction] = useState<Kind | null>(null);
   const [pendingCommand, setPendingCommand] = useState<PendingFlow | null>(
     null,
@@ -91,7 +109,12 @@ function App() {
   const [amount, setAmount] = useState("25");
   const [all, setAll] = useState(false);
   const [help, setHelp] = useState(false);
+  const [cashOut, setCashOut] = useState(false);
   const [menuPage, setMenuPage] = useState("menu");
+  const unsettled =
+    !!pendingCommand ||
+    !!me?.flows?.some((f) => !["completed", "failed"].includes(f.state)) ||
+    !!me?.intents?.some((i) => !terminal.has(i.state));
   const rolled = BigInt(me?.balances.investmentValue ?? "0") / 10000n;
   const helpDialog = useRef<HTMLDialogElement>(null);
   const backdropPress = useRef(false);
@@ -102,6 +125,10 @@ function App() {
   useEffect(
     () =>
       onBack(() => {
+        if (cashOut) {
+          setCashOut(false);
+          return true;
+        }
         if (help) {
           setHelp(false);
           return true;
@@ -116,23 +143,43 @@ function App() {
         }
         return false;
       }),
-    [help, action, tab, busy],
+    [help, action, cashOut, tab, busy],
   );
   const authEpoch = useRef(0);
   const dialog = useRef<HTMLDialogElement>(null),
     inFlight = useRef(false);
+  // Cost: one account read. Periodic cadence is 1.5s pending / 15s idle;
+  // hidden tabs pause and explicit mutations/resume invalidate immediately.
   async function refresh() {
     const epoch = authEpoch.current;
-    const next = await api<Me>("/me");
+    let next: Me;
+    try {
+      next = await api<Me>("/me");
+    } catch (e) {
+      if (epoch === authEpoch.current) setConnected(false);
+      throw e;
+    }
     if (epoch === authEpoch.current) {
       csrf = next.csrf;
       setMe(next);
+      setConnected(true);
     }
     return next;
   }
   useEffect(() => {
-    refresh()
-      .catch(() => {})
+    Promise.all([
+      api<{
+        provider: "demo" | "steward" | "eliza-cloud";
+        accountUrl: string | null;
+      }>("/auth/config").then((config) => {
+        setAuthProvider(config.provider);
+        setAccountUrl(config.accountUrl);
+      }),
+      refresh().catch((e) => {
+        if (!(e instanceof ApiError && e.status === 401)) throw e;
+      }),
+    ])
+      .catch((e) => setError((e as Error).message))
       .finally(() => setLoaded(true));
   }, []);
   useEffect(
@@ -144,9 +191,21 @@ function App() {
   );
   useEffect(() => {
     if (!me) return;
-    const t = setInterval(() => {
+    let cancelled = false,
+      refreshing = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      if (!cancelled && !document.hidden)
+        timer = setTimeout(poll, unsettled ? 1500 : 15000);
+    };
+    async function poll() {
+      if (cancelled || refreshing || document.hidden) return;
+      clearTimeout(timer);
+      refreshing = true;
       const epoch = authEpoch.current;
-      refresh().catch((e) => {
+      try {
+        await refresh();
+      } catch (e) {
         if (
           epoch === authEpoch.current &&
           e instanceof ApiError &&
@@ -158,10 +217,25 @@ function App() {
           setAction(null);
           setError("Session expired. Sign in again.");
         }
-      });
-    }, 1500);
-    return () => clearInterval(t);
-  }, [me?.handle]);
+      } finally {
+        refreshing = false;
+        schedule();
+      }
+    }
+    const resume = () => {
+      clearTimeout(timer);
+      if (!document.hidden) void poll();
+    };
+    schedule();
+    document.addEventListener("visibilitychange", resume);
+    window.addEventListener("focus", resume);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", resume);
+      window.removeEventListener("focus", resume);
+    };
+  }, [me?.handle, unsettled]);
   useEffect(() => {
     if (action) {
       dialog.current?.showModal();
@@ -170,7 +244,7 @@ function App() {
   const activeFlow = me?.flows?.find(
     (f) => !["completed", "failed"].includes(f.state),
   );
-  const working = busy || !!activeFlow || !!pendingCommand;
+  const working = busy || !!activeFlow || !!pendingCommand || !connected;
   useEffect(() => {
     setPendingCommand(null);
     if (!me?.handle) return;
@@ -205,6 +279,21 @@ function App() {
   function submitFlow(event: React.FormEvent) {
     event.preventDefault();
     if (inFlight.current || working || !action || !me) return;
+    try {
+      const preview = quoteNumbers(
+        action === "sell" ? "sell" : "buy",
+        all ? BigInt(me.balances.investmentValue) : cents(amount),
+        all ? BigInt(me.balances.availableUnits) : undefined,
+      );
+      if (
+        action === "sell" &&
+        BigInt(preview.units) > BigInt(me.balances.availableUnits)
+      )
+        throw new Error("Choose an amount within your available investment.");
+    } catch (e) {
+      setError((e as Error).message);
+      return;
+    }
     const command: PendingFlow = {
       key: crypto.randomUUID(),
       body: { kind: action === "sell" ? "spark" : "fill", amount, all },
@@ -390,11 +479,29 @@ function App() {
         <Tray
           key={me?.handle ?? "guest"}
           value={me?.balances.investmentValue ?? "0"}
-          paused={!!action || help || tab !== "wallet"}
+          paused={!!action || help || cashOut || tab !== "wallet"}
         />
 
         {!loaded ? (
           <p role="status">Opening your wallet…</p>
+        ) : !authProvider ? (
+          <section className="card setup-overlay">
+            <h2>Connection interrupted</h2>
+            <p>Your wallet records are safe. Reconnect to continue.</p>
+            <button onClick={() => window.location.reload()}>Reconnect</button>
+          </section>
+        ) : !me && authProvider !== "demo" ? (
+          <StewardLogin
+            api={api}
+            providerLabel={
+              authProvider === "eliza-cloud" ? "Eliza Cloud" : "Steward"
+            }
+            onSuccess={async (token) => {
+              csrf = token;
+              await refresh();
+              setNotice("");
+            }}
+          />
         ) : !me ? (
           <section
             className="welcome setup-overlay"
@@ -409,6 +516,7 @@ function App() {
                     ? "Welcome back"
                     : "Recover your wallet"}
               </h2>
+              <p>Demo wallet · no real money or investments.</p>
 
               <form onSubmit={authenticate}>
                 <label>
@@ -479,7 +587,11 @@ function App() {
                 aria-label="Wallet setup"
               >
                 <h1>Try it out.</h1>
-                <p>All money and investments in this demo are simulated.</p>
+                <p>
+                  {me.steward
+                    ? "Steward manages your login and wallet. Trading here uses demo funds; your real wallet funds are never used."
+                    : "All money and investments in this demo are simulated."}
+                </p>
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -546,30 +658,12 @@ function App() {
                         onClick={() => open("fund")}
                       >
                         <span className="orb">
-                          <svg
-                            width="42"
-                            height="42"
-                            viewBox="0 0 42 42"
-                            fill="none"
-                          >
-                            <path
-                              d="M5 26c6 7 26 7 32 0"
-                              stroke="#15210a"
-                              strokeWidth="3.2"
-                              strokeLinecap="round"
-                            />
-                            <circle cx="14" cy="9" r="2.6" fill="#15210a" />
-                            <circle cx="22" cy="15" r="2.2" fill="#15210a" />
-                            <circle cx="28" cy="7" r="2" fill="#15210a" />
-                            <circle cx="19" cy="4" r="1.6" fill="#15210a" />
-                            <path
-                              d="M21 19v6M18 22.5l3 3 3-3"
-                              stroke="#15210a"
-                              strokeWidth="2.4"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
+                          <BanknoteArrowDown
+                            size={42}
+                            strokeWidth={2.2}
+                            color="#15210a"
+                            aria-hidden="true"
+                          />
                         </span>
                         <span className="lbl">FILL</span>
                       </button>
@@ -579,9 +673,14 @@ function App() {
                         disabled={
                           me.status !== "active" ||
                           working ||
-                          BigInt(me.balances.availableUnits) <= 0n
+                          (BigInt(me.balances.availableUnits) <= 0n &&
+                            BigInt(me.balances.availableCash) <= 0n)
                         }
-                        onClick={() => open("sell")}
+                        onClick={() =>
+                          BigInt(me.balances.availableUnits) > 0n
+                            ? open("sell")
+                            : setCashOut(true)
+                        }
                       >
                         <span className="orb">
                           <svg
@@ -716,7 +815,9 @@ function App() {
                               await api("/destinations", {
                                 label: values.get("label"),
                                 rail: values.get("rail"),
-                                password: values.get("password"),
+                                ...(!me.steward
+                                  ? { password: values.get("password") }
+                                  : {}),
                               });
                               form.reset();
                               await refresh();
@@ -747,15 +848,17 @@ function App() {
                               </option>
                             </select>
                           </label>
-                          <label>
-                            Confirm password
-                            <input
-                              name="password"
-                              type="password"
-                              required
-                              autoComplete="current-password"
-                            />
-                          </label>
+                          {!me.steward && (
+                            <label>
+                              Confirm password
+                              <input
+                                name="password"
+                                type="password"
+                                required
+                                autoComplete="current-password"
+                              />
+                            </label>
+                          )}
                           <button disabled={busy}>Save test destination</button>
                         </form>
                       </section>
@@ -828,7 +931,12 @@ function App() {
                             Dinari US <span>Not connected</span>
                           </li>
                           <li>
-                            Real wallet <span>Not connected</span>
+                            Steward wallet{" "}
+                            <span>
+                              {me.steward?.wallet
+                                ? "Connected"
+                                : "Not connected"}
+                            </span>
                           </li>
                         </ul>
                       </section>
@@ -847,7 +955,9 @@ function App() {
                           const values = new FormData(e.currentTarget);
                           run(async () => {
                             await api("/close", {
-                              password: values.get("password"),
+                              ...(!me.steward
+                                ? { password: values.get("password") }
+                                : {}),
                             });
                             authEpoch.current++;
                             csrf = "";
@@ -859,15 +969,17 @@ function App() {
                           });
                         }}
                       >
-                        <label>
-                          Confirm password
-                          <input
-                            name="password"
-                            type="password"
-                            required
-                            autoComplete="current-password"
-                          />
-                        </label>
+                        {!me.steward && (
+                          <label>
+                            Confirm password
+                            <input
+                              name="password"
+                              type="password"
+                              required
+                              autoComplete="current-password"
+                            />
+                          </label>
+                        )}
                         <button className="danger" disabled={busy}>
                           Close account
                         </button>
@@ -882,6 +994,22 @@ function App() {
         {!action && !help && error && (
           <div className="error" role="alert">
             {error}
+          </div>
+        )}
+        {me && !connected && !action && !help && !error && (
+          <div className="notice" role="status">
+            Connection interrupted. Showing your last confirmed balance.
+            <button
+              className="quiet"
+              disabled={busy}
+              onClick={() =>
+                void run(async () => {
+                  await refresh();
+                })
+              }
+            >
+              Reconnect
+            </button>
           </div>
         )}
         {!action && pendingCommand && !busy && (
@@ -998,14 +1126,7 @@ function App() {
             </button>
           </div>
         ) : menuPage === "how" ? (
-          <div className="menu-how">
-            <p>
-              Fill adds funds and invests. Spark sells and sends funds back out.
-            </p>
-            <p>One blunt represents $100 invested. Ten blunts make a band.</p>
-            <p>This version uses simulated money and investments.</p>
-            <button onClick={() => setMenuPage("menu")}>Back to menu</button>
-          </div>
+          <HowItWorks onDone={() => setHelp(false)} />
         ) : (
           <>
             <button className="quiet" onClick={() => setMenuPage("menu")}>
@@ -1030,68 +1151,125 @@ function App() {
                   >
                     Settings
                   </button>
-                </div>
-                <h3>Back up wallet</h3>
-                <p>
-                  Save a recovery code for this demo account. This is not a seed
-                  phrase.
-                </p>
-                {recovery ? (
-                  <>
-                    <code className="recovery">{recovery}</code>
-                    <button
-                      onClick={() => {
-                        setRecovery("");
-                        setNotice("");
-                      }}
-                    >
-                      I saved my recovery code
-                    </button>
-                  </>
-                ) : (
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      const values = new FormData(e.currentTarget);
-                      void run(async () => {
-                        const result = await api("/auth/backup", {
-                          password: values.get("password"),
-                        });
-                        setRecovery(result.recoveryCode);
-                      });
+                  <button
+                    disabled={me.status !== "active" || working}
+                    onClick={() => {
+                      setHelp(false);
+                      setCashOut(true);
                     }}
                   >
-                    <label>
-                      Confirm password
-                      <input
-                        name="password"
-                        type="password"
-                        autoComplete="current-password"
-                        required
-                      />
-                    </label>
-                    <p>Generating a code replaces the previous one.</p>
-                    <button disabled={busy}>Generate recovery code</button>
-                  </form>
+                    Cash out
+                  </button>
+                </div>
+                {me.steward ? (
+                  <>
+                    <h3>
+                      {authProvider === "eliza-cloud"
+                        ? "Cloud wallet"
+                        : "Steward wallet"}
+                    </h3>
+                    <p>
+                      Login, keys and recovery are managed by your Steward
+                      service. This demo never signs transactions or spends
+                      wallet funds.
+                    </p>
+                    {accountUrl && (
+                      <a href={accountUrl} target="_blank" rel="noreferrer">
+                        Manage account and recovery
+                      </a>
+                    )}
+                    {me.steward.wallet ? (
+                      <code className="recovery">
+                        {me.steward.wallet.address}
+                      </code>
+                    ) : (
+                      <button
+                        disabled={busy}
+                        onClick={() =>
+                          void run(async () => {
+                            await api("/steward/wallet", {});
+                            await refresh();
+                          })
+                        }
+                      >
+                        Create Steward wallet
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <h3>Back up wallet</h3>
+                    <p>
+                      Save a recovery code for this demo account. This is not a
+                      seed phrase.
+                    </p>
+                    {recovery ? (
+                      <>
+                        <code className="recovery">{recovery}</code>
+                        <button
+                          onClick={() => {
+                            setRecovery("");
+                            setNotice("");
+                          }}
+                        >
+                          I saved my recovery code
+                        </button>
+                      </>
+                    ) : (
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          const values = new FormData(e.currentTarget);
+                          void run(async () => {
+                            const result = await api("/auth/backup", {
+                              password: values.get("password"),
+                            });
+                            setRecovery(result.recoveryCode);
+                          });
+                        }}
+                      >
+                        <label>
+                          Confirm password
+                          <input
+                            name="password"
+                            type="password"
+                            autoComplete="current-password"
+                            required
+                          />
+                        </label>
+                        <p>Generating a code replaces the previous one.</p>
+                        <button disabled={busy}>Generate recovery code</button>
+                      </form>
+                    )}
+                  </>
                 )}
                 <button
                   className="quiet"
                   disabled={busy}
                   onClick={() =>
                     void run(async () => {
-                      await api("/auth/logout", {});
+                      const result = await api<{ upstreamRevoked: boolean }>(
+                        "/auth/logout",
+                        {},
+                      );
                       authEpoch.current++;
                       csrf = "";
                       setMe(null);
                       setRecovery("");
                       setTab("wallet");
                       setHelp(false);
+                      if (!result.upstreamRevoked)
+                        setNotice(
+                          "Signed out of Blunts. Steward was unavailable; manage other sessions in Steward when it reconnects.",
+                        );
                     })
                   }
                 >
                   Sign out
                 </button>
               </>
+            ) : authProvider !== "demo" ? (
+              <p>Sign in with your Steward email to recover access.</p>
             ) : (
               <button
                 onClick={() => {
@@ -1172,35 +1350,42 @@ function App() {
             />
           )}
           <button className="picker-go" disabled={working}>
-            <svg
-              width="22"
-              height="24"
-              viewBox="0 0 42 44"
-              fill="none"
-              aria-hidden="true"
-            >
-              {action === "fund" ? (
-                <>
-                  <path
-                    d="M5 26c6 7 26 7 32 0"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                  />
-                  <circle cx="14" cy="10" r="3" fill="currentColor" />
-                  <circle cx="23" cy="15" r="3" fill="currentColor" />
-                  <circle cx="29" cy="7" r="2.6" fill="currentColor" />
-                </>
-              ) : (
+            {action === "fund" ? (
+              <BanknoteArrowDown
+                size={24}
+                strokeWidth={2.2}
+                aria-hidden="true"
+              />
+            ) : (
+              <svg
+                width="22"
+                height="24"
+                viewBox="0 0 42 44"
+                fill="none"
+                aria-hidden="true"
+              >
                 <path
                   d="M20 3c2 7 11 11 11 22a11 11 0 0 1-22 0c0-6 3-9 5-12 0 4 2 6 4 6-1-6 0-11 2-16z"
                   fill="currentColor"
                 />
-              )}
-            </svg>
+              </svg>
+            )}
             {action === "fund" ? "FILL" : "SPARK"}
           </button>
-          <small className="action-fee">1% fee</small>
+          <small className="action-fee">Demo money · 1% fee</small>
+          {action === "sell" &&
+            BigInt(me?.balances.availableCash ?? "0") > 0n && (
+              <button
+                type="button"
+                className="cash-out-link"
+                onClick={() => {
+                  setAction(null);
+                  setCashOut(true);
+                }}
+              >
+                Cash out available {dollars(me!.balances.availableCash)}
+              </button>
+            )}
         </form>
         {error && (
           <div className="error" role="alert">
@@ -1208,7 +1393,39 @@ function App() {
           </div>
         )}
       </dialog>
+      {cashOut && me && (
+        <CashOut
+          handle={me.handle}
+          available={me.balances.availableCash}
+          destinations={me.destinations}
+          passwordRequired={!me.steward}
+          api={api}
+          onClose={() => setCashOut(false)}
+          onSettings={() => {
+            setCashOut(false);
+            setTab("settings");
+          }}
+          onComplete={async () => {
+            setNotice(
+              "Demo cash-out submitted. Follow its settlement in History.",
+            );
+            await refresh().catch(() =>
+              setError("Cash-out submitted. Reload to refresh your balance."),
+            );
+          }}
+        />
+      )}
     </>
   );
 }
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(
+  window.location.pathname === "/legacy" ? (
+    <App />
+  ) : window.location.pathname === "/sol" ? (
+    <Suspense fallback={<p>Opening your stash…</p>}>
+      <SolanaApp />
+    </Suspense>
+  ) : (
+    <EvmApp />
+  ),
+);

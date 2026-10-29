@@ -1,0 +1,409 @@
+.evm-network {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 78px);
+  left: 24px;
+  right: 24px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--dim);
+  pointer-events: none;
+}
+.solana-eligibility {
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 18px 0;
+}
+.solana-eligibility input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin: 2px 0 0;
+  padding: 0;
+  accent-color: var(--gold);
+}
+.evm-connect {
+  position: absolute;
+  bottom: 180px;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+.evm-connect button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #24190f;
+  color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+.evm-market-error {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 230px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--gold);
+}
+.evm-sheet {
+  width: min(440px, calc(100% - 24px));
+  max-height: 85dvh;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: #20160f;
+  color: var(--paper);
+  border-radius: 18px;
+  margin: auto auto 18px;
+  box-shadow: 0 18px 60px #0008;
+}
+.evm-sheet::backdrop {
+  background: #070504bd;
+}
+.evm-sheet-body {
+  position: relative;
+  padding: 32px 26px 24px;
+  overflow-wrap: anywhere;
+}
+.evm-sheet h1 {
+  font:
+    26px/1.3 Bungee,
+    sans-serif;
+  margin: 12px 30px 18px 0;
+  color: var(--gold);
+}
+.evm-sheet p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--paper);
+}
+.evm-sheet a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gold);
+  min-height: 44px;
+}
+.evm-sheet button {
+  margin: 8px 0;
+}
+.evm-sheet .primary {
+  width: 100%;
+  color: #15210a;
+  background: var(--leaf);
+}
+.evm-close {
+  position: sticky;
+  top: 0;
+  right: auto;
+  float: right;
+  margin: -20px -12px 0 0;
+  z-index: 2;
+  border: 0;
+  background: #20160f;
+  color: var(--paper);
+  padding: 10px;
+  min-width: 44px;
+}
+.evm-wallet-choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: #38281b;
+  color: var(--paper);
+  border: 1px solid var(--line);
+}
+.evm-sheet .evm-fine {
+  font-size: 12px;
+  color: var(--dim);
+  margin-top: 22px;
+}
+.evm-sheet .evm-note {
+  padding: 14px;
+  background: #38281b;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.evm-sheet .evm-error {
+  color: #ffd0a6;
+}
+.evm-amount {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  margin: 24px 0 12px;
+}
+.evm-amount input {
+  background: #100b07;
+  color: var(--paper);
+  font-size: 28px;
+  padding: 14px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.evm-quote {
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  margin-top: 18px;
+}
+.evm-quote strong {
+  display: block;
+  font-size: 22px;
+  color: var(--gold);
+  overflow-wrap: anywhere;
+}
+.evm-quote p {
+  font-size: 12px;
+}
+.evm-address {
+  font-family: monospace;
+  font-size: 12px !important;
+}
+.evm-sheet :focus-visible,
+.evm-connect :focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+.evm-plan {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.evm-plan h2 {
+  font-size: 16px;
+  margin: 0 0 12px;
+  color: var(--paper);
+}
+.evm-plan ol {
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.evm-plan li {
+  margin: 8px 0;
+}
+.evm-saved {
+  margin: 20px 0;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.evm-saved h2 {
+  font-size: 16px;
+  line-height: 1.4;
+  margin: 0 0 10px;
+  color: var(--paper);
+}
+.evm-activity {
+  margin: 22px 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.evm-activity h2 {
+  font-size: 16px;
+  line-height: 1.4;
+  margin: 0 0 12px;
+}
+.evm-activity label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+}
+.evm-activity input {
+  width: 100%;
+  padding: 12px;
+  background: #100b07;
+  color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 13px;
+}
+.evm-activity-list {
+  list-style: none;
+  padding: 0;
+}
+.evm-activity-list li {
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+.evm-activity-list small {
+  display: block;
+  color: var(--dim);
+}
+
+.evm-activity summary {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  min-height: 44px;
+  padding: 10px 0;
+  cursor: pointer;
+  color: var(--paper);
+}
+.evm-saved + .evm-activity {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
+.evm-step-details {
+  margin: 16px 0;
+}
+.evm-step-details summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 10px 0;
+  color: var(--paper);
+  font-size: 13px;
+}
+.evm-network-details dl,
+.evm-step-details dl {
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 12px 0;
+}
+.evm-network-details dt,
+.evm-step-details dt {
+  color: var(--dim);
+  margin-top: 12px;
+}
+.evm-network-details dd,
+.evm-step-details dd {
+  margin: 3px 0 0;
+}
+.evm-step-details section {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  margin-top: 16px;
+}
+.evm-step-details h3 {
+  font-size: 14px;
+}
+.evm-network-details code,
+.evm-step-details code {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.evm-step-details a {
+  min-height: 32px;
+}
+.evm-wallet-handoff {
+  font-weight: 700;
+  min-height: 44px;
+}
+.evm-wallet-help p {
+  margin-top: 12px;
+}
+
+.evm-signing h3 {
+  font-size: 16px;
+  line-height: 1.4;
+}
+.evm-signing label {
+  align-items: flex-start;
+  font-size: 13px;
+}
+.evm-signing .primary {
+  margin-top: 16px;
+}
+.evm-finality {
+  margin: 14px 0;
+  font-size: 12px;
+}
+.evm-finality p {
+  font-size: 12px;
+}
+.evm-finality p:first-child {
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.evm-available {
+  margin: -4px 0 18px;
+  font-size: 12px !important;
+  color: var(--dim) !important;
+}
+.evm-purpose {
+  margin-bottom: 20px;
+}
+.evm-price-details {
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--dim);
+}
+.evm-price-details summary {
+  cursor: pointer;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+.evm-signing {
+  margin: 8px 0 18px;
+  padding-top: 0;
+  border: 0;
+}
+.evm-signing > h3 {
+  margin-top: 0;
+}
+.evm-signing > p {
+  font-size: 13px;
+}
+.evm-quote .evm-signing label {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.evm-spend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+.evm-spend strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 18px;
+  color: var(--paper);
+}
+.evm-sheet .evm-edit {
+  background: none;
+  border: 0;
+  color: var(--gold);
+  padding: 6px;
+  font-size: 12px;
+  min-height: 44px;
+}
+.evm-flow-status {
+  border: 0;
+  padding-top: 0;
+}
+.evm-wait-spinner {
+  display: block;
+  margin: 24px auto;
+  color: var(--gold);
+  animation: evm-wait 1s linear infinite;
+}
+.evm-complete {
+  text-align: center;
+  padding: 16px 0;
+}
+.evm-complete > svg {
+  color: var(--leaf);
+}
+@keyframes evm-wait {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .evm-wait-spinner {
+    animation: none;
+  }
+}

@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: blunts
+  labels:
+    app.kubernetes.io/part-of: blunts
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blunts
+  namespace: blunts
+spec:
+  ports: [{ name: http, port: 80, targetPort: http }]
+  type: ClusterIP
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: https-redirect
+  namespace: blunts
+spec:
+  redirectScheme: { scheme: https, permanent: true }
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: blunts-https
+  namespace: blunts
+spec:
+  entryPoints: [websecure]
+  routes:
+    - match: Host(`blunt.nubs.site`)
+      kind: Rule
+      services: [{ name: blunts, port: 80 }]
+  tls:
+    certResolver: letsencrypt
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: blunts-http
+  namespace: blunts
+spec:
+  entryPoints: [web]
+  routes:
+    - match: Host(`blunt.nubs.site`)
+      kind: Rule
+      middlewares: [{ name: https-redirect }]
+      services: [{ name: blunts, port: 80 }]

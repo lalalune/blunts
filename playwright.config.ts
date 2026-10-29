@@ -14,7 +14,7 @@ export default defineConfig({
   },
   webServer: {
     command:
-      "PORT=8741 APP_ORIGIN=http://localhost:8741 DATABASE_URL=data/e2e npm start",
+      "AUTH_PROVIDER=demo PORT=8741 APP_ORIGIN=http://localhost:8741 DATABASE_URL=data/e2e npm run start:legacy",
     url: "http://localhost:8741/api/health",
     reuseExistingServer: false,
     timeout: 90_000,

@@ -138,5 +138,17 @@ export async function migrate(db: Database) {
       );
       await tx.query("INSERT INTO schema_version VALUES (4,$1)", [Date.now()]);
     }
+    if (
+      !(await tx.query("SELECT version FROM schema_version WHERE version=5"))
+        .length
+    ) {
+      await tx.query(
+        "CREATE TABLE steward_identities (issuer TEXT NOT NULL,subject TEXT NOT NULL,user_id TEXT NOT NULL UNIQUE REFERENCES users(id),PRIMARY KEY(issuer,subject))",
+      );
+      await tx.query(
+        "CREATE TABLE steward_sessions (hash TEXT PRIMARY KEY REFERENCES sessions(hash) ON DELETE CASCADE,sealed TEXT NOT NULL,expires_at BIGINT NOT NULL,lease_until BIGINT NOT NULL DEFAULT 0)",
+      );
+      await tx.query("INSERT INTO schema_version VALUES (5,$1)", [Date.now()]);
+    }
   });
 }

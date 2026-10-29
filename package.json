@@ -7,29 +7,43 @@
     "node": ">=24 <25"
   },
   "scripts": {
-    "dev": "tsx watch app/server/main.ts",
+    "dev": "tsx watch app/server/evm-main.ts",
     "build": "tsc --noEmit && vite build",
-    "start": "tsx app/server/main.ts",
+    "start": "tsx app/server/evm-main.ts",
     "test": "tsx --test --test-concurrency=1 app/tests/*.test.ts",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --config playwright.evm.config.ts",
+    "test:local-services": "playwright test --config playwright.steward.config.ts",
     "check": "npm run build && npm test",
     "db:backup": "tsx app/server/backup.ts",
-    "format": "prettier --write app vite.config.ts playwright.config.ts tsconfig.json package.json .github/workflows/checks.yml capacitor.config.ts scripts",
-    "format:check": "prettier --check app vite.config.ts playwright.config.ts tsconfig.json package.json .github/workflows/checks.yml capacitor.config.ts scripts",
+    "format": "prettier --write app vite.config.ts playwright*.config.ts tsconfig.json package.json .github/workflows/checks.yml capacitor.config.ts scripts",
+    "format:check": "prettier --check app vite.config.ts playwright*.config.ts tsconfig.json package.json .github/workflows/checks.yml capacitor.config.ts scripts",
     "ops": "tsx app/server/ops.ts",
+    "providers:check": "tsx app/server/qualify-providers.ts",
+    "providers:workbench": "tsx app/server/provider-workbench.ts",
     "mobile:sync": "node scripts/mobile.mjs",
     "android:debug": "cd android && ./gradlew assembleDebug",
     "android:bundle": "cd android && ./gradlew bundleRelease",
     "ios:open": "cap open ios",
-    "mobile:release-check": "node scripts/check-mobile.mjs"
+    "mobile:release-check": "node scripts/check-mobile.mjs",
+    "start:legacy": "tsx app/server/main.ts",
+    "test:e2e:legacy": "playwright test --config playwright.config.ts",
+    "release:qualify-origin": "tsx scripts/qualify-release-origin.ts",
+    "release:qualify-https": "node scripts/qualify-local-https.mjs",
+    "dev:solana": "tsx watch app/server/solana-main.ts",
+    "start:solana": "tsx app/server/solana-main.ts",
+    "test:e2e:solana": "playwright test --config playwright.solana.config.ts",
+    "test:solana:fork": "npm run build && tsx scripts/qualify-solana-surfpool.ts --browser",
+    "test:solana:fork:game": "npm run build && tsx scripts/qualify-solana-surfpool.ts --browser --game"
   },
   "dependencies": {
+    "@bonfida/spl-name-service": "4.0.1",
     "@capacitor/android": "^8.5.2",
     "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.5.2",
     "@capacitor/filesystem": "^8.1.4",
     "@capacitor/ios": "^8.5.2",
     "@capacitor/share": "^8.0.3",
+    "@dinari/api-sdk": "0.15.0",
     "@electric-sql/pglite": "^0.5.8",
     "@fastify/cookie": "^11.1.2",
     "@fastify/helmet": "^13.1.1",
@@ -37,17 +51,27 @@
     "@fastify/static": "^10.1.5",
     "@fontsource/bungee": "^5.3.0",
     "@fontsource/figtree": "^5.3.0",
+    "@solana/spl-token": "0.4.15",
+    "@solana/wallet-standard-features": "1.5.0",
+    "@solana/web3.js": "1.98.4",
+    "@wallet-standard/app": "1.1.1",
+    "bs58": "6.0.0",
+    "buffer": "6.0.3",
     "fastify": "^5.12.5",
+    "lucide-react": "^1.62.0",
     "pg": "^8.23.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "three": "^0.186.1",
-    "zod": "^4.6.5"
+    "viem": "^2.57.12",
+    "zod": "^4.6.5",
+    "tsx": "^4.23.15"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@capacitor/cli": "^8.5.2",
     "@playwright/test": "^1.63.0",
+    "@solana/surfpool": "1.7.0",
     "@types/node": "^26.6.4",
     "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",
@@ -55,12 +79,15 @@
     "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^6.1.1",
     "prettier": "^3.9.9",
-    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.2"
   },
   "overrides": {
     "xcode": {
+      "uuid": "11.1.1"
+    },
+    "bigint-buffer": "file:./vendor/bigint-buffer",
+    "jayson": {
       "uuid": "11.1.1"
     }
   }

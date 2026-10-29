@@ -1,6 +1,8 @@
 import { openDatabase } from "./database.js";
 import { createApp } from "./app.js";
 import { tick, reconcile } from "./domain.js";
+import { stewardConfig } from "./steward.js";
+import { openProviderSandbox } from "./provider-sandbox-config.js";
 const port = Number(process.env.PORT ?? 8740);
 const origin = process.env.APP_ORIGIN ?? `http://localhost:${port}`;
 const mode = process.env.MONEY_MODE ?? "simulation";
@@ -9,12 +11,15 @@ if (mode !== "simulation")
     "Live money is not implemented. MONEY_MODE must be simulation.",
   );
 const db = await openDatabase(process.env.DATABASE_URL ?? "data/blunts");
+const providerSandbox = await openProviderSandbox(origin);
 const app = await createApp({
   db,
   origin,
   mode,
   serveStatic: true,
   logger: true,
+  steward: await stewardConfig(),
+  providerSandbox: providerSandbox?.options,
 });
 let running = false,
   stopping = false,
@@ -42,6 +47,7 @@ async function stop() {
   await app.close();
   while (running) await new Promise((r) => setTimeout(r, 25));
   await db.close();
+  await providerSandbox?.close();
 }
 process.once("SIGTERM", () => void stop());
 process.once("SIGINT", () => void stop());

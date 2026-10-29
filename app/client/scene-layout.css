@@ -88,6 +88,108 @@ body::before {
   width: 26px;
   font-size: 26px;
 }
+.menu-how {
+  touch-action: pan-y;
+}
+.how-art {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  color: var(--leaf);
+  padding: 18px 0;
+}
+.how-art-2,
+.how-art-3 {
+  color: var(--gold);
+}
+.how-art-4 {
+  color: var(--ember);
+}
+.how-band {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px 0;
+}
+.how-band::after {
+  content: "";
+  position: absolute;
+  inset: 18px 0;
+  border: 4px solid #c8412f;
+  border-radius: 10px;
+}
+.how-lesson h3 {
+  font:
+    24px/1.2 "Bungee",
+    sans-serif;
+  text-align: center;
+}
+.how-lesson > p {
+  line-height: 1.6;
+}
+.how-facts {
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+  margin: 20px 0;
+  text-align: center;
+}
+.how-facts dt {
+  color: var(--gold);
+  font:
+    18px/1.4 "Bungee",
+    sans-serif;
+}
+.how-facts dd {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--dim);
+}
+.how-progress,
+.menu-how > small {
+  text-align: center;
+  font-size: 12px;
+}
+.how-more {
+  margin: 16px 0;
+  font-size: 14px;
+}
+.how-more summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 10px 0;
+  color: var(--paper);
+}
+.how-more p {
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.how-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0 20px;
+}
+.how-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--dim);
+}
+.how-dots .current {
+  background: var(--leaf);
+}
+.how-controls {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+@media (max-width: 350px) {
+  .how-band svg {
+    width: 44px;
+  }
+}
 .scene-header .menu-button {
   width: 40px;
   height: 40px;
@@ -154,6 +256,22 @@ body::before {
 }
 .scene-cash strong {
   color: var(--paper);
+}
+.transaction-sheet .cash-out-link {
+  display: block;
+  margin: 4px auto 0;
+  padding: 8px 16px;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: var(--leaf);
+  pointer-events: auto;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.cash-out-sheet form {
+  display: grid;
+  gap: 16px;
 }
 .scene-dock {
   position: absolute;

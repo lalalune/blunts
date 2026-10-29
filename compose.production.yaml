@@ -1,0 +1,21 @@
+services:
+  app:
+    image: ${BLUNTS_IMAGE:?Pin BLUNTS_IMAGE to a qualified local release tag}
+    container_name: blunts-web
+    restart: unless-stopped
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,nodev,size=64m"]
+    mem_limit: 512m
+    cpus: 1
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    ports: ["172.30.46.1:8746:8745"]
+    networks:
+      backend: { ipv4_address: 172.30.46.2 }
+    logging:
+      driver: json-file
+      options: { max-size: 10m, max-file: "2" }
+networks:
+  backend:
+    name: blunts-backend
+    external: true
